@@ -2,7 +2,7 @@
 
 **Artivista** é uma plataforma digital voltada para a promoção da arte independente e o reconhecimento de artistas emergentes. A proposta da aplicação é aproximar o público da produção artística contemporânea, permitindo que usuários descubram, interajam e apoiem obras e criadores através de uma rede social interativa.
 
-Além de incentivar a visibilidade cultural, a plataforma também promove o empreendedorismo artístico, possibilitando que os usuários **contratem serviços de artistas diretamente pela aplicação**. Os visitantes poderão ainda **acessar eventos e cursos** disponibilizados na rede, contribuindo para o crescimento profissional dos criadores e para a formação cultural dos participantes.
+Além de incentivar a visibilidade cultural, a plataforma também promove o empreendedorismo artístico, possibilitando que os usuários **contratem serviços de artistas diretamente pela aplicação**. Os visitantes poderão ainda **acessar eventos e cursos** disponibilizados na rede, contribuindo para o crescimento profissional dos criadores e com a apoximação com a cultura.
 
 
 ## Objetivos do Projeto
