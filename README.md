@@ -14,7 +14,7 @@ Além de incentivar a visibilidade cultural, a plataforma também promove o empr
 
 ## Stacks Utilizadas
 
-### 🧩 Backend
+### Backend
 
 - **Node.js**: Ambiente de execução JavaScript no servidor.
 - **Express.js**: Framework minimalista e flexível para construção das APIs RESTful.
@@ -25,11 +25,11 @@ Além de incentivar a visibilidade cultural, a plataforma também promove o empr
 
 > O gerenciamento de dependências é feito com o **NPM**, que permite a instalação, organização e automação de bibliotecas e scripts.
 
-### 🗃️ Banco de Dados
+### Banco de Dados
 
 - **MySQL**: Sistema de Gerenciamento de Banco de Dados (SGBD) relacional, utilizado para armazenar e organizar as informações dos usuários, obras, eventos, cursos, curtidas, comentários e demais interações da plataforma.
 
-### 🎨 Frontend
+### Frontend
 
 - **React.js**: Biblioteca JavaScript para construção de interfaces dinâmicas e responsivas.
 - **Bootstrap**: Framework CSS com componentes pré-definidos, utilizado para acelerar a criação de interfaces responsivas e acessíveis.
@@ -37,7 +37,7 @@ Além de incentivar a visibilidade cultural, a plataforma também promove o empr
 
 ---
 
-## 🔗 Integração com APIs
+## Integração com APIs
 
 - **Google Identity Services API** (Frontend): API pública da Google utilizada para autenticação via conta Google, tornando o processo de login mais ágil, seguro e compatível com grande número de usuários.
 
