@@ -9,7 +9,7 @@ app.use(cors());
 // Rota POST de cadastro de usuário
 app.post("/user/register", (req, res) => {
     const { name, dateBirth, userName, email, password} = req.body; 
-    const sql = `INSERT INTO users (name, dateBirth, userName, email, password) VALUES (?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO users (name, userName, email, password) VALUES (?, ?, ?, ?, ?)`;
   
     db.query(sql, [ name, dateBirth, userName, email, password], (err, result) => {
         if (err) {
@@ -57,8 +57,6 @@ app.post('/user/login', (req, res) => {
   
       // Login bem-sucedido
       const user = results[0];
-      delete user.password; // remover senha da resposta
-  
       res.status(200).json({
         success: true,
         message: 'Login realizado com sucesso!',
