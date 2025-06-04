@@ -4,9 +4,8 @@ use Artivista_db;
 create table users(
 id int auto_increment not null primary key,
 name varchar(255),
-dateBirth date,
-userName varchar(30),
-email varchar(50),
+userName varchar(255),
+email varchar(255),
 password varchar(50),
 userType enum('artista', 'padrão') default 'padrão',
 profileImage varchar (255)
