@@ -111,11 +111,11 @@ app.post('/user/login', (req, res) => {
     });
   });
 
-  //Rota POST para colocar a foto de perfil
-  app.post('/user/uploadProfile', upload.single('profileImage'), (req, res) => {
+  //Rota PUT para colocar a foto de perfil
+  app.put('/user/uploadProfile', upload.single('profileImage'), (req, res) => {
     const userId = req.body.userId;  
     const profileImage = req.file.filename; 
-
+    console.log(req);
     if (!req.file) {
         return res.status(400).json({ success: false, message: "Nenhum arquivo enviado." });
     }
@@ -157,39 +157,31 @@ app.get("/users/list", (req, res) => {
 });
 
 //Rota PUT pra atualizar o perfil
-app.put('/user/updateProfile/:id', upload.single('profileImage'), (req, res) => {
-  const id = req.params.id;
-  const { name, userName } = req.body;
+app.put('/user/edit/:id', (req, res) => {
+  const {id} = req.params
+  const {name, username, password} = req.body
+  let query = 'UPDATE users SET name = ?, username = ? WHERE id = ?'
+  let values = [name, username, id]
 
-  if (!id || !name || !userName) {
-    return res.status(400).json({ success: false, message: 'ID, name e userName são obrigatórios.' });
+  if(password){
+      query = 'UPDATE users SET name = ?, username = ?, password = ? WHERE id = ?'
+      values = [name, username, password, id]
   }
 
-  const profileImage = req.file ? req.file.filename : null;
+  db.query(query, values, (err, result) => {
+      if (err) {
+          return res.status(500).json ({ success: false, message: 'Erro ao atualizar usuario' })
+      }
 
-  let sql, params;
+      db.query('SELECT * FROM users WHERE id = ?', [id], (err, results) => {
+          if(err){
+              return res.status(500).json({success: false, message: 'Erro ao buscar o usuário'})
+          }
+          res.json({success: true, message: 'Perfil atualizado com sucesso', user: results[0]})
+      })
+  })
 
-  if (profileImage) {
-    sql = `UPDATE users SET name = ?, userName = ?, profileImage = ? WHERE id = ?`;
-    params = [name, userName, profileImage, id];
-  } else {
-    sql = `UPDATE users SET name = ?, userName = ? WHERE id = ?`;
-    params = [name, userName, id];
-  }
-
-  db.query(sql, params, (err, result) => {
-    if (err) {
-      console.error('Erro ao atualizar perfil:', err);
-      return res.status(500).json({ success: false, message: 'Erro ao atualizar perfil.' });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
-    }
-
-    res.json({ success: true, message: 'Perfil atualizado com sucesso.' });
-  });
-});
+})
 
 //Rota DELETE paradeletar user
 app.delete("/users/delete/:id", (req, res) => {
