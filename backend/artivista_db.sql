@@ -11,19 +11,42 @@ userType enum('artista', 'padrão') default 'padrão',
 profileImage varchar (255)
 );
 
+CREATE TABLE activities (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL
+);
+
+INSERT INTO activities (name) VALUES 
+('Pintura'),
+('Escultura'),
+('Fotografia'),
+('Música'),
+('Dança'),
+('Teatro'),
+('Literatura'),
+('Grafite'),
+('Artesanato'),
+('Moda'),
+('Arte digital'),
+('Ilustração'),
+('Performance'),
+('Cinema'),
+('Design gráfico');
+
 create table artists(
 id int not null primary key auto_increment,
-activity varchar(100),
 service enum ('sim', 'não'),
 userId int,
-foreign key (userId) references users(id)
+activityId int,
+foreign key (userId) references users(id),
+foreign key (activityId) references activities(id)
 );
 
 create table posts(
 id int not null primary key auto_increment,
 title varchar(100),
 description varchar(225),
-artSection enum ('musica e audiovisual', 'artes plásticas', 'artes cênicas', 'literatura'), 
+artSection varchar(100),
 image varchar(255), 
 artistId int,
 foreign key (artistId) references artists(id)

@@ -113,7 +113,7 @@ app.post('/user/login', (req, res) => {
 
   //Rota PUT para colocar a foto de perfil
   app.put('/user/uploadProfile', upload.single('profileImage'), (req, res) => {
-    const userId = req.body.userId;  
+    const userId = req.body.id;  
     const profileImage = req.file.filename; 
     console.log(req);
     if (!req.file) {
@@ -183,8 +183,8 @@ app.put('/user/edit/:id', (req, res) => {
 
 })
 
-//Rota DELETE paradeletar user
-app.delete("/users/delete/:id", (req, res) => {
+//Rota DELETE para deletar user
+app.delete("/user/delete/:id", (req, res) => {
   const { id } = req.params;
   const sql = `DELETE FROM users WHERE id = ?`;
 
@@ -197,4 +197,45 @@ app.delete("/users/delete/:id", (req, res) => {
   });
 });
   
+//Rota POST para cadastrar artistas
+app.post('/artist/register', (req, res) => {
+  const {service, userId, activityId} = req.body
+
+  if( !service || !userId || activityId){
+    return res.status(400).json({
+      success: false,
+      message: 'Todos os campos são obrigatórios'
+    })
+  }
+
+  const checkArtist = 'SELECT * FROM users WHERE id = ? AND userType = "artista"'
+  db.query(checkArtist, [userId], (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Erro ao verificar usuário.',
+        error: err
+      });
+    }
+    const insertArtist = 'INSERT INTO artists (service, userId, activityId) VALUES (?, ?, ?)';
+    db.query(insertArtist, [service, userId , activityId], (err, result) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: 'Erro ao cadastrar artista.',
+          error: err
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Artista cadastrado com sucesso.',
+        artistId: result.insertId
+      })
+    })
+  })
+})
+
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`))
+
+
