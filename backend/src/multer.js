@@ -20,22 +20,33 @@ const storageFeed = multer.diskStorage({
 });
 
 // Filtro de tipos de arquivo
-function fileFilter(req, file, cb) {
+function imageOnlyFilter(req, file, cb) {
     const ext = path.extname(file.originalname).toLowerCase();
-    const allowedTypes = ['.jpg', '.jpeg', '.png', '.webp'];
+    const allowedImages = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    if (allowedImages.includes(ext)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Tipo de arquivo inválido. Somente imagens (JPG, JPEG, PNG, WEBP) são permitidas.'));
+    }
+}
+
+function imageAndVideoFilter(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedTypes = ['.jpg', '.jpeg', '.png', '.webp', '.mp4', '.mov', '.webm', '.avi'];
 
     if (allowedTypes.includes(ext)) {
         cb(null, true);
     } else {
-        cb(new Error('Tipo de arquivo inválido. Somente JPG, JPEG, PNG e WEBP são permitidos.'));
+        cb(new Error('Tipo de arquivo inválido. Somente imagens e vídeos (JPG, PNG, MP4, etc.) são permitidos.'));
     }
 }
 
 // Upload para foto de perfil
-const uploadProfile = multer({ storage: storageProfile, fileFilter });
+const uploadProfile = multer({ storage: storageProfile, fileFilter:imageOnlyFilter });
 
 // Upload para fotos do feed (permite múltiplas imagens, por exemplo)
-const uploadFeed = multer({ storage: storageFeed, fileFilter });
+const uploadFeed = multer({ storage: storageFeed, fileFilter:imageAndVideoFilter });
 
 module.exports = {
     uploadProfile,

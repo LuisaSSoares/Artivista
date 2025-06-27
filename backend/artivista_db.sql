@@ -46,10 +46,20 @@ create table posts(
 id int not null primary key auto_increment,
 title varchar(100),
 description varchar(225),
-artSection varchar(100),
-image varchar(255), 
+artSection varchar(100), 
 artistId int,
 foreign key (artistId) references artists(id)
+);
+
+create table imageAndVideo(
+id_imgs int primary key auto_increment,
+id_post int,
+img1 varchar(255), 
+img2 varchar(255), 
+img3 varchar(255), 
+img4 varchar(255), 
+img5 varchar(255), 
+foreign key (id_post) references posts(id)
 );
 
 create table events(
