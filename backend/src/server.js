@@ -275,6 +275,7 @@ app.post('/artist/register', (req, res) => {
 //Rota POST para postar fotos e videos
 app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
   const { title, description, artSection, artistId } = req.body;
+  console.log(req.body);
 
   if (!title || !artistId) {
     return res.status(400).json({ success: false, message: 'Título e artistId são obrigatórios.' });
@@ -392,7 +393,7 @@ app.delete('/feed/delete/:id', (req, res) => {
 });
 
 // ** Eventos e Cursos** // 
-//Usar link-preview-js aqui pra recuperar preview de imgs em links especificos 
+//Usar [] aqui pra recuperar preview de imgs em links especificos 
 
 //** Chat ** // 
 
