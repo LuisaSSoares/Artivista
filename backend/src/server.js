@@ -78,6 +78,7 @@ app.post("/user/register", (req, res) => {
   });
 })
 
+//***Artistas e usuários***
 
 // Rota POST para logar usuário
 app.post('/user/login', (req, res) => {
@@ -122,7 +123,7 @@ app.post('/user/login', (req, res) => {
   });
 
   //Rota PUT para colocar a foto de perfil
-  app.put('/user/uploadProfile', upload.single('profileImage'), (req, res) => {
+  app.put('/user/uploadProfile', uploadProfile.single('profileImage'), (req, res) => {
     const userId = req.body.id;  
     const profileImage = req.file.filename; 
     console.log(req);
@@ -196,55 +197,80 @@ app.put('/user/edit/:id', (req, res) => {
 //Rota DELETE para deletar user
 app.delete("/user/delete/:id", (req, res) => {
   const { id } = req.params;
-  const sql = `DELETE FROM users WHERE id = ?`;
 
-  db.query(sql, [id], (err, result) => {
+  // Primeiro apaga artistas relacionados
+  const deleteArtists = `DELETE FROM artists WHERE userId = ?`;
+  db.query(deleteArtists, [id], (err) => {
     if (err) {
-      res.json({ success: false, message: "Erro ao excluir o usuário." });
-    } else {
-      res.json({ success: true, message: "Usuário excluído com sucesso." });
+      return res.status(500).json({ success: false, message: "Erro ao remover artistas relacionados." });
     }
+
+    // Depois apaga o usuário
+    const deleteUser = `DELETE FROM users WHERE id = ?`;
+    db.query(deleteUser, [id], (err2) => {
+      if (err2) {
+        return res.status(500).json({ success: false, message: "Erro ao excluir o usuário." });
+      }
+
+      res.json({ success: true, message: "Usuário e artistas relacionados excluídos com sucesso." });
+    });
   });
 });
   
 //Rota POST para cadastrar artistas
 app.post('/artist/register', (req, res) => {
-  const {service, userId, activityId} = req.body
+  const { service, userId, activityId } = req.body;
 
-  if( !service || !userId || activityId){
+  if (!service || !userId || !activityId) {
     return res.status(400).json({
       success: false,
-      message: 'Todos os campos são obrigatórios'
-    })
+      message: 'Todos os campos são obrigatórios.'
+    });
   }
 
-  const checkArtist = 'SELECT * FROM users WHERE id = ? AND userType = "artista"'
-  db.query(checkArtist, [userId], (err, result) => {
-    if (err) {
-      return res.status(500).json({
+  // Verifica se o usuário existe
+  const checkUserSql = 'SELECT * FROM users WHERE id = ?';
+  db.query(checkUserSql, [userId], (err, users) => {
+    if (err || users.length === 0) {
+      return res.status(404).json({
         success: false,
-        message: 'Erro ao verificar usuário.',
-        error: err
+        message: 'Usuário não encontrado.'
       });
     }
-    const insertArtist = 'INSERT INTO artists (service, userId, activityId) VALUES (?, ?, ?)';
-    db.query(insertArtist, [service, userId , activityId], (err, result) => {
+
+    // Atualiza userType para 'artista', se ainda não for
+    const updateUserType = 'UPDATE users SET userType = "artista" WHERE id = ?';
+    db.query(updateUserType, [userId], (err) => {
       if (err) {
         return res.status(500).json({
           success: false,
-          message: 'Erro ao cadastrar artista.',
+          message: 'Erro ao atualizar tipo de usuário.',
           error: err
         });
       }
 
-      return res.status(201).json({
-        success: true,
-        message: 'Artista cadastrado com sucesso.',
-        artistId: result.insertId
-      })
-    })
-  })
-})
+      // Insere o artista na tabela artists
+      const insertArtist = 'INSERT INTO artists (service, userId, activityId) VALUES (?, ?, ?)';
+      db.query(insertArtist, [service, userId, activityId], (err, result) => {
+        if (err) {
+          return res.status(500).json({
+            success: false,
+            message: 'Erro ao cadastrar artista.',
+            error: err
+          });
+        }
+
+        return res.status(201).json({
+          success: true,
+          message: 'Artista cadastrado com sucesso.',
+          artistId: result.insertId
+        });
+      });
+    });
+  });
+});
+
+//***Postagens***
 
 //Rota POST para postar fotos e videos
 app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
@@ -258,7 +284,7 @@ app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
     return res.status(400).json({ success: false, message: 'Nenhum arquivo enviado.' });
   }
 
-  // 1. Insere os dados do post na tabela posts
+  // Insere os dados do post na tabela posts
   const sqlPost = `INSERT INTO posts (title, description, artSection, artistId) VALUES (?, ?, ?, ?)`;
 
   db.query(sqlPost, [title, description, artSection, artistId], (err, result) => {
@@ -268,7 +294,7 @@ app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
 
     const postId = result.insertId;
 
-    // 2. Prepara os nomes dos arquivos para a tabela imageAndVideo (máx 5)
+    // Prepara os nomes dos arquivos para a tabela imageAndVideo (máx 5)
     const files = req.files.slice(0, 5); // garante no máximo 5
     const images = [null, null, null, null, null];
 
@@ -320,6 +346,63 @@ app.get('/feed/list', (req, res) => {
     res.json({ success: true, posts });
   });
 });
+
+//Rota PUT para edição de postagens
+app.put('/feed/edit/:id', (req, res) => {
+  const { id } = req.params;
+  const { title, description, artSection } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ success: false, message: 'O título é obrigatório.' });
+  }
+
+  const sql = `UPDATE posts SET title = ?, description = ?, artSection = ? WHERE id = ?`;
+
+  db.query(sql, [title, description, artSection, id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao editar o post.' });
+    }
+
+    res.json({ success: true, message: 'Post atualizado com sucesso.' });
+  });
+});
+
+
+//Rota DELETE para exclusão de postagens
+app.delete('/feed/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  // Primeiro, deleta as mídias relacionadas
+  const deleteMedia = `DELETE FROM imageAndVideo WHERE id_post = ?`;
+  db.query(deleteMedia, [id], (err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao remover as mídias do post.' });
+    }
+
+    // Depois, deleta o post
+    const deletePost = `DELETE FROM posts WHERE id = ?`;
+    db.query(deletePost, [id], (err2) => {
+      if (err2) {
+        return res.status(500).json({ success: false, message: 'Erro ao excluir o post.' });
+      }
+
+      res.json({ success: true, message: 'Post excluído com sucesso.' });
+    });
+  });
+});
+
+// ** Eventos e Cursos** // 
+//Usar link-preview-js aqui pra recuperar preview de imgs em links especificos 
+
+//** Chat ** // 
+
+// ** Seguidores ** //
+
+// ** Notificações ** //
+
+//Rota GET para listar notificações
+
+// ** Reações de postagem** // 
 
 
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`))
