@@ -271,7 +271,6 @@ app.post('/artist/register', (req, res) => {
 });
 
 //***Postagens***
-
 //Rota POST para postar fotos e videos
 app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
   const { title, description, artSection, artistId } = req.body;
@@ -393,18 +392,224 @@ app.delete('/feed/delete/:id', (req, res) => {
 });
 
 // ** Eventos e Cursos** // 
-//Usar [] aqui pra recuperar preview de imgs em links especificos 
+//Usar "Link Preview" aqui pra recuperar preview de imgs em links especificos 
 
 //** Chat ** // 
 
 // ** Seguidores ** //
 
 // ** Notificações ** //
-
 //Rota GET para listar notificações
+app.get('/notifications/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'SELECT * FROM notifications WHERE userId = ? ORDER BY sendData DESC';
+
+  db.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar notificações.' });
+
+    res.json({ success: true, notifications: results });
+  });
+});
 
 // ** Reações de postagem** // 
+// ** curtidos ** 
+//Rota POST para curtir postagens
+app.post('/post/like', (req, res) => {
+  const { postId, userId } = req.body;
 
+  const checkSql = 'SELECT * FROM likes WHERE postId = ? AND userId = ?';
+  db.query(checkSql, [postId, userId], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao verificar curtida.' });
+
+    if (results.length > 0) {
+      return res.status(400).json({ success: false, message: 'Usuário já curtiu este post.' });
+    }
+
+    const insertSql = 'INSERT INTO likes (postId, userId) VALUES (?, ?)';
+    db.query(insertSql, [postId, userId], (err2) => {
+      if (err2) return res.status(500).json({ success: false, message: 'Erro ao curtir o post.' });
+
+      res.json({ success: true, message: 'Post curtido com sucesso.' });
+    });
+  });
+});
+
+//Rota DELETE pra remover post curtido
+app.delete('/post/unlike', (req, res) => {
+  const { postId, userId } = req.body;
+
+  const sql = 'DELETE FROM likes WHERE postId = ? AND userId = ?';
+  db.query(sql, [postId, userId], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao remover curtida.' });
+
+    res.json({ success: true, message: 'Curtida removida com sucesso.' });
+  });
+});
+
+//Rota GET pra listar posts curtidos pelo usuário
+app.get('/user/:id/liked-posts', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    SELECT p.*, i.img1, i.img2, i.img3, i.img4, i.img5
+    FROM likes l
+    JOIN posts p ON l.postId = p.id
+    LEFT JOIN imageAndVideo i ON p.id = i.id_post
+    WHERE l.userId = ?
+    ORDER BY p.id DESC
+  `;
+
+  db.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar posts curtidos.' });
+
+    const posts = results.map(post => {
+      const images = [post.img1, post.img2, post.img3, post.img4, post.img5].filter(Boolean);
+      return { ...post, media: images };
+    });
+
+    res.json({ success: true, posts });
+  });
+});
+
+//*favoritos **
+//Rota POST pra adicionar uma postagem aos favoritos
+app.post('/favorites/add', (req, res) => {
+  const { postId, userId } = req.body;
+
+  const checkSql = 'SELECT * FROM favorites WHERE postId = ? AND userId = ?';
+  db.query(checkSql, [postId, userId], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao verificar favorito.' });
+
+    if (results.length > 0) {
+      return res.status(400).json({ success: false, message: 'Post já favoritado.' });
+    }
+
+    const sql = 'INSERT INTO favorites (postId, userId) VALUES (?, ?)';
+    db.query(sql, [postId, userId], (err2) => {
+      if (err2) return res.status(500).json({ success: false, message: 'Erro ao favoritar o post.' });
+
+      res.json({ success: true, message: 'Post favoritado com sucesso.' });
+    });
+  });
+});
+
+//Rota DELETE pra remover uma postagem dos favoritos
+app.delete('/favorites/remove', (req, res) => {
+  const { postId, userId } = req.body;
+
+  const sql = 'DELETE FROM favorites WHERE postId = ? AND userId = ?';
+  db.query(sql, [postId, userId], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao remover favorito.' });
+
+    res.json({ success: true, message: 'Favorito removido com sucesso.' });
+  });
+});
+
+//Rota GET pra listar as postagens favoritadas 
+app.get('/user/:id/favorites', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    SELECT p.*, i.img1, i.img2, i.img3, i.img4, i.img5
+    FROM favorites f
+    JOIN posts p ON f.postId = p.id
+    LEFT JOIN imageAndVideo i ON p.id = i.id_post
+    WHERE f.userId = ?
+    ORDER BY p.id DESC
+  `;
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao buscar posts favoritos.' });
+    }
+
+    const posts = results.map(post => {
+      const media = [post.img1, post.img2, post.img3, post.img4, post.img5].filter(Boolean);
+      return {
+        id: post.id,
+        title: post.title,
+        description: post.description,
+        artSection: post.artSection,
+        artistId: post.artistId,
+        media
+      };
+    });
+
+    res.json({ success: true, posts });
+  });
+});
+
+//**comentários**
+// Rota POST para adicionar um comentário
+app.post('/comments/add', (req, res) => {
+  const {content, postId, userId} = req.body;
+
+  if (!content || !postId || !userId) {
+    return res.status(400).json({ success: false, message: 'Campos obrigatórios faltando.' });
+  }
+
+  const sql = 'INSERT INTO comments (content, postId, userId) VALUES (?, ?, ?)';
+  db.query(sql, [content, postId, userId], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao adicionar comentário.' });
+
+    res.json({ success: true, message: 'Comentário adicionado com sucesso.' });
+  });
+});
+
+// Rota GET para listar comentários de um post
+app.get('/comments/:postId', (req, res) => {
+  const { postId } = req.params;
+
+  const sql = `
+    SELECT c.*, u.name, u.userName, u.profileImage
+    FROM comments c
+    JOIN users u ON c.userId = u.id
+    WHERE c.postId = ?
+    ORDER BY c.sendData DESC
+  `;
+
+  db.query(sql, [postId], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
+
+    res.json({ success: true, comments: results });
+  });
+});
+
+//Rota PUT pra editar o conteúdo do comentário
+app.put('/comments/edit/:id', (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+
+  if (!content) {
+    return res.status(400).json({ success: false, message: 'O novo conteúdo do comentário é obrigatório.' });
+  }
+
+  const sql = `UPDATE comments SET content = ? WHERE id = ?`;
+
+  db.query(sql, [content, id], (err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao editar comentário.' });
+    }
+
+    res.json({ success: true, message: 'Comentário editado com sucesso.' });
+  });
+});
+
+//Rota DELETE pra excluir comentário
+app.delete('/comments/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `DELETE FROM comments WHERE id = ?`;
+
+  db.query(sql, [id], (err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao excluir comentário.' });
+    }
+
+    res.json({ success: true, message: 'Comentário excluído com sucesso.' });
+  });
+});
 
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`))
 
