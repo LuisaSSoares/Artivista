@@ -6,7 +6,7 @@ id int auto_increment not null primary key,
 name varchar(255),
 userName varchar(255),
 email varchar(255),
-password varchar(50),
+password varchar(255),
 userType enum('artista', 'padrão') default 'padrão',
 profileImage varchar (255)
 );

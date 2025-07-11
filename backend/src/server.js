@@ -37,92 +37,128 @@ const uploadFeed = multer({ storage: storageFeed });
 
 //***Artistas e usuários***
 // Rota POST de cadastro de usuário
-app.post("/user/register", (req, res) => {
-  const { name, userName, email, password} = req.body; 
+app.post("/user/register", async (req, res) => {
+  const { name, userName, email, password } = req.body;
+
   if (!name || !userName || !email || !password) {
-    return res.json({ 
-      success: false, 
-      message: "Todos os campos são obrigatórios." 
+    return res.json({
+      success: false,
+      message: "Todos os campos são obrigatórios."
     });
-}
+  }
 
   const checkSql = `SELECT * FROM users WHERE email = ? OR userName = ?`;
 
-  db.query(checkSql, [email, userName], (err, results) => {
+  db.query(checkSql, [email, userName], async (err, results) => {
     if (err) {
       console.log(err);
       return res.json({
-        success: false, 
-        message: "Erro ao verificar usuário." 
+        success: false,
+        message: "Erro ao verificar usuário."
       });
     }
 
     if (results.length > 0) {
-      return res.json({ 
-        success: false, 
-        message: "Email ou nome de usuário já cadastrados. Tente novamente ou faça o login" 
+      return res.json({
+        success: false,
+        message: "Email ou nome de usuário já cadastrados. Tente novamente ou faça o login"
       });
     }
-  const sql = `INSERT INTO users (name, userName, email, password) VALUES (?, ?, ?, ?)`;
 
-  db.query(sql, [ name, userName, email, password], (err, result) => {
-      if (err) {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const sql = `INSERT INTO users (name, userName, email, password) VALUES (?, ?, ?, ?)`;
+
+      db.query(sql, [name, userName, email, hashedPassword], (err, result) => {
+        if (err) {
           console.log(err);
-          res.json({ 
-            success: false, 
-            message: "Erro ao cadastrar usuário." });
-      } else {
-          const id = result.insertId; // pega o id cadastrado
-          res.json({ success: 
-            true, 
-            message: "Usuário cadastrado com sucesso.", 
-            id });
-      }
+          res.json({
+            success: false,
+            message: "Erro ao cadastrar usuário."
+          });
+        } else {
+          const token = jwt.sign({ id: result.insertId, email, userName }, jwtSecret, { expiresIn: '1h' });
+
+          res.json({
+            success: true,
+            message: "Usuário cadastrado com sucesso.",
+            token,
+            user: {
+              id: result.insertId,
+              name,
+              userName,
+              email
+            }
+          });
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: 'Erro ao criptografar a senha.' });
+    }
   });
 });
-})
 
 // Rota POST para logar usuário
 app.post('/user/login', (req, res) => {
-    const { email, password } = req.body;
-  
-    // Validação dos campos obrigatórios
-    if (!email || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Por favor, informe email e senha!' 
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Por favor, informe email e senha!'
+    });
+  }
+
+  const query = 'SELECT * FROM users WHERE email = ?';
+
+  db.query(query, [email], async (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: 'Erro no servidor.',
+        error: err
       });
     }
-  
-    // Consulta para verificar usuário e senha
-    const query = 'SELECT * FROM users WHERE email = ? AND password = ?';
-  
-    db.query(query, [email, password], (err, results) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: 'Erro no servidor.',
-          error: err
-        });
-      }
-  
-      if (results.length === 0) {
-        // Usuário não encontrado ou senha incorreta
-        return res.status(401).json({
-          success: false,
-          message: 'Email ou senha incorretos.'
-        });
-      }
-  
-      // Login bem-sucedido
-      const user = results[0];
-      res.status(200).json({
-        success: true,
-        message: 'Login realizado com sucesso!',
-        user
+
+    if (results.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Email ou senha incorretos.'
       });
+    }
+
+    const user = results[0];
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Email ou senha incorretos.'
+      });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, userName: user.userName },
+      jwtSecret,
+      { expiresIn: '5h' }
+    );
+
+    //Login bem-sucedido
+    res.status(200).json({
+      success: true,
+      message: 'Login realizado com sucesso!',
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        userName: user.userName,
+        email: user.email
+      }
     });
   });
+});
 
   //Rota PUT para colocar a foto de perfil
   app.put('/user/uploadProfile', uploadProfile.single('profileImage'), (req, res) => {
@@ -172,13 +208,13 @@ app.get("/users/list", (req, res) => {
 //Rota PUT pra atualizar o perfil
 app.put('/user/edit/:id', (req, res) => {
   const {id} = req.params
-  const {name, username, password} = req.body
-  let query = 'UPDATE users SET name = ?, username = ? WHERE id = ?'
-  let values = [name, username, id]
+  const {name, userName, password} = req.body
+  let query = 'UPDATE users SET name = ?, userName = ? WHERE id = ?'
+  let values = [name, userName, id]
 
   if(password){
-      query = 'UPDATE users SET name = ?, username = ?, password = ? WHERE id = ?'
-      values = [name, username, password, id]
+      query = 'UPDATE users SET name = ?, userName = ?, password = ? WHERE id = ?'
+      values = [name, userName, password, id]
   }
 
   db.query(query, values, (err, result) => {
