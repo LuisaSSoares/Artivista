@@ -3,6 +3,9 @@ const app = express();
 const port = 3520;
 const db = require("./db_config");
 const cors = require("cors");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const jwtSecret = process.env.JWT_SECRET || 'senhajwt'
 const multer = require('multer')
 
 app.use(express.json());
@@ -32,53 +35,52 @@ const storageFeed = multer.diskStorage({
 const uploadProfile = multer({ storage: storageProfile });
 const uploadFeed = multer({ storage: storageFeed });
 
+//***Artistas e usuários***
 // Rota POST de cadastro de usuário
 app.post("/user/register", (req, res) => {
-    const { name, userName, email, password} = req.body; 
-    if (!name || !userName || !email || !password) {
+  const { name, userName, email, password} = req.body; 
+  if (!name || !userName || !email || !password) {
+    return res.json({ 
+      success: false, 
+      message: "Todos os campos são obrigatórios." 
+    });
+}
+
+  const checkSql = `SELECT * FROM users WHERE email = ? OR userName = ?`;
+
+  db.query(checkSql, [email, userName], (err, results) => {
+    if (err) {
+      console.log(err);
+      return res.json({
+        success: false, 
+        message: "Erro ao verificar usuário." 
+      });
+    }
+
+    if (results.length > 0) {
       return res.json({ 
         success: false, 
-        message: "Todos os campos são obrigatórios." 
+        message: "Email ou nome de usuário já cadastrados. Tente novamente ou faça o login" 
       });
-  }
+    }
+  const sql = `INSERT INTO users (name, userName, email, password) VALUES (?, ?, ?, ?)`;
 
-    const checkSql = `SELECT * FROM users WHERE email = ? OR userName = ?`;
-
-    db.query(checkSql, [email, userName], (err, results) => {
+  db.query(sql, [ name, userName, email, password], (err, result) => {
       if (err) {
-        console.log(err);
-        return res.json({
-          success: false, 
-          message: "Erro ao verificar usuário." 
-        });
+          console.log(err);
+          res.json({ 
+            success: false, 
+            message: "Erro ao cadastrar usuário." });
+      } else {
+          const id = result.insertId; // pega o id cadastrado
+          res.json({ success: 
+            true, 
+            message: "Usuário cadastrado com sucesso.", 
+            id });
       }
-  
-      if (results.length > 0) {
-        return res.json({ 
-          success: false, 
-          message: "Email ou nome de usuário já cadastrados. Tente novamente ou faça o login" 
-        });
-      }
-    const sql = `INSERT INTO users (name, userName, email, password) VALUES (?, ?, ?, ?)`;
-  
-    db.query(sql, [ name, userName, email, password], (err, result) => {
-        if (err) {
-            console.log(err);
-            res.json({ 
-              success: false, 
-              message: "Erro ao cadastrar usuário." });
-        } else {
-            const id = result.insertId; // pega o id do morador cadastrado
-            res.json({ success: 
-              true, 
-              message: "Usuário cadastrado com sucesso.", 
-              id });
-        }
-    });
   });
+});
 })
-
-//***Artistas e usuários***
 
 // Rota POST para logar usuário
 app.post('/user/login', (req, res) => {
@@ -392,11 +394,147 @@ app.delete('/feed/delete/:id', (req, res) => {
 });
 
 // ** Eventos e Cursos** // 
-//Usar "Link Preview" aqui pra recuperar preview de imgs em links especificos 
+// ** Eventos **
+//Rota POST para postar eventos
+app.post('/events/create', (req, res) => {
+  const { title, dateEvent, time, description, classification, link, artistId } = req.body;
+
+  if (!title || !dateEvent || !time || !description || !classification || !artistId) {
+    return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  }
+
+  const sql = `
+    INSERT INTO events (title, dateEvent, time, description, classification, link, artistId)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [title, dateEvent, time, description, classification, link, artistId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao criar evento.', error: err });
+    }
+
+    res.status(201).json({ success: true, message: 'Evento criado com sucesso.', eventId: result.insertId });
+  });
+});
+
+//Rota GET para listar eventos
+app.get('/events', (req, res) => {
+  const sql = 'SELECT * FROM events ORDER BY dateEvent ASC';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao buscar eventos.' });
+    }
+
+    res.json({ success: true, events: results });
+  });
+});
+
+//Rota PUT para editar eventos
+app.put('/events/edit/:id', (req, res) => {
+  const { id } = req.params;
+  const { title, dateEvent, time, description, classification, link } = req.body;
+
+  if (!title || !dateEvent || !time || !description || !classification) {
+    return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  }
+
+  const sql = `UPDATE events SET title = ?, dateEvent = ?, time = ?, description = ?, classification = ?, link = ? WHERE id = ?`;
+
+  db.query(sql, [title, dateEvent, time, description, classification, link, id], (err, result) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao editar evento.' });
+
+    res.json({ success: true, message: 'Evento atualizado com sucesso.' });
+  });
+});
+
+//Rota DELETE para remover eventos
+app.delete('/events/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM events WHERE id = ?';
+  db.query(sql, [id], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao deletar evento.' });
+
+    res.json({ success: true, message: 'Evento deletado com sucesso.' });
+  });
+});
+
+// **Cursos**
+// Rota POST para criar curso
+app.post('/courses/create', (req, res) => {
+  const { title, dateCourse, time, description, classification, participantsLimit, link, artistId } = req.body;
+
+  if (!title || !dateCourse || !time || !description || !classification || !participantsLimit || !link || !artistId) {
+    return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  }
+
+  const sql = `
+    INSERT INTO courses (title, dateCourse, time, description, classification, participantsLimit, link, artistId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [title, dateCourse, time, description, classification, participantsLimit, link, artistId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao criar curso.', error: err });
+    }
+
+    res.status(201).json({ success: true, message: 'Curso criado com sucesso.', courseId: result.insertId });
+  });
+});
+
+// Rota GET para listar todos os cursos
+app.get('/courses', (req, res) => {
+  const sql = 'SELECT * FROM courses ORDER BY dateCourse ASC';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao buscar cursos.' });
+    }
+
+    res.json({ success: true, courses: results });
+  });
+});
+
+// Rota PUT para editar curso
+app.put('/courses/edit/:id', (req, res) => {
+  const { id } = req.params;
+  const { title, dateCourse, time, description, classification, participantsLimit, link } = req.body;
+
+  if (!title || !dateCourse || !time || !description || !classification || !participantsLimit || !link) {
+    return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  }
+
+  const sql = `
+    UPDATE courses SET title = ?, dateCourse = ?, time = ?, description = ?, classification = ?, participantsLimit = ?, link = ?
+    WHERE id = ?
+  `;
+
+  db.query(sql, [title, dateCourse, time, description, classification, participantsLimit, link, id], (err, result) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao editar curso.' });
+    }
+
+    res.json({ success: true, message: 'Curso atualizado com sucesso.' });
+  });
+});
+
+// Rota DELETE para remover curso
+app.delete('/courses/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = 'DELETE FROM courses WHERE id = ?';
+  db.query(sql, [id], (err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao deletar curso.' });
+    }
+
+    res.json({ success: true, message: 'Curso deletado com sucesso.' });
+  });
+});
 
 //** Chat ** // 
 
-// ** Seguidores ** //
 
 // ** Notificações ** //
 //Rota GET para listar notificações

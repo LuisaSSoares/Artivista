@@ -128,11 +128,4 @@ foreign key (userId) references users(id),
 foreign key (postId) references posts(id)
 );
 
-create table followers(
-followers int, 
-following int, 
-userId int,
-foreign key (userId) references users(id)
-);
-
 
