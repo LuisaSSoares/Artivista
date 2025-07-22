@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET || 'senhajwt'
 const multer = require('multer')
+const { encrypt, decrypt } = require('./cryptoHelper');
 
 app.use(express.json());
 app.use(cors());
@@ -578,9 +579,10 @@ app.post('/chat/send', (req, res) => {
     return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
   }
 
+  const encryptedMessage = encrypt(message);
   const sql = `INSERT INTO chat (message, userId, recipientId) VALUES (?, ?, ?)`;
 
-  db.query(sql, [message, userId, recipientId], (err, result) => {
+  db.query(sql, [encryptedMessage, userId, recipientId], (err, result) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Erro ao enviar mensagem.', error: err });
     }
@@ -604,7 +606,13 @@ app.get('/chat/:userId/:recipientId', (req, res) => {
   db.query(sql, [userId, recipientId, recipientId, userId], (err, results) => {
     if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar mensagens.' });
 
-    res.json({ success: true, messages: results });
+    // Descriptografa as mensagens
+    const decryptedMessages = results.map(msg => ({
+      ...msg,
+      message: decrypt(msg.message)
+    }));
+
+    res.json({ success: true, messages: decryptedMessages });
   });
 });
 
@@ -616,10 +624,10 @@ app.put('/chat/edit/:id', (req, res) => {
   if (!message) {
     return res.status(400).json({ success: false, message: 'A nova mensagem é obrigatória.' });
   }
-
+  const encryptedMessage = encrypt(message);
   const sql = `UPDATE chat SET message = ? WHERE id = ?`;
 
-  db.query(sql, [message, id], (err) => {
+  db.query(sql, [encryptedMessage, id], (err) => {
     if (err) return res.status(500).json({ success: false, message: 'Erro ao editar mensagem.' });
 
     res.json({ success: true, message: 'Mensagem editada com sucesso.' });
