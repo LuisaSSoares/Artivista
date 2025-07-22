@@ -435,16 +435,16 @@ app.delete('/feed/delete/:id', (req, res) => {
 app.post('/events/create', (req, res) => {
   const { title, dateEvent, time, description, classification, link, artistId } = req.body;
 
-  if (!title || !dateEvent || !time || !description || !classification || !artistId) {
+  if (!title || !dateEvent || !time || !description || !classification || !eventType || !artistId) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    INSERT INTO events (title, dateEvent, time, description, classification, link, artistId)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (title, dateEvent, time, description, classification, eventType, link, artistId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [title, dateEvent, time, description, classification, link, artistId], (err, result) => {
+  db.query(sql, [title, dateEvent, time, description, classification, eventType, link, artistId], (err, result) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Erro ao criar evento.', error: err });
     }
@@ -499,18 +499,18 @@ app.delete('/events/delete/:id', (req, res) => {
 // **Cursos**
 // Rota POST para criar curso
 app.post('/courses/create', (req, res) => {
-  const { title, dateCourse, time, description, classification, participantsLimit, link, artistId } = req.body;
+  const { title, dateCourse, time, description, classification, courseType, participantsLimit, link, artistId } = req.body;
 
-  if (!title || !dateCourse || !time || !description || !classification || !participantsLimit || !link || !artistId) {
+  if (!title || !dateCourse || !time || !description || !classification || !courseType|| !participantsLimit || !link || !artistId) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    INSERT INTO courses (title, dateCourse, time, description, classification, participantsLimit, link, artistId)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO courses (title, dateCourse, time, description, classification, courseType, participantsLimit, link, artistId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [title, dateCourse, time, description, classification, participantsLimit, link, artistId], (err, result) => {
+  db.query(sql, [title, dateCourse, time, description, classification, courseType, participantsLimit, link, artistId], (err, result) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Erro ao criar curso.', error: err });
     }
@@ -570,7 +570,74 @@ app.delete('/courses/delete/:id', (req, res) => {
 });
 
 //** Chat ** // 
+//Rota POST para enviar mensagem a um user
+app.post('/chat/send', (req, res) => {
+  const { message, userId, recipientId } = req.body;
 
+  if (!message || !userId || !recipientId) {
+    return res.status(400).json({ success: false, message: 'Todos os campos são obrigatórios.' });
+  }
+
+  const sql = `INSERT INTO chat (message, userId, recipientId) VALUES (?, ?, ?)`;
+
+  db.query(sql, [message, userId, recipientId], (err, result) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao enviar mensagem.', error: err });
+    }
+
+    res.status(201).json({ success: true, message: 'Mensagem enviada com sucesso.', chatId: result.insertId });
+  });
+});
+
+//Rota GET pra recuperar histórico de mensagem
+app.get('/chat/:userId/:recipientId', (req, res) => {
+  const { userId, recipientId } = req.params;
+
+  const sql = `
+    SELECT c.*, u.userName, u.profileImage
+    FROM chat c
+    JOIN users u ON c.userId = u.id
+    WHERE (c.userId = ? AND c.recipientId = ?) OR (c.userId = ? AND c.recipientId = ?)
+    ORDER BY c.sendIn ASC
+  `;
+
+  db.query(sql, [userId, recipientId, recipientId, userId], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar mensagens.' });
+
+    res.json({ success: true, messages: results });
+  });
+});
+
+//Rota PUT pra editar mensagem 
+app.put('/chat/edit/:id', (req, res) => {
+  const { id } = req.params;
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ success: false, message: 'A nova mensagem é obrigatória.' });
+  }
+
+  const sql = `UPDATE chat SET message = ? WHERE id = ?`;
+
+  db.query(sql, [message, id], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao editar mensagem.' });
+
+    res.json({ success: true, message: 'Mensagem editada com sucesso.' });
+  });
+});
+
+//Rota DELETE pra excluir mensagem
+app.delete('/chat/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  const sql = `DELETE FROM chat WHERE id = ?`;
+
+  db.query(sql, [id], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao deletar mensagem.' });
+
+    res.json({ success: true, message: 'Mensagem excluída com sucesso.' });
+  });
+});
 
 // ** Notificações ** //
 //Rota GET para listar notificações

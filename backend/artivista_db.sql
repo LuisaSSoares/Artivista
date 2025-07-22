@@ -6,7 +6,7 @@ id int auto_increment not null primary key,
 name varchar(255),
 userName varchar(255),
 email varchar(255),
-password varchar(255),
+password varchar(50),
 userType enum('artista', 'padrão') default 'padrão',
 profileImage varchar (255)
 );
@@ -38,8 +38,8 @@ id int not null primary key auto_increment,
 service enum ('sim', 'não'),
 userId int,
 activityId int,
-foreign key (userId) references users(id) on delete cascade,
-foreign key (activityId) references activities(id) 
+foreign key (userId) references users(id),
+foreign key (activityId) references activities(id)
 );
 
 create table posts(
@@ -61,6 +61,7 @@ img4 varchar(255),
 img5 varchar(255), 
 foreign key (id_post) references posts(id)
 );
+
 create table events(
 id int not null auto_increment primary key,
 title varchar(100),
@@ -68,6 +69,7 @@ dateEvent date,
 time varchar(45), 
 description varchar(255),
 classification enum ('livre', '12 anos', '14 anos', '16 anos', '18 anos ou mais'),
+eventType enum ('gratuito', 'pago'), 
 link varchar(255), 
 artistId int,
 foreign key (artistId) references artists(id)
@@ -80,10 +82,10 @@ dateCourse date,
 time varchar(45), 
 description varchar(255),
 classification enum ('livre', '12 anos', '14 anos', '16 anos', '18 anos ou mais'),
+courseType ENUM('gratuito', 'pago'),
 participantsLimit int, 
-link varchar(255), 
 artistId int,
-foreign key (artistId) references artists(id) 
+foreign key (artistId) references artists(id)
 );
 
 create table chat(
@@ -91,7 +93,9 @@ id int not null auto_increment primary key,
 message varchar(255), 
 sendIn datetime default current_timestamp, 
 userId int,
-foreign key (userId) references users(id) 
+recipientId int not null,
+foreign key (userId) references users(id),
+foreign key (recipientId) references users(id)
 );
 
 create table notifications(
@@ -120,12 +124,13 @@ foreign key (postId) references posts(id)
 
 create table comments(
 id int not null primary key auto_increment,
-content text, 
 sendData datetime default current_timestamp,
 postId int,
 userId int,
 foreign key (userId) references users(id),
 foreign key (postId) references posts(id)
 );
+
+
 
 
