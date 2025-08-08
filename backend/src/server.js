@@ -39,7 +39,7 @@ const uploadFeed = multer({ storage: storageFeed });
 //***Artistas e usuários***
 // Rota POST de cadastro de usuário
 app.post("/user/register", async (req, res) => {
-  const { name, userName, email, password } = req.body;
+  const { name, userName, email, password, userType} = req.body;
 
   if (!name || !userName || !email || !password) {
     return res.json({
@@ -60,6 +60,23 @@ app.post("/user/register", async (req, res) => {
     }
 
     if (results.length > 0) {
+      const emailExiste = results.some(user => user.email === email);
+      const usernameExiste = results.some(user => user.userName === userName);
+
+      if (emailExiste) {
+        return res.json({
+          success: false,
+          message: "Este email já está cadastrado. Tente novamente ou faça o login"
+        });
+      }
+
+      if (usernameExiste) {
+        return res.json({
+          success: false,
+          message: "Este nome de usuário já existe. Tente novamente"
+        });
+      }
+
       return res.json({
         success: false,
         message: "Email ou nome de usuário já cadastrados. Tente novamente ou faça o login"
@@ -69,9 +86,9 @@ app.post("/user/register", async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const sql = `INSERT INTO users (name, userName, email, password) VALUES (?, ?, ?, ?)`;
+      const sql = `INSERT INTO users (name, userName, email, password, userType) VALUES (?, ?, ?, ?, ?)`;
 
-      db.query(sql, [name, userName, email, hashedPassword], (err, result) => {
+      db.query(sql, [name, userName, email, hashedPassword, userType], (err, result) => {
         if (err) {
           console.log(err);
           res.json({
@@ -89,7 +106,8 @@ app.post("/user/register", async (req, res) => {
               id: result.insertId,
               name,
               userName,
-              email
+              email,
+              userType
             }
           });
         }
@@ -257,57 +275,39 @@ app.delete("/user/delete/:id", (req, res) => {
 });
   
 //Rota POST para cadastrar artistas
-app.post('/artist/register', (req, res) => {
-  const { service, userId, activityId } = req.body;
+app.post('/artist/register', async (req, res) => {
+  const { service, userId, activity1, activity2 = null, links = [] } = req.body;
 
-  if (!service || !userId || !activityId) {
-    return res.status(400).json({
-      success: false,
-      message: 'Todos os campos são obrigatórios.'
-    });
+  // Validação básica
+  if (!service || !userId || !activity1) {
+    return res.status(400).json({ success: false, message: 'service, userId e activity1 são obrigatórios.' });
   }
 
-  // Verifica se o usuário existe
-  const checkUserSql = 'SELECT * FROM users WHERE id = ?';
-  db.query(checkUserSql, [userId], (err, users) => {
-    if (err || users.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'Usuário não encontrado.'
-      });
+  if (!Array.isArray(links) || links.length > 3) {
+    return res.status(400).json({ success: false, message: 'links deve ser um array com até 3 URLs.' });
+  }
+
+  try {
+    const userCheck = await db.promise().query('SELECT id FROM users WHERE id = ?', [userId]);
+    if (userCheck[0].length === 0) {
+      return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
     }
 
-    // Atualiza userType para 'artista', se ainda não for
-    const updateUserType = 'UPDATE users SET userType = "artista" WHERE id = ?';
-    db.query(updateUserType, [userId], (err) => {
-      if (err) {
-        return res.status(500).json({
-          success: false,
-          message: 'Erro ao atualizar tipo de usuário.',
-          error: err
-        });
-      }
+    const [link1, link2, link3] = links.concat([null, null, null]); // garante 3 posições
+    const sql = `
+      INSERT INTO artists (service, userId, activity1, activity2, link1, link2, link3)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    const [result] = await db.promise().query(sql, [service, userId, activity1, activity2, link1, link2, link3]);
 
-      // Insere o artista na tabela artists
-      const insertArtist = 'INSERT INTO artists (service, userId, activityId) VALUES (?, ?, ?)';
-      db.query(insertArtist, [service, userId, activityId], (err, result) => {
-        if (err) {
-          return res.status(500).json({
-            success: false,
-            message: 'Erro ao cadastrar artista.',
-            error: err
-          });
-        }
+    res.status(201).json({ success: true, message: 'Artista cadastrado com sucesso.', artistId: result.insertId });
 
-        return res.status(201).json({
-          success: true,
-          message: 'Artista cadastrado com sucesso.',
-          artistId: result.insertId
-        });
-      });
-    });
-  });
-});
+  } catch (err) {
+    console.error('Erro na rota /artist/register:', err);
+    res.status(500).json({ success: false, message: 'Erro interno no servidor.', error: err.message });
+  }
+})
 
 //***Postagens***
 //Rota POST para postar fotos e videos

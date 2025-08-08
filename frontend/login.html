@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artivista - login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="background"></div>
+  <main class="containerLogin">
+    <img src="./components/ArtivistaLogo.png" alt="Artivista Logo" class="logo-img">
+    <form class=" form">
+        <div class="campo">
+            <input type="email" id="email" name="email" required placeholder=" ">
+            <label for="email">Email:</label>
+          </div> 
+  
+          <div class="campo">
+            <input type="password" id="senha" name="senha" required placeholder=" ">
+            <label for="senha">Senha:</label>
+          </div> 
+          <div class="buttons">
+            <button type="submit" class="btn entrar">Entrar</button>            
+            <button type="button" class="btn cadastrar">Faça seu cadastro</button>
+          </div>
+        </form>
+        <div>
+          <button class="btnGoogle">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
+        Entrar com o Google
+      </button>          
+        </div>
+    <a href="./index.html" class="link">Continuar sem login</a>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+  <script src="./login.js"></script>
+ 
+</body>
+</html>

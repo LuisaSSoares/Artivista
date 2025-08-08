@@ -1,0 +1,510 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Bellota Text", sans-serif;
+  }
+  
+  body {
+    min-height: 100vh;
+  }
+  
+  .background {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+  
+  .background::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url('components/fundoHome.jpg');
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.1);
+    z-index: -2;
+  }
+  
+  .background::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: -1;
+  }
+  
+  .containerLogin {
+    max-width: 500px;
+    width: 90%;
+    margin: 60px auto;
+    padding: 0 30px 40px 30px;
+    background: linear-gradient(to bottom, #dce8d0, #a7ce7d);
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+
+  .logo-img {
+    max-width: 90%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .campo {
+    position: relative;
+    max-width: 360px;
+    width: 100%;
+    margin: 0 auto 40px auto;
+  }
+  
+  .campo input {
+    width: 100%;
+    padding: 12px 12px;
+    border: 1px solid #CCCCCC;
+    border-radius: 20px;
+    font-size: 14px;
+    box-shadow: 2px 2px 4px rgba(95, 145, 4, 0.3);
+    background: white;
+    color: #000;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    outline: none;
+  }
+  
+  .campo label {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    color: #aaa;
+    font-size: 14px;
+    pointer-events: none;
+    background-color: white;
+    padding: 0 6px;
+    transform: translateY(-50%);
+    transition: all 0.3s ease;
+  }
+
+  .campo input:focus + label,
+  .campo input:not(:placeholder-shown) + label {
+    top: -1px;
+    left: 12px;
+    font-size: 12px;
+    font-weight: bolder;
+    color: white;
+    background-color: #5c8d2a;
+    border-radius: 12px;
+    padding: 2px 8px;
+    width: auto;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+  
+
+  .campo input:focus {
+    border-color: #5c8d2a;
+    box-shadow: 0 0 5px 2px #5c8d2a;
+  }
+  
+  
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 45px;
+  }
+  
+  .btn {
+    width: 150px;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color, font-size 0.4s ease;
+    margin-bottom: 40px;
+  }
+  
+  .cadastrar{
+    background-color: #1c1c1c;
+    color: #fff;
+  }
+  
+  .entrar {
+    background-color: #5c8d2a;
+    color: #fff;
+    border: 1px solid #2C5712;
+  }
+
+  .cadastrar:hover {
+    background-color: #121212; 
+    font-size: 16px;
+    color: #fff;
+
+  }
+  
+  .entrar:hover {
+    background-color: #4a6e21; 
+    font-size: 16px;
+    color: #fff;
+  }
+
+  .link{
+    margin-top: 20px;
+    color: #2C5712;
+    display: inline-block; 
+  }
+
+  @media (max-width: 480px) {
+    .containerLogin {
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .containerCadastro{
+        margin: 30px auto;
+        padding: 20px;
+      }
+  
+    .form {
+      gap: 20px;
+    }
+  
+    .form input {
+      font-size: 0.9rem;
+    }
+  
+    .buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+  
+    .btn {
+      width: 100%;
+      padding: 12px;
+    }
+  }
+
+  /* Cadastro */
+  .cadastroTitulo h1{
+    font-family: "Julius Sans One", sans-serif;
+    font-size: 50px;
+    font-weight: 100;
+  }
+
+  .cadastroTitulo hr{
+    width: 80%;
+    border: 0.5px solid black;
+    margin-top: 5px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+
+  }
+
+
+  .containerCadastro{
+    max-width: 500px;
+    width: 90%;
+    margin: 60px auto;
+    padding-top: 40px;
+    background: linear-gradient(to bottom, #a7ce7d 0%, #dce8d0 50%, #a7ce7d 100%);
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    text-align: center;
+  }
+  
+  .campoSenhaCadastro{
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .artistaCheck {
+    color: #5A5A5A;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+  }
+
+  .artistaCheck input[type="checkbox"] {
+    transform: scale(1.5);
+    accent-color: #5c8d2a; 
+  }
+
+  .continuar {
+    background-color: #5c8d2a;
+    color: #fff;
+    border: 1px solid #2C5712;
+  }
+  
+  .login {
+    background-color: #1c1c1c;
+    color: #fff;
+  }
+  .continuar:hover {
+    background-color: #4a6e21;
+    font-size: 16px;
+    color: #fff;
+  }
+  
+  .login:hover {
+    background-color: #121212;
+    font-size: 16px;
+    color: #fff;
+  }
+
+/* Infos artista */
+  .artistaTitulo h1{
+    font-family: "Julius Sans One", sans-serif;
+    font-size: 40px;
+    font-weight: 100;
+}
+
+.artistaTitulo hr{
+  width: 80%;
+  border: 0.5px solid black;
+  margin-top: 5px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+}
+
+.areaContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  margin: 0 auto 20px auto;
+}
+
+.inputContainer {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.inputContainer input {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-right: none;
+  border-radius: 30px 0 0 30px;
+  padding: 10px 15px;
+  outline: none;
+  font-size: 14px;
+}
+
+.inputContainer button {
+  width: 50px;
+  border: 1px solid #ccc;
+  border-left: none;
+  background-color: #5F9104;
+  border-radius: 0 30px 30px 0;
+  cursor: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+#areasSelecionadas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+  
+
+.tag {
+  background-color: #5c8d2a;
+  color: white;
+  border-radius: 15px;
+  font-size: 12px;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remover-tag {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.sugestoesLista {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  border-radius: 20px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  background-color: white;
+  max-height: 150px;
+  position: absolute;
+  display: flex;
+  top: 100%;
+}
+
+
+.sugestoesLista li {
+  text-align: left;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sugestoesLista li:hover {
+  background-color: #e5f1d8;
+}
+
+.sugestoesLista::-webkit-scrollbar {
+  width: 8px;
+
+}
+
+.sugestoesLista::-webkit-scrollbar-thumb {
+  background-color: rgba(92, 141, 42, 0.6);
+  border-radius: 40px;
+}
+
+
+.checkServico {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+  color: #7E7E7E;
+}
+
+.checkServico label {
+  font-size: 13px;
+}
+
+.checkServico input[type="checkbox"] {
+  transform: scale(1.5);
+  accent-color: #5c8d2a; 
+}
+
+.btn.finalizar {
+  width: auto;
+  white-space: nowrap;
+  background-color: #5c8d2a;
+  color: #fff;
+  border: 1px solid #2C5712;
+}
+
+.btn.finalizar:hover {
+  background-color: #4a6e21;
+  font-size: 16px;
+  color: #fff;
+}
+
+.addLinkContainer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.addLink {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#linksContainer {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-width: 350px;
+}
+
+.linkItem {
+  background-color: #e5f1d8;
+  padding: 6px 10px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #2C5712;
+  max-width: 350px;
+  word-break: break-all;
+}
+
+.linkItem span {
+  flex: 1;
+  font-size: 14px;
+}
+
+.linkItem button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+#link {
+  width: 350px;
+  padding: 12px 14px;
+  background-color: transparent;
+  border: none;
+  font-style: italic;
+  font-size: 15px;
+  color: #5A5A5A;
+  text-decoration: underline;
+  outline: none;
+}
+
+.btnLink {
+  border: none;
+  padding: 8px;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnLink img {
+  width: 25px;
+  height: 25px;
+}
+
+.backgroundHomepage{
+  background-image: url('components/fundoHome2.jpg');
+  background-size: cover;
+  position: fixed;
+  height: 100%;
+  width: 100%;
+}

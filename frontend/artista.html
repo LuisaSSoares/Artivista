@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Informações do Artista</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="background"></div>
+  <main class="containerCadastro">
+    <div class="artistaTitulo">
+        <h1>INFORMAÇÕES DO ARTISTA</h1>
+        <hr>        
+    </div>
+    <div class="areaContainer">
+        <div class="tagsContainer" id="areasSelecionadas"></div>
+        <div class="inputContainer">
+          <input type="text" id="buscaArea" placeholder="Informe sua(s) área(s) de atuação">
+          <button><img src="./icons/search.svg" alt="buscar"></button>
+          <ul id="sugestoes" class="sugestoesLista"></ul>
+        </div>
+      </div>
+
+      <div class="addLinkContainer">
+        <div class="addLink">
+          <input type="url" id="link" name="link" placeholder="">
+          <button type="button" class="btnLink">
+            <img src="./icons/plus-lg.svg" id="addLinkBtn" alt="adicione link para perfil externo">
+          </button>
+        </div>
+        <div id="linksContainer"></div>
+      </div>
+
+      <div class="checkServico">
+        <input type="checkbox" id="servico">
+        <label for="servico">Estou interessado em disponibilizar meus serviços de arte dentro da plataforma (você pode alterar essa informação nas configurações)</label>
+      </div>
+
+      <button type="submit" class="btn finalizar">Finalizar cadastro
+        <img src="./icons/arrow-right.svg" alt="">
+      </button>
+  </main>
+  <script src="./artista.js"></script>
+</body>
+</html>
