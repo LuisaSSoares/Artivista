@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         "br.pinterest.com": "Pinterest",
         "deviantart.com": "DeviantArt",
         "github.io": "Portfólio (GitHub Pages)",
-        "github.com": "GitHub",
         "medium.com": "Medium",
         "notion.so": "Notion",
         "cargocollective.com": "Cargo",
