@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
           links: infosUser.links
         });
       }
+
   
       // 2) Atualiza com dados da API, se houver id
       if (viewedId) {
@@ -205,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
           .catch(err => console.warn('Falha ao carregar perfil:', err));
       }
     }
+
     
     const nav = document.querySelector('.navBar');
     if (!nav) return;
@@ -296,6 +298,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // reajusta quando redimensionar
     window.addEventListener('resize', placeIndicator);
   });
-  
-
   

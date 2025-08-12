@@ -1138,8 +1138,6 @@ body {
 .tag--1 {
   background-color: #5F9104;
 }
-
-/* Segunda área (um tom mais claro) */
 .tag--2 {
   background-color: #8FBE53;
 }
@@ -1152,4 +1150,186 @@ body {
   margin-bottom: 15px;
   border-radius: 8px;
   text-decoration: none;
+}
+
+/* Modal editar perfil */
+.modal[aria-hidden="true"] { display: none; }
+.modal[aria-hidden="false"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  position: fixed;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5); 
+}
+
+.modal-perfil {
+  background-color: #DCEEC8;
+  padding: 40px;
+  border-radius: 10px;
+  max-width: 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.headerModal{
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  gap: 10px; 
+}
+.headerModal h3{
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  color: #2C5712;
+}
+
+.headerModal button{
+  background: none;    
+  border: none;         
+  padding: 0;            
+  cursor: pointer;
+  transition: transform 0.25s ease, opacity 0.25s ease;      
+}
+
+.headerModal button:hover {
+  transform: scale(1.1);         
+  opacity: 0.85;          
+}
+
+/* Campo de foto de perfil */
+.profile-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid #cfe3b7;
+  background: #C3DEA5;
+  border-radius: 16px;
+}
+
+.profile-img {
+  font-size: 0;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #5F9104;       
+  box-shadow: 0 6px 18px rgba(95,145,4,.18);               
+  background-color: #e9f4da;      
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100%;
+}
+
+/* Mostra o ícone padrão quando não há foto (src vazio) */
+.profile-img[src=""],
+.profile-img:not([src]) {
+  background-image: url("./icons/person-circle.svg");
+
+}
+
+.profile-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  gap: 6px;
+}
+
+.profile-input{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0);
+  white-space:nowrap; border:0;
+}
+
+.upload-btn{
+  padding:3px 20px;
+  border-radius:50px;
+  background:#5F9104;
+  color:#fff;
+  font-weight:700;
+  transition:transform .12s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.upload-btn:hover{
+  background:#4b7503; box-shadow:0 4px 14px rgba(0,0,0,.12);
+}
+.field-label {
+  font-weight: 600;
+  margin-top: 6px;
+  color: #2C5712;
+}
+
+.field-input{
+  height: 30px;
+  width: 100% ;
+  padding: 16px 20px;
+  border: 1px solid #cfe3b7;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
+
+.field-textarea{
+  width: 100% ;
+  padding: 16px 20px;
+  border: 1px solid #cfe3b7;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
+
+.bio-historia-container {
+  display: flex;
+  gap: 20px; 
+  width: 100%;
+}
+
+
+.bio-historia-container .field-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-input:focus,
+.field-textarea:focus {
+  border-color: #5F9104;
+  box-shadow: 0 0 0 3px rgba(95,145,4,.15);
+}
+
+/* Botão (usa sua classe existente) */
+.CustomConfirm {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background: #5F9104;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.CustomConfirm:hover {
+  background: #4b7503;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+
+.CustomConfirm:active {
+  transform: translateY(1px);
 }

@@ -223,6 +223,59 @@
                     </section>
                     <section class="tabPanel" data-tab="agenda" ></section>
                   </section>
+                  
+                  <div id="ModalScreen" class="modal" aria-hidden="false">
+                    <div class="modal-perfil">
+                        <div class="headerModal">
+                            <button>
+                                <img src="./icons/x.svg" alt="">
+                            </button>
+                            <h3>Editar perfil</h3>                              
+                        </div>
+                        
+                  
+                      <div class="profile-row">
+                        <img id="previewProfileImg" class="profile-img" src="" alt="Foto de perfil">
+                        <div class="profile-upload">
+                          <input type="file" id="profileImage" class="profile-input" accept="image/*" placeholder="Escolher foto de perfil">
+                          <label for="profileImage" class="upload-btn" role="button" tabindex="0">
+                            Editar foto do perfil
+                          </label>
+                          <small class="profile-hint">JPG/PNG até 5MB</small>
+                        </div>
+                      </div>
+                  
+                      <form id="formEditarPerfil" class="profile-form">
+                            <label for="ModifyName" class="field-label">Nome:</label>
+                            <input type="text" id="ModifyName" class="field-input" required>                            
+
+                            <label for="ModifyUserName" class="field-label">Nome de usuário (userName):</label>
+                            <input type="text" id="ModifyUserName" class="field-input" required>                            
+                            
+                            <label for="ModifyPassword" class="field-label">Senha (opcional):</label>
+                            <input type="password" id="ModifyPassword" class="field-input">  
+
+                            <label for="confirmPassword" class="field-label">Confirmar nova senha:</label>
+                            <input type="password" id="ModifyPassword" class="field-input">                            
+
+                            <div class="bio-historia-container">
+                                <div class="field-group">
+                                  <label for="ModifyBio" class="field-label">Bio:</label>
+                                  <textarea id="ModifyBio" class="field-textarea" rows="3" maxlength="500"></textarea>
+                                </div>
+                              
+                                <div class="field-group">
+                                  <label for="ModifyHistoriaArte" class="field-label">História na arte (historia_arte):</label>
+                                  <textarea id="ModifyHistoriaArte" class="field-textarea" rows="4" maxlength="2000"></textarea>
+                                </div>
+                              </div>
+
+
+                  
+                        <button id="Confirm" class="CustomConfirm" type="submit">Confirmar</button>
+                      </form>
+                    </div>
+                  </div>
                 </div>
             </div> 
 
