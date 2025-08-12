@@ -14,6 +14,24 @@ app.use(cors());
 app.use("/uploads/profile", express.static("src/profile"));
 app.use("/uploads/feed", express.static("src/feed"));
 
+function verificarToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader) {
+    return res.status(401).json({ success: false, message: 'Token não fornecido.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  jwt.verify(token, jwtSecret, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ success: false, message: 'Token inválido ou expirado.' });
+    }
+    req.user = decoded;
+    next();
+  });
+}
+
 // Storage para foto de perfil
 const storageProfile = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "./src/profile"),
@@ -96,7 +114,7 @@ app.post("/user/register", async (req, res) => {
             message: "Erro ao cadastrar usuário."
           });
         } else {
-          const token = jwt.sign({ id: result.insertId, email, userName }, jwtSecret, { expiresIn: '1h' });
+          const token = jwt.sign({ id: result.insertId, email, userName }, jwtSecret, { expiresIn: '5h' });
 
           res.json({
             success: true,
@@ -225,31 +243,31 @@ app.get("/users/list", (req, res) => {
 });
 
 //Rota PUT pra atualizar o perfil
-app.put('/user/edit/:id', (req, res) => {
-  const {id} = req.params
-  const {name, userName, password} = req.body
-  let query = 'UPDATE users SET name = ?, userName = ? WHERE id = ?'
-  let values = [name, userName, id]
+  app.put('/user/edit/:id', (req, res) => {
+    const {id} = req.params
+    const {name, userName, password, bio, historia_arte} = req.body
+    let query = 'UPDATE users SET name = ?, userName = ?, bio = ?, historia_arte = ? WHERE id = ?'
+    let values = [name, userName, bio, historia_arte, id]
 
-  if(password){
-      query = 'UPDATE users SET name = ?, userName = ?, password = ? WHERE id = ?'
-      values = [name, userName, password, id]
-  }
+    if(password){
+        query = 'UPDATE users SET name = ?, userName = ?, password = ?, bio = ?, historia_arte = ?  WHERE id = ?'
+        values = [name, userName, password, bio, historia_arte, id]
+    }
 
-  db.query(query, values, (err, result) => {
-      if (err) {
-          return res.status(500).json ({ success: false, message: 'Erro ao atualizar usuario' })
-      }
+    db.query(query, values, (err, result) => {
+        if (err) {
+            return res.status(500).json ({ success: false, message: 'Erro ao atualizar usuario' })
+        }
 
-      db.query('SELECT * FROM users WHERE id = ?', [id], (err, results) => {
-          if(err){
-              return res.status(500).json({success: false, message: 'Erro ao buscar o usuário'})
-          }
-          res.json({success: true, message: 'Perfil atualizado com sucesso', user: results[0]})
-      })
+        db.query('SELECT * FROM users WHERE id = ?', [id], (err, results) => {
+            if(err){
+                return res.status(500).json({success: false, message: 'Erro ao buscar o usuário'})
+            }
+            res.json({success: true, message: 'Perfil atualizado com sucesso', user: results[0]})
+        })
+    })
+
   })
-
-})
 
 //Rota DELETE para deletar user
 app.delete("/user/delete/:id", (req, res) => {
@@ -275,8 +293,9 @@ app.delete("/user/delete/:id", (req, res) => {
 });
   
 //Rota POST para cadastrar artistas
-app.post('/artist/register', async (req, res) => {
-  const { service, userId, activity1, activity2 = null, links = [] } = req.body;
+app.post('/artist/register', verificarToken, async (req, res) => {
+  const { service, activity1, activity2 = null, links = [] } = req.body;
+  const userId = req.user.id
 
   // Validação básica
   if (!service || !userId || !activity1) {
@@ -308,6 +327,34 @@ app.post('/artist/register', async (req, res) => {
     res.status(500).json({ success: false, message: 'Erro interno no servidor.', error: err.message });
   }
 })
+
+// Rota GET perfil simples
+app.get('/profile/:id', (req, res) => {
+  const userId = req.params.id;
+
+  const sql = `
+    SELECT 
+      u.id, u.name, u.userName, u.email, u.userType, u.bio, u.historia_arte, u.profileImage,
+      a.service, a.activity1, a.activity2, a.link1, a.link2, a.link3
+    FROM users u
+    LEFT JOIN artists a ON a.userId = u.id
+    WHERE u.id = ?
+    LIMIT 1
+  `;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error('Erro ao buscar perfil:', err);
+      return res.status(500).json({ success: false, message: 'Erro no servidor.' });
+    }
+
+    if (!results.length) {
+      return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
+    }
+
+    res.json({ success: true, data: results[0] });
+  });
+});
 
 //***Postagens***
 //Rota POST para postar fotos e videos

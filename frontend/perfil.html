@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artivista - homepage</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="backgroundHomepage"></div>
+        <div class="boxContainers">
+            <div class="containerMenu">
+                <img src="./components/ArtivistaLogo.png" id="logoMenu" alt="logo do Artivista">
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/house-fill.svg" alt="">
+                        <a href="./index.html">Início </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/person-circle.svg" alt="">
+                        <a href="./perfil.html">Minha conta </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/chat-dots.svg" alt="">
+                        <a href="./conversas.html">Conversas</a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/bell-fill.svg" alt="">
+                        <a href="./notificacoes.html">Notificações </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/gear-fill.svg" alt="">
+                        <a href="./configuracoes.html">Configurações </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="addContent" id="addContent">
+                    <a href="criacaoConteudo.html">
+                        <p>Criar novo conteúdo</p>
+                        <img src="./icons/plus-circle-fill.svg" alt="">
+                    </a>
+                </div>                    
+
+            </div>
+            <div class="containerContent">
+                <section id="perfilComum" hidden>
+                    <div class="perfilContainer">
+                        <div class="perfilSeparator">
+                            <img src="./icons/person-circle.svg" alt="" id="perfilPhoto">
+                            <div class="infos">
+                                <h2 id="nomeUsuario">Nome do Usuário</h2>
+                                <h5 id="username">@nomeusuario</h5>
+                                <p id="bio">Nenhuma bio adicionada</p>
+                                <button  class="editProfile" id="editProfile">Editar perfil</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aboutProfile">
+                        <div class="activityAndHistory">
+                                <div class="activityContainer"> 
+                                    <p>Atividades:</p>
+                                    <div class="postsReact">
+                                        <div>
+                                            <img src="./icons/heart-fill.svg" alt="">
+                                            <p>0 postagens curtidas</p>
+                                            <img src="./icons/arrow-right-short.svg" alt="">
+                                        </div>
+                                        <div>
+                                            <img src="./icons/chat-dots-fill.svg" alt="">
+                                            <p>0 comentários feitos</p>
+                                            <img src="./icons/arrow-right-short.svg" alt="">
+                                        </div>                                      
+                                    </div>
+                                </div>
+
+                            <div class="historyContainer">
+                            <h3>Minha relação com a arte:</h3>  
+                            <div>
+                                <button>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                                    </svg>                          
+                                </button>
+                                <p>Compartilhe sua história com a arte</p>
+                            </div>
+                            </div>
+                        </div>
+                            <div class="galeriaPessoal">
+                                <p>Galeria Pessoal:</p>
+                                <div class="galeriaPessoalContainers">
+
+                                    <div class="gpItem" data-count="0">
+                                        <img src="./icons/musicaEAudiovisual.svg" alt="">
+                                        <hr>
+                                        <p>0 postagens favoritas</p>
+                                    </div>
+
+                                    <div class="gpItem" data-count="0">
+                                        <img src="./icons/artesPlasticas.svg" alt="">
+                                        <hr>
+                                        <p>0 postagens favoritas</p>
+                                    </div>
+
+                                    <div class="gpItem" data-count="0">
+                                        <img src="./icons/artesCenicas.svg" alt="">
+                                        <hr>
+                                        <p>0 postagens favoritas</p>
+                                    </div>
+
+                                    <div class="gpItem" data-count="0">
+                                        <img src="./icons/literatura.svg" alt="">
+                                        <hr>
+                                        <p>0 postagens favoritas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                                 
+                  </section>
+
+
+                  <section id="perfilArtista" hidden>
+                    <div class="perfilContainer">
+                        <div class="perfilSeparator">
+                            <img src="./icons/person-circle.svg" alt="" id="perfilPhoto">
+                            <div class="infos">
+                                <h2 id="nomeUsuario">Nome do Usuário</h2>
+                                <span id="atuacaoTag">
+                                    <span class="tag tag--1"></span>
+                                    <span class="tag tag--2" hidden></span>
+                                </span>
+                                <h5 id="username">@nomeusuario</h5>
+                                <p id="bio">Nenhuma bio adicionada</p>
+                                <div id="externalLinksContainer" class="external-links"></div>
+                                <button  class="editProfile" id="editProfile">Editar perfil</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="navBar" data-scope="perfil">
+                        <a href="#postagens" data-tab="postagens" class="active">Postagens</a>
+                        <a href="#sobre"     data-tab="sobre">Sobre o perfil</a>
+                        <a href="#agenda"    data-tab="agenda">Programação</a>
+                        <span class="indicator"></span> 
+                    </div> 
+                    <section class="tabPanel" data-tab="postagens"></section>
+                    <section class="tabPanel" data-tab="sobre" hidden>
+                        <div class="aboutProfile">
+                            <div class="activityAndHistory">
+                                    <div class="activityContainer"> 
+                                        <p>Atividades:</p>
+                                        <div class="postsReact">
+                                            <div>
+                                                <img src="./icons/heart-fill.svg" alt="">
+                                                <p>0 postagens curtidas</p>
+                                                <img src="./icons/arrow-right-short.svg" alt="">
+                                            </div>
+                                            <div>
+                                                <img src="./icons/chat-dots-fill.svg" alt="">
+                                                <p>0 comentários feitos</p>
+                                                <img src="./icons/arrow-right-short.svg" alt="">
+                                            </div>                                      
+                                        </div>
+                                    </div>
+    
+                                <div class="historyContainer">
+                                <h3>Minha relação com a arte:</h3>  
+                                <div>
+                                    <button>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                                        </svg>                          
+                                    </button>
+                                    <p>Compartilhe sua história com a arte</p>
+                                </div>
+                                </div>
+                            </div>
+                                <div class="galeriaPessoal">
+                                    <p>Galeria Pessoal:</p>
+                                    <div class="galeriaPessoalContainers">
+    
+                                        <div class="gpItem" data-count="0">
+                                            <img src="./icons/musicaEAudiovisual.svg" alt="">
+                                            <hr>
+                                            <p>0 postagens favoritas</p>
+                                        </div>
+    
+                                        <div class="gpItem" data-count="0">
+                                            <img src="./icons/artesPlasticas.svg" alt="">
+                                            <hr>
+                                            <p>0 postagens favoritas</p>
+                                        </div>
+    
+                                        <div class="gpItem" data-count="0">
+                                            <img src="./icons/artesCenicas.svg" alt="">
+                                            <hr>
+                                            <p>0 postagens favoritas</p>
+                                        </div>
+    
+                                        <div class="gpItem" data-count="0">
+                                            <img src="./icons/literatura.svg" alt="">
+                                            <hr>
+                                            <p>0 postagens favoritas</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>   
+                    </section>
+                    <section class="tabPanel" data-tab="agenda" ></section>
+                  </section>
+                </div>
+            </div> 
+
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

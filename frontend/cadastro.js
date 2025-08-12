@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
         userName: usuario,
         email: email,
         password: senha,
-        userType: isArtista ? 'artista' : 'padrão'
+        userType: isArtista ? 'artista' : 'padrão'  
       };
   
       fetch('http://localhost:3520/user/register', {
@@ -82,8 +82,15 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            localStorage.setItem('userId', data.user?.id || data.userId);
-            localStorage.setItem('userType', isArtista ? 'artista' : 'padrão');
+            const user = data.user || { id: data.userId, ...dadosCadastro }
+            delete user.password;
+            localStorage.setItem('usuario', JSON.stringify(user));
+            localStorage.setItem('userId', user.id);
+            localStorage.setItem('userType', user.userType);
+          
+            if (data.token) {
+              sessionStorage.setItem('authToken', data.token);
+            }
             window.location.href = isArtista ? 'artista.html' : 'index.html';
           } else {
             // Exibir mensagens de erro específicas nos inputs

@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const tag = document.createElement('div');
         tag.className = 'linkItem';
         tag.innerHTML = `
-          <img src="https://www.google.com/s2/favicons?domain=${hostname}" alt="" style="width: 16px; height: 16px; margin-right: 8px;">
+          <img src="https://www.google.com/s2/favicons?sz=64&domain_url=${url}" alt="" style="width: 16px; height: 16px; margin-right: 8px;">
           <span>${nome}</span>
           <button title="Remover link">&times;</button>
         `;
@@ -273,7 +273,7 @@ const atividades = [
       areaInput.setCustomValidity("");
     }
   
-    const body = {
+    const dadosArtista = {
       service,
       userId,
       activity1,
@@ -284,8 +284,8 @@ const atividades = [
     try {
       const response = await fetch('http://localhost:3520/artist/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`},
+        body: JSON.stringify(dadosArtista)
       });
   
       let data = {};
