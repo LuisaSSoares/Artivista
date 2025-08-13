@@ -16,7 +16,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const addContent = document.getElementById('addContent')
         if (addContent) addContent.style.visibility = 'visible'
       }
-      
+     
+      const buildProfileUrl = (filename) =>
+      filename ? `http://localhost:3520/uploads/profile/${filename}` : './icons/person-circle.svg';
+
+      function setSideProfileIcon(url){
+      const secPerfil = Array.from(document.querySelectorAll('.navSections'))
+        .find(sec => sec.querySelector('a[href$="perfil.html"]'));
+      const imgMenu = secPerfil?.querySelector('div > img'); 
+      if (!imgMenu) return;
+
+      imgMenu.src = url;
+      if (url && !/person-circle\.svg$/i.test(url)) {
+        imgMenu.classList.add('avatarIcon');  
+      } else {
+        imgMenu.classList.remove('avatarIcon'); 
+      }
+      }
+      setSideProfileIcon(buildProfileUrl(infosUser?.profileImage));
       
       const inicioLink = document.querySelector('.navSections a[href="./index.html"]')
       if (inicioLink) {
@@ -135,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
           wrap.appendChild(a);
         });
       }
+      
   
       function renderProfile(data) {
         const isArtist = data?.userType === 'artista' || data?.activity1 || data?.activity2;
@@ -152,7 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
         setText(qs('#bio',         root), data?.bio || 'Nenhuma bio adicionada');
   
         const foto = qs('#perfilPhoto', root);
-        if (foto) foto.src = imgSrc(data?.profileImage);
+        const urlFoto = imgSrc(data?.profileImage);
+        if (foto) foto.src = urlFoto
+        setSideProfileIcon(urlFoto);
   
         if (isArtist) {
           const tag1 = qs('#atuacaoTag .tag--1', root);
@@ -169,6 +189,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const links = (data?.links && Array.isArray(data.links)) ? data.links : [];
           renderLinksExternos(root, links);
         }
+
+
+        const histP = root.querySelector('.historyContainer p');
+        if (histP) {
+          histP.textContent = (data?.historia_arte && data.historia_arte.trim())? data.historia_arte: 'Compartilhe sua história com a arte';
+          }
       }
   
       // 1) Fallback com localStorage (evita “piscada”)
@@ -188,26 +214,26 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(r => r.json())
           .then(json => {
             if (!json?.success || !json?.data) return;
-            const d = json.data;
+            const data = json.data;
             renderProfile({
-              id: d.id,
-              name: d.name,
-              userName: d.userName,
-              email: d.email,
-              userType: d.userType,
-              bio: d.bio,
-              historia_arte: d.historia_arte,
-              profileImage: d.profileImage,
-              activity1: d.activity1,
-              activity2: d.activity2,
-              links: [d.link1, d.link2, d.link3].filter(Boolean)
+              id: data.id,
+              name: data.name,
+              userName: data.userName,
+              email: data.email,
+              userType: data.userType,
+              bio: data.bio,
+              historia_arte: data.historia_arte,
+              profileImage: data.profileImage,
+              activity1: data.activity1,
+              activity2: data.activity2,
+              links: [data.link1, data.link2, data.link3].filter(Boolean)
             });
           })
           .catch(err => console.warn('Falha ao carregar perfil:', err));
       }
     }
 
-    
+
     const nav = document.querySelector('.navBar');
     if (!nav) return;
     if (nav.dataset.scope === 'perfil') {
@@ -298,4 +324,140 @@ document.addEventListener('DOMContentLoaded', () => {
     // reajusta quando redimensionar
     window.addEventListener('resize', placeIndicator);
   });
+
+  //Modal Editar Perfil
+const editButton = document.querySelector('.editProfile');
+const modal = document.getElementById('ModalScreen');
+const closeModal = document.getElementById('sair')
+
+
+function showFieldError(el, msg) {
+  if (!el) return;
+  el.setCustomValidity(msg);
+  // Mostra o balão do próprio navegador:
+  el.reportValidity();
+  el.focus();
+  // limpamos a mensagem quando o usuário digitar de novo
+  const clear = () => { el.setCustomValidity(''); el.removeEventListener('input', clear); };
+  el.addEventListener('input', clear);
+}
+
+
+if (editButton) {
+  editButton.addEventListener('click', editarPerfil);
+}
+
+if(closeModal) {
+  modal.setAttribute('aria-hidden', 'true')
+  window.onclick = (e) => { if (e.target === modal) modal.setAttribute('aria-hidden', 'true'); };
+}
+
+const newName = document.getElementById('ModifyName');
+const newUsername = document.getElementById('ModifyUserName');
+const newBio  = document.getElementById('ModifyBio');
+const newProfileImg  = document.getElementById('previewProfileImg');
+const newPassword = document.getElementById('ModifyPassword');       
+const newConfirmPassword = document.getElementById('confirmPassword');
+const fileInput = document.getElementById('profileImage');
+fileInput?.addEventListener('change', (e) => {
+  const f = e.target.files?.[0];
+  if (f && newProfileImg) newProfileImg.src = URL.createObjectURL(f);
+});
+
+  function preencherDados(data = {}) {
+    if (newName) newName.value = data?.name || '';
+    if (newUsername) newUsername.value = data?.userName || '';
+    if (newBio)  newBio.value  = data?.bio || '';
+    if (newProfileImg)  newProfileImg.src    = data?.profileImage ? `http://localhost:3520/uploads/profile/${data.profileImage}` : '';
+    if (newPassword) newPassword.value = '';
+    if (newConfirmPassword) newConfirmPassword.value = '';
+    modal?.setAttribute('aria-hidden', 'false');
+  }
+
+  function editarPerfil() {
+    const dadosUser = JSON.parse(localStorage.getItem('usuario') || '{}') 
+    preencherDados(dadosUser)
+    modal?.setAttribute('aria-hidden', 'false')
+  }
+
+  // Fechar no X
+  closeModal?.addEventListener('click', () => {
+  modal?.setAttribute('aria-hidden', 'true');
+});
+
+// Fechar ao clicar fora do conteúdo
+modal?.addEventListener('click', (e) => {
+  if (e.target === modal) modal.setAttribute('aria-hidden', 'true');
+});
+
+const confirmBtn = document.getElementById('Confirm');
+
+confirmBtn?.addEventListener('click', async (e) => {
+  e.preventDefault();
+
+  const user = JSON.parse(localStorage.getItem('usuario') || '{}');
+  if (!user?.id) return alert('Usuário não encontrado.');
+
+  const name = (newName?.value || '').trim();
+  const userName = (newUsername?.value || '').trim();
+  const bio = (newBio?.value || '').trim();
+  const pwd     = (newPassword?.value || '').trim();    
+  const confInp = (newConfirmPassword?.value || '').trim(); 
+
+  if (confInp && !pwd) {
+    showFieldError(newPassword, 'Digite a nova senha para confirmar.');
+    return;
+  }
+  if (pwd && pwd !== confInp) {
+    showFieldError(newConfirmPassword, 'As senhas não coincidem.');
+    return;
+  }
+
+  // monta payload (só inclui password se foi preenchida)
+  const payload = { name, userName, bio};
+  if (pwd) payload.password = pwd;
+
+  try {
+    const response = await fetch(`http://localhost:3520/user/edit/${user.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await response.json();
+    if (!response.ok || json?.success === false) {
+      return alert(json?.message || 'Erro ao atualizar dados.');
+    }
+
+    let newProfileImage = user.profileImage;
+    const file = fileInput?.files?.[0];
+    if (file) {
+      const formData = new FormData();
+      formData.append('id', user.id);
+      formData.append('profileImage', file);
+
+      const response2 = await fetch('http://localhost:3520/user/uploadProfile', {
+        method: 'PUT',
+        body: formData
+      });
+      const json2 = await response2.json();
+      if (!response2.ok || !json2?.success) {
+        return alert(json2?.message || 'Erro ao enviar foto de perfil.');
+      }
+      newProfileImage = json2.profileImage; // nome salvo no servidor
+    }
+
+    // 3) salva no localStorage e atualiza a UI
+    const atualizado = { ...user, ...payload, profileImage: newProfileImage };
+    localStorage.setItem('usuario', JSON.stringify(atualizado));
+    if (typeof renderProfile === 'function') renderProfile(atualizado);
+
+    modal?.setAttribute('aria-hidden', 'true');
+    alert('Perfil atualizado!');
+  } catch (err) {
+    console.error(err);
+    alert('Não foi possível atualizar. Tente novamente.');
+  }
+});
+
+
   

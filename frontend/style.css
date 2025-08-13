@@ -534,6 +534,16 @@ body {
   color: #2C5712;
 }
 
+.navSections img.avatarIcon{
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  object-fit: cover;      
+  border: 2px solid #5F9104;  
+  box-shadow: 0 6px 18px rgba(95,145,4,.18);
+}
+
+
 .containerContent{
   margin-top: 20px;
   margin-left: 25px;
@@ -934,7 +944,8 @@ body {
 #perfilPhoto{
   width: 120px;
   height: 120px;
-  border-radius: 50%;        
+  border-radius: 50%;  
+  border: 3px solid #5F9104;       
   object-fit: cover;   
 }
 
@@ -1170,18 +1181,22 @@ body {
 
 .modal-perfil {
   background-color: #DCEEC8;
-  padding: 40px;
   border-radius: 10px;
-  max-width: 60%;
+  width: min(640px, 96vw);
+  max-height: 88vh;          
+  padding: 22px;            
+  gap: 12px;          
   display: flex;
+  overflow: auto;
   flex-direction: column;
-  gap: 10px;
 }
+
 .headerModal{
   display: flex;
   align-items: center;
   justify-content: space-between; 
-  gap: 10px; 
+  gap: 8px;
+  padding-inline: 4px;
 }
 .headerModal h3{
   margin: 0;
@@ -1204,6 +1219,61 @@ body {
   opacity: 0.85;          
 }
 
+.passwordContainer{
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+.passwordContainer .field-group{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  font-weight: 600;
+  margin-top: 6px;
+  color: #2C5712;
+}
+
+.field-input{
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #cfe3b7;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
+
+.field-textarea{
+  width: 100% ;
+  padding: 16px 20px;
+  border: 1px solid #cfe3b7;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
+
+.bio-historia-container {
+  display: flex;
+  gap: 20px; 
+  width: 100%;
+}
+
+
+.field-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.field-input:focus,
+.field-textarea:focus {
+  border-color: #5F9104;
+  box-shadow: 0 0 0 3px rgba(95,145,4,.15);
+}
 /* Campo de foto de perfil */
 .profile-row {
   display: flex;
@@ -1231,7 +1301,6 @@ body {
   background-size: 100%;
 }
 
-/* Mostra o ícone padrão quando não há foto (src vazio) */
 .profile-img[src=""],
 .profile-img:not([src]) {
   background-image: url("./icons/person-circle.svg");
@@ -1265,53 +1334,8 @@ body {
 .upload-btn:hover{
   background:#4b7503; box-shadow:0 4px 14px rgba(0,0,0,.12);
 }
-.field-label {
-  font-weight: 600;
-  margin-top: 6px;
-  color: #2C5712;
-}
 
-.field-input{
-  height: 30px;
-  width: 100% ;
-  padding: 16px 20px;
-  border: 1px solid #cfe3b7;
-  border-radius: 10px;
-  outline: none;
-  transition: border-color .2s ease, box-shadow .2s ease;
-  background: #fff;
-}
-
-.field-textarea{
-  width: 100% ;
-  padding: 16px 20px;
-  border: 1px solid #cfe3b7;
-  border-radius: 10px;
-  outline: none;
-  transition: border-color .2s ease, box-shadow .2s ease;
-  background: #fff;
-}
-
-.bio-historia-container {
-  display: flex;
-  gap: 20px; 
-  width: 100%;
-}
-
-
-.bio-historia-container .field-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.field-input:focus,
-.field-textarea:focus {
-  border-color: #5F9104;
-  box-shadow: 0 0 0 3px rgba(95,145,4,.15);
-}
-
-/* Botão (usa sua classe existente) */
+/* Salvando novos dados do perfil */
 .CustomConfirm {
   width: 100%;
   margin-top: 12px;
@@ -1332,4 +1356,23 @@ body {
 
 .CustomConfirm:active {
   transform: translateY(1px);
+}
+
+/* anima fundo levemente */
+.modal[aria-hidden="false"] {
+  animation: modal-backdrop-in .18s ease-out;
+}
+@keyframes modal-backdrop-in {
+  from { background-color: rgba(0,0,0,0); }
+  to   { background-color: rgba(0,0,0,.5); }
+}
+
+/* anima a caixa subindo */
+.modal[aria-hidden="false"] .modal-perfil {
+  animation: modal-slide-up .28s ease-out;
+  will-change: transform, opacity;
+}
+@keyframes modal-slide-up {
+  from { transform: translateY(24px) scale(.98); opacity: 0; }
+  to   { transform: translateY(0)    scale(1);   opacity: 1; }
 }

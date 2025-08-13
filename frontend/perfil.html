@@ -68,7 +68,7 @@
                                 <h2 id="nomeUsuario">Nome do Usuário</h2>
                                 <h5 id="username">@nomeusuario</h5>
                                 <p id="bio">Nenhuma bio adicionada</p>
-                                <button  class="editProfile" id="editProfile">Editar perfil</button>
+                                <button  class="editProfile" onclick="editarPerfil()">Editar perfil</button>
                             </div>
                         </div>
                     </div>
@@ -148,7 +148,7 @@
                                 <h5 id="username">@nomeusuario</h5>
                                 <p id="bio">Nenhuma bio adicionada</p>
                                 <div id="externalLinksContainer" class="external-links"></div>
-                                <button  class="editProfile" id="editProfile">Editar perfil</button>
+                                <button class="editProfile" onclick="editarPerfil()">Editar perfil</button>
                             </div>
                         </div>
                     </div>
@@ -224,16 +224,15 @@
                     <section class="tabPanel" data-tab="agenda" ></section>
                   </section>
                   
-                  <div id="ModalScreen" class="modal" aria-hidden="false">
+                  <div id="ModalScreen" class="modal" aria-hidden="true">
                     <div class="modal-perfil">
                         <div class="headerModal">
-                            <button>
-                                <img src="./icons/x.svg" alt="">
+                            <button id="sair">
+                                <img src="./icons/x.svg" >
                             </button>
                             <h3>Editar perfil</h3>                              
                         </div>
                         
-                  
                       <div class="profile-row">
                         <img id="previewProfileImg" class="profile-img" src="" alt="Foto de perfil">
                         <div class="profile-upload">
@@ -241,7 +240,6 @@
                           <label for="profileImage" class="upload-btn" role="button" tabindex="0">
                             Editar foto do perfil
                           </label>
-                          <small class="profile-hint">JPG/PNG até 5MB</small>
                         </div>
                       </div>
                   
@@ -249,26 +247,21 @@
                             <label for="ModifyName" class="field-label">Nome:</label>
                             <input type="text" id="ModifyName" class="field-input" required>                            
 
-                            <label for="ModifyUserName" class="field-label">Nome de usuário (userName):</label>
-                            <input type="text" id="ModifyUserName" class="field-input" required>                            
+                            <label for="ModifyUserName" class="field-label">Nome de usuário:</label>
+                            <input type="text" id="ModifyUserName" class="field-input" required>   
+                            <div class="passwordContainer">
+                                <div class="field-group">
+                                    <label for="ModifyPassword" class="field-label">Senha (opcional):</label>
+                                    <input type="password" id="ModifyPassword" class="field-input" autocomplete="new-password">   
+                                </div>                                      
+                                    <div class="field-group">
+                                        <label for="confirmPassword" class="field-label">Confirmar nova senha:</label>
+                                        <input type="password" id="confirmPassword" class="field-input" autocomplete="new-password">                                         
+                                    </div>
+                            </div>  
+                                <label for="ModifyBio" class="field-label">Bio:</label>
+                                <textarea id="ModifyBio" class="field-textarea" maxlength="100"></textarea>
                             
-                            <label for="ModifyPassword" class="field-label">Senha (opcional):</label>
-                            <input type="password" id="ModifyPassword" class="field-input">  
-
-                            <label for="confirmPassword" class="field-label">Confirmar nova senha:</label>
-                            <input type="password" id="ModifyPassword" class="field-input">                            
-
-                            <div class="bio-historia-container">
-                                <div class="field-group">
-                                  <label for="ModifyBio" class="field-label">Bio:</label>
-                                  <textarea id="ModifyBio" class="field-textarea" rows="3" maxlength="500"></textarea>
-                                </div>
-                              
-                                <div class="field-group">
-                                  <label for="ModifyHistoriaArte" class="field-label">História na arte (historia_arte):</label>
-                                  <textarea id="ModifyHistoriaArte" class="field-textarea" rows="4" maxlength="2000"></textarea>
-                                </div>
-                              </div>
 
 
                   
