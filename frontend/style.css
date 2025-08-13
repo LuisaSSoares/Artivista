@@ -1376,3 +1376,119 @@ body {
   from { transform: translateY(24px) scale(.98); opacity: 0; }
   to   { transform: translateY(0)    scale(1);   opacity: 1; }
 }
+
+/* ======================== Página Contrate Artista ======================== */
+
+.contrateArtistaContainer {
+  display: flex;
+}
+
+#listaContrateArtista {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.contrateArtista {
+  background: linear-gradient(to bottom, #9EC16A, #C3DEA5, #C3DEA5, #5F9104);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(56, 95, 54, 0.555);
+  width: 220px;
+  height: 300px;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.contrateArtista:hover {
+  transform: translateY(-5px);
+}
+
+.contrateArtista .profileImage {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #5F9104;
+}
+
+.nomeArtista {
+  font-size: 20px;
+  font-weight: bolder;
+  color: #2C5712;
+  margin: 0;
+}
+
+.nomeUserArtista {
+  font-size: 15px;
+  color: #2C5712;
+  margin: 0;
+}
+
+.bioArtista {
+  font-size: 10px;
+  color: #2C5712;
+  text-align: center;
+  margin-bottom: 15px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  
+}
+
+.artistArea {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.tagArea {
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.btnPerfil {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #fff;
+  color: #5cb85c; /* Cor de sucesso (verde) */
+  padding: 10px 25px;
+  border: 2px solid #5cb85c;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'PT Sans', sans-serif;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.btnPerfil p {
+  margin: 0;
+}
+
+.btnPerfil:hover {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.btnPerfil:hover img {
+  filter: brightness(0) invert(1); /* Inverte a cor do ícone para branco no hover */
+}
+
+/* Garante que o ícone do botão não mude de cor por padrão */
+.btnPerfil img {
+  width: 20px;
+  height: 20px;
+  transition: filter 0.3s ease;
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artivista - homepage</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="backgroundHomepage"></div>
+        <div class="boxContainers">
+            <div class="containerMenu">
+                <img src="./components/ArtivistaLogo.png" id="logoMenu" alt="logo do Artivista">
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/house-fill.svg" alt="">
+                        <a href="./index.html">Início </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/person-circle.svg" alt="">
+                        <a href="./perfil.html">Minha conta </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/chat-dots.svg" alt="">
+                        <a href="./conversas.html">Conversas</a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/bell-fill.svg" alt="">
+                        <a href="./notificacoes.html">Notificações </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/gear-fill.svg" alt="">
+                        <a href="./configuracoes.html">Configurações </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="addContent" id="addContent">
+                    <a href="criacaoConteudo.html">
+                        <p>Criar novo conteúdo</p>
+                        <img src="./icons/plus-circle-fill.svg" alt="">
+                    </a>
+                </div>                    
+
+            </div>
+            <div class="containerContent">
+                <div class="inputContainerHome">
+                    <button><img src="./icons/search.svg" alt="buscar"></button>
+                    <input type="text" id="buscaHome" placeholder="Pesquisar">                    
+                </div>
+                    <div class="navBar">
+                        <a href="./index.html">Home</a>
+                        <a href="./eventosECursos.html">Eventos & Cursos</a>
+                        <a href="./contrateArtista.html">Contrate um artista</a>
+                        <span class="indicator"></span> 
+                    </div> 
+                    <div class="contrateArtistaContainer">
+                        <ul id="listaContrateArtista">
+                            <li>
+                                <div class="contrateArtista">
+                                    <img class="profileImage" src="./icons/person-circle.svg" alt="">
+                                    <p class="nomeArtista">Nome do Artista</p>
+                                    <p class="nomeUserArtista">@nomeusuario</p>
+                                    <div class="artistAreas">
+                                        <span class="tag tag--1"></span>
+                                        <span class="tag tag--2" hidden></span>                                        
+                                    </div>
+                                    <p class="bioArtista">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Recusandae soluta enim id cum placeat nam dolor. Exercitationem culpa aliquid nostrum quidem perspiciatis, sequi maiores assumenda eveniet. Quo ducimus possimus necessitatibus?</p>
+                                    <div id="perfilArtistButton">
+                                        <button>
+                                            <p>Ver perfil</p>
+                                            <img src="./icons/arrow-right-short.svg" alt="">
+                                        </button>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+            </div> 
+
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
