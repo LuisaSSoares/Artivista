@@ -1,15 +1,16 @@
 const qs = (sel, root = document) => root.querySelector(sel);
+let page
 document.addEventListener('DOMContentLoaded', () => {
     const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase()
-    const page =
-      (file === 'index.html' || file === 'feed.html') ? 'home' :
-      file.includes('eventosecursos') ? 'eventos' :
-      file.includes('contrateartista') ? 'contrate' :
-      file.includes('perfil') ? 'perfil' :
-      file.includes('conversas') ? 'conversas' :
-      file.includes('notificacoes') ? 'notificacoes' :
-      file.includes('configuracoes') ? 'configuracoes' :
-      'home'
+    page =
+    (file === 'index.html' || file === 'feed.html') ? 'home' :
+    file.includes('eventosecursos') ? 'eventos' :
+    file.includes('contrateartista') ? 'contrate' :
+    file.includes('perfil') ? 'perfil' :
+    file.includes('conversas') ? 'conversas' :
+    file.includes('notificacoes') ? 'notificacoes' :
+    file.includes('configuracoes') ? 'configuracoes' :
+    'home'
 
       const infosUser = JSON.parse(localStorage.getItem('usuario'));
       if (infosUser && infosUser.userType === 'artista') {
@@ -25,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .find(sec => sec.querySelector('a[href$="perfil.html"]'));
       const imgMenu = secPerfil?.querySelector('div > img'); 
       if (!imgMenu) return;
-
       imgMenu.src = url;
       if (url && !/person-circle\.svg$/i.test(url)) {
         imgMenu.classList.add('avatarIcon');  
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         imgMenu.classList.remove('avatarIcon'); 
       }
       }
-      setSideProfileIcon(buildProfileUrl(infosUser?.profileImage));
+       setSideProfileIcon(buildProfileUrl(infosUser?.profileImage));
       
       const inicioLink = document.querySelector('.navSections a[href="./index.html"]')
       if (inicioLink) {
@@ -323,6 +323,67 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => requestAnimationFrame(placeIndicator));
     // reajusta quando redimensionar
     window.addEventListener('resize', placeIndicator);
+    const fetchArtists = async () => {
+      try {
+          const infosUser = JSON.parse(localStorage.getItem('usuario'));
+          let url = 'http://localhost:3520/artists/list';
+  
+          if (infosUser && infosUser.userType === 'artista') {
+              url += `?excludeUserId=${infosUser.id}`;
+          }
+  
+          const response = await fetch(url);
+          const data = await response.json();
+  
+          if (data.success) {
+              const listaContrateArtista = document.getElementById('listaContrateArtista');
+              
+              if (listaContrateArtista) {
+                  listaContrateArtista.innerHTML = '';
+                  data.data.forEach(artist => {
+                      const profileImageUrl = artist.profileImage ?
+                          `http://localhost:3520/uploads/profile/${artist.profileImage}` :
+                          './icons/person-circle.svg';
+                      const activity1Html = artist.activity1 ? `<span class="tag tag--1">${artist.activity1}</span>` : '';
+                      const activity2Html = artist.activity2 ? `<span class="tag tag--2">${artist.activity2}</span>` : '';
+                      const artistCard = `
+                          <li>
+                              <div class="contrateArtista">
+                                  <img class="profileImage" src="${profileImageUrl}" alt="">
+                                  <div>
+                                    <p class="nomeArtista">${artist.name}</p>
+                                    <p class="nomeUserArtista">@${artist.userName || 'nomeusuario'}</p>                                  
+                                  </div>
+                                  <div class="bioProfileContainer">
+                                    <div class="artistAreas">
+                                    ${activity1Html}
+                                    ${activity2Html}                                    
+                                    </div>
+                                    <p class="bioArtista">${artist.bio || 'Sem biografia.'}</p>
+                                    <button id="perfilArtistButton">
+                                    <p>Ver perfil</p>
+                                    <img src="./icons/arrow-right-short.svg" alt="">
+                                    </button>
+                                  </div>
+                              </div>
+                          </li>
+                      `;
+                      listaContrateArtista.innerHTML += artistCard;
+                  });
+              } else {
+                  console.error("Erro: O elemento com o ID 'listaContrateArtista' não foi encontrado na página.");
+              }
+          } else {
+              console.error("Erro ao carregar artistas:", data.message);
+          }
+      } catch (error) {
+          console.error("Erro na requisição:", error);
+      }
+  }
+  
+  if (page === 'contrate') {
+      fetchArtists();
+  }
   });
 
   //Modal Editar Perfil
@@ -385,7 +446,6 @@ fileInput?.addEventListener('change', (e) => {
   modal?.setAttribute('aria-hidden', 'true');
 });
 
-// Fechar ao clicar fora do conteúdo
 modal?.addEventListener('click', (e) => {
   if (e.target === modal) modal.setAttribute('aria-hidden', 'true');
 });
@@ -413,7 +473,6 @@ confirmBtn?.addEventListener('click', async (e) => {
     return;
   }
 
-  // monta payload (só inclui password se foi preenchida)
   const payload = { name, userName, bio};
   if (pwd) payload.password = pwd;
 
@@ -443,10 +502,9 @@ confirmBtn?.addEventListener('click', async (e) => {
       if (!response2.ok || !json2?.success) {
         return alert(json2?.message || 'Erro ao enviar foto de perfil.');
       }
-      newProfileImage = json2.profileImage; // nome salvo no servidor
+      newProfileImage = json2.profileImage; 
     }
 
-    // 3) salva no localStorage e atualiza a UI
     const atualizado = { ...user, ...payload, profileImage: newProfileImage };
     localStorage.setItem('usuario', JSON.stringify(atualizado));
     if (typeof renderProfile === 'function') renderProfile(atualizado);
@@ -458,6 +516,3 @@ confirmBtn?.addEventListener('click', async (e) => {
     alert('Não foi possível atualizar. Tente novamente.');
   }
 });
-
-
-  

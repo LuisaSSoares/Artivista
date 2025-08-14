@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artivista - homepage</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="backgroundHomepage"></div>
+        <div class="boxContainers">
+            <div class="containerMenu">
+                <img src="./components/ArtivistaLogo.png" id="logoMenu" alt="logo do Artivista">
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/house-fill.svg" alt="">
+                        <a href="./index.html">Início </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/person-circle.svg" alt="">
+                        <a href="./perfil.html">Minha conta </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/chat-dots.svg" alt="">
+                        <a href="./conversas.html">Conversas</a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/bell-fill.svg" alt="">
+                        <a href="./notificacoes.html">Notificações </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/gear-fill.svg" alt="">
+                        <a href="./configuracoes.html">Configurações </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="addContent" id="addContent">
+                    <a href="criacaoConteudo.html">
+                        <p>Criar novo conteúdo</p>
+                        <img src="./icons/plus-circle-fill.svg" alt="">
+                    </a>
+                </div>                    
+
+            </div>
+            <div class="containerContent">
+                <div class="inputContainerHome">
+                    <button><img src="./icons/search.svg" alt="buscar"></button>
+                    <input type="text" id="buscaHome" placeholder="Pesquisar">                    
+                </div>
+                <section data-tab="musicaAudiovisual" hidden>
+                    <div class="feedTitle">
+                        <div>
+                            <h1>Música e Audiovisual</h1>
+                            <img src="./icons/musicaEAudiovisual.svg" alt="">                            
+                        </div>
+                        <hr>
+                    </div>
+                    <div class="feedContainer">
+                        <div class="postCard">
+                                <div id="carouselExampleIndicators" class="carousel slide">
+                                    <div class="carousel-indicators">
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="4" aria-label="Slide 5"></button>
+                                    </div>
+                                    <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <img src="" class="d-block w-100" alt="...">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="./icons/_ (57).jpeg" class="d-block w-100" alt="...">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="..." class="d-block w-100" alt="...">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="..." class="d-block w-100" alt="...">
+                                    </div>
+                                    <div class="carousel-item">
+                                        <img src="..." class="d-block w-100" alt="...">
+                                    </div>
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                    </button>
+                                </div> 
+                                  
+                                <div class="postContent">
+                                    <div class="postHeader">
+                                        <img src="./icons/person-circle.svg" id="profileImage" alt="">
+                                        <div class="postUser">
+                                            <p id="name">Nome do Autor</p>
+                                            <p id="username">@nomeusuario</p>
+                                            <div class="tagsFeed">
+                                                <span class="tag tag--1">Tag</span>
+                                                <span class="tag tag--2" hidden></span>
+                                            </div>
+                                        </div>
+                                        <img src="./icons/bookmark-star.svg" alt="">
+                                    </div>
+
+                                    <div class="postInfos">
+                                        <h3>Titulo da Postagem</h3>
+                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed voluptatem iusto ullam veniam error? Quia, eum saepe. Ut quas corrupti laboriosam nulla omnis illum? Aliquid excepturi debitis laboriosam nulla ipsa.</p>
+                                    </div>
+                                    <div class="reactCommentGroup">
+                                        <div class="postReact">
+                                            <button>
+                                                <img src="./icons/heart.svg" alt="">
+                                            </button>
+                                            <button>
+                                                <img src="./icons/chat-dots.svg" alt="">
+                                            </button>
+                                            <button>
+                                                <img src="./icons/send-fill.svg" alt="">
+                                            </button>
+                                        </div>
+                                        <div class="postComment">
+                                            <img src="./icons/person-circle.svg" alt="">
+                                            <input type="text" placeholder="Digite algo...">
+                                        </div>                                          
+                                    </div>
+                                      
+                                </div>                                                       
+                        </div>
+                    </div>
+                </section>
+
+                <section data-tab="artesPlasticas" hidden>
+                    <div class="feedTitle">
+                        <div>
+                            <h1>Artes Plásticas</h1>
+                            <img src="./icons/artesPlasticas.svg" alt="">                            
+                        </div>
+                        <hr>
+                    </div>
+                    <div class="feedContainer">
+
+                    </div>
+
+                </section>
+
+                <section data-tab="artesCenicas" hidden>
+                    <div class="feedTitle">
+                        <div>
+                            <h1>Artes Cênicas</h1>
+                            <img src="./icons/artesCenicas.svg" alt="">                            
+                        </div>
+                        <hr>
+                    </div>
+                    
+                    <div class="feedContainer">
+
+                    </div>
+
+                </section>
+
+                <section data-tab="literatura" hidden>
+                    <div class="feedTitle">
+                        <div>
+                            <h1>Literatura</h1>
+                            <img src="./icons/literatura.svg" alt="">                            
+                        </div>
+
+                        <hr>
+                    </div>
+                    <div class="feedContainer">
+
+                    </div>
+
+                </section>
+            </div> 
+
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+  <script src="./script.js"></script>
+  <script src="./feed.js"></script>
+</body>
+</html>

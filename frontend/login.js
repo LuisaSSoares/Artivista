@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Salva token e dados do usuário
             localStorage.setItem('token', data.token);
             localStorage.setItem('userId', data.user.id);
+            localStorage.setItem('usuario', JSON.stringify(data.user))
             localStorage.setItem('userType', data.user.userType);
             // Redireciona para a página principal ou artista conforme fluxo
             window.location.href = 'index.html';

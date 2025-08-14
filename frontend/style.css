@@ -642,6 +642,7 @@ body {
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+  text-decoration: none;
   width: 100%;
   height: 25vh;
   overflow: hidden;                
@@ -844,10 +845,6 @@ body {
 .optionCreate:hover img {
   filter: brightness(0) invert(1);
 }
-
-/* ============================= */
-/* MEDIA QUERIES                 */
-/* ============================= */
 
 /* Telas pequenas (até 480px) */
 @media (max-width: 480px) {
@@ -1377,18 +1374,14 @@ body {
   to   { transform: translateY(0)    scale(1);   opacity: 1; }
 }
 
-/* ======================== Página Contrate Artista ======================== */
-
-.contrateArtistaContainer {
-  display: flex;
-}
 
 #listaContrateArtista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
   justify-content: center;
+  gap: 20px;
+  
 }
 
 .contrateArtista {
@@ -1403,7 +1396,9 @@ body {
   flex-direction: column;
   align-items: center;
   transition: transform 0.3s ease;
+  justify-content: space-between;
 }
+
 
 .contrateArtista:hover {
   transform: translateY(-5px);
@@ -1415,6 +1410,7 @@ body {
   border-radius: 50%;
   border: 3px solid #5F9104;
 }
+
 
 .nomeArtista {
   font-size: 20px;
@@ -1433,62 +1429,247 @@ body {
   font-size: 10px;
   color: #2C5712;
   text-align: center;
-  margin-bottom: 15px;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  word-break: break-all; 
+  margin-top: 10px; 
+  flex: 1;
   
 }
 
-.artistArea {
+.artistAreas {
   display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  justify-content: center;
-}
-
-.tagArea {
-  background-color: #f0f0f0;
-  color: #555;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.btnPerfil {
-  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  background-color: #fff;
-  color: #5cb85c; /* Cor de sucesso (verde) */
-  padding: 10px 25px;
-  border: 2px solid #5cb85c;
+  justify-content: center;
+  min-height: 40px;
+}
+
+.artistAreas span{
+  display: flex;
+  justify-content: center;
+  width: 120px; 
+  height: 18px; 
+  font-size: 10px; 
+  padding: 2px 5px; 
+}
+
+.bioProfileContent{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  flex: 1;
+}
+
+#perfilArtistButton {
+  display: flex;
+  border: none;
+  align-items: center;
+  margin: 0 auto;
+  gap: 10px;
+  background-color: #2C5712;
+  color: #DCEEC8; 
+  padding: 3px 20px;
   border-radius: 50px;
   text-decoration: none;
-  font-family: 'PT Sans', sans-serif;
-  font-weight: 700;
+  font-weight: bold;
   transition: all 0.3s ease;
 }
 
-.btnPerfil p {
+#perfilArtistButton:hover{
+  background-color: #5c8d2a;
+}
+
+#perfilArtistButton:active {
+  transform: translateY(2px);
+}
+
+#perfilArtistButton  p {
   margin: 0;
 }
 
-.btnPerfil:hover {
-  background-color: #5cb85c;
-  color: white;
-}
-
-.btnPerfil:hover img {
-  filter: brightness(0) invert(1); /* Inverte a cor do ícone para branco no hover */
-}
-
-/* Garante que o ícone do botão não mude de cor por padrão */
-.btnPerfil img {
+#perfilArtistButton  img {
   width: 20px;
   height: 20px;
-  transition: filter 0.3s ease;
 }
+
+#perfilArtistButton:hover img {
+  filter: brightness(0) invert(1);
+}
+
+/* Feed */
+.feedTitle{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.feedTitle div{
+  display: flex;
+  align-items: center;
+}
+.feedTitle h1{
+  font-weight: lighter;
+  color: #5F9104;
+}
+
+.feedTitle img{
+  width: 70px;
+  height: 70px;
+}
+
+.feedTitle hr{
+  width: 55%;
+  margin: 0;
+  border: 1px solid #609104;
+}
+
+/* Estilização do post (padrão) */
+.postCard {
+  background: linear-gradient(to bottom, #C3DEA5, #B8D592, #ADCB7F);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  width: 70%;
+  margin: 0 auto;
+  margin-top: 20px;
+}
+
+
+.carousel {
+  flex-shrink: 0;
+  width: 50%; 
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.carousel-item img {
+  width: 70%;
+  max-height: 230px; 
+  object-fit: cover;
+}
+
+/* Conteúdo do post (lado direito) */
+.postContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.postHeader img{
+  height: 30px;
+  width: 30px;
+  margin-bottom: auto;
+}
+
+#profileImage{
+  height: 60px;
+  width: 60px;
+}
+
+.postUser {
+  flex: 1; 
+  display: flex; 
+  flex-direction: column; 
+
+}
+
+.postUser p{
+  margin: 0; 
+  line-height: 1.1;
+}
+#name{
+  color: #2C5712;
+  font-size: 20px;
+  font-weight: bolder;
+}
+
+#username{
+  color: #2C5712;
+  font-size: 15px;
+}
+
+
+.tagsFeed {
+  display: flex;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.tagsFeed .tag {
+  padding: 1px 8px;
+  border-radius: 12px;
+  font-size: 8px;
+  margin-bottom: 20px;
+}
+
+.postInfos h3 {
+  font-size: 20px; 
+  color: #2C5712;
+  font-weight: bolder;
+  margin: 0;
+}
+
+.postInfos p {
+  color: #2C5712;
+  line-height: 1.3; 
+  font-size: 10px;
+}
+
+.reactCommentFlex{
+  margin-top: auto;
+}
+
+.postReact {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+
+.postReact button{
+  background-color: transparent;
+  border: none;
+  gap: 20px; 
+}
+
+.postReact button img{
+  width: 25px;
+  height: 25px;
+}
+
+.postComment img{
+  width: 30px;
+  height: 30px;
+}
+
+.postComment input{
+  background-color: #DCEEC8;
+  border-radius: 50px;
+  padding: 3px;
+  border: none;
+  width: 80%;
+}
+
+.postComment ::placeholder{
+  font-size: 12px;
+  color: #5F9104;
+}
+

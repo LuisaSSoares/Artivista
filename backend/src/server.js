@@ -191,7 +191,8 @@ app.post('/user/login', (req, res) => {
         id: user.id,
         name: user.name,
         userName: user.userName,
-        email: user.email
+        email: user.email,
+        profileImage: user.profileImage
       }
     });
   });
@@ -201,7 +202,6 @@ app.post('/user/login', (req, res) => {
   app.put('/user/uploadProfile', uploadProfile.single('profileImage'), (req, res) => {
     const userId = req.body.id;  
     const profileImage = req.file.filename; 
-    console.log(req);
     if (!req.file) {
         return res.status(400).json({ success: false, message: "Nenhum arquivo enviado." });
     }
@@ -356,6 +356,45 @@ app.get('/profile/:id', (req, res) => {
   });
 });
 
+// Rota GET para listar os artistas que vendem serviços (com filtro opcional)
+app.get("/artists/list", (req, res) => {
+  const { excludeUserId } = req.query;
+
+  let sql = `
+    SELECT
+      u.id,
+      u.name,
+      u.userName,
+      u.bio,
+      u.profileImage,
+      a.activity1,
+      a.activity2
+    FROM users AS u
+    INNER JOIN artists AS a ON u.id = a.userId
+    WHERE u.userType = 'artista' AND a.service = 'sim'
+  `;
+  const params = [];
+
+  if (excludeUserId) {
+    sql += " AND u.id != ?";
+    params.push(excludeUserId);
+  }
+
+  db.query(sql, params, (err, result) => {
+    if (err) {
+      console.error("Erro ao listar os artistas:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Erro ao listar os artistas."
+      });
+    }
+
+    res.json({
+      success: true,
+      data: result
+    });
+  });
+});
 //***Postagens***
 //Rota POST para postar fotos e videos
 app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
