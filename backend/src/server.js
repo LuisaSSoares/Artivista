@@ -192,6 +192,8 @@ app.post('/user/login', (req, res) => {
         name: user.name,
         userName: user.userName,
         email: user.email,
+        userType: user.userType,
+        bio: user.bio,
         profileImage: user.profileImage
       }
     });
