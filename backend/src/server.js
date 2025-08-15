@@ -4,6 +4,7 @@ const port = 3520;
 const db = require("./db_config");
 const cors = require("cors");
 const bcrypt = require('bcrypt');
+const saltRounds = 10; 
 const jwt = require('jsonwebtoken');
 const jwtSecret = process.env.JWT_SECRET || 'senhajwt'
 const multer = require('multer')
@@ -245,15 +246,23 @@ app.get("/users/list", (req, res) => {
 });
 
 //Rota PUT pra atualizar o perfil
-  app.put('/user/edit/:id', (req, res) => {
+  app.put('/user/edit/:id', async (req, res) => {
     const {id} = req.params
     const {name, userName, password, bio, historia_arte} = req.body
     let query = 'UPDATE users SET name = ?, userName = ?, bio = ?, historia_arte = ? WHERE id = ?'
     let values = [name, userName, bio, historia_arte, id]
-
+    
     if(password){
+      const [userRows] = await db.promise().query('SELECT password FROM users WHERE id = ?', [id]);
+      const currentHashedPassword = userRows[0]?.password;
+      
+      // Se a nova senha foi fornecida e é igual à senha atual, retorna um erro
+      if (currentHashedPassword && (await bcrypt.compare(password, currentHashedPassword))) {
+          return res.status(400).json({ success: false, message: 'A nova senha não pode ser igual à senha atual.' });
+      } 
+      const hashedPassword = await bcrypt.hash(password, saltRounds)
         query = 'UPDATE users SET name = ?, userName = ?, password = ?, bio = ?, historia_arte = ?  WHERE id = ?'
-        values = [name, userName, password, bio, historia_arte, id]
+        values = [name, userName, hashedPassword, bio, historia_arte, id]
     }
 
     db.query(query, values, (err, result) => {
@@ -268,7 +277,6 @@ app.get("/users/list", (req, res) => {
             res.json({success: true, message: 'Perfil atualizado com sucesso', user: results[0]})
         })
     })
-
   })
 
 //Rota DELETE para deletar user
@@ -522,18 +530,18 @@ app.delete('/feed/delete/:id', (req, res) => {
 // ** Eventos **
 //Rota POST para postar eventos
 app.post('/events/create', (req, res) => {
-  const { title, dateEvent, time, description, classification, link, artistId } = req.body;
+  const { title, dateEvent, time, description, classification, typeEvent, link, artistId } = req.body;
 
-  if (!title || !dateEvent || !time || !description || !classification || !eventType || !artistId) {
+  if (!title || !dateEvent || !time || !description || !classification || !typeEvent || !artistId) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    INSERT INTO events (title, dateEvent, time, description, classification, eventType, link, artistId)
+    INSERT INTO events (title, dateEvent, time, description, classification, typeEvent, link, artistId)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [title, dateEvent, time, description, classification, eventType, link, artistId], (err, result) => {
+  db.query(sql, [title, dateEvent, time, description, classification, typeEvent, link, artistId], (err, result) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Erro ao criar evento.', error: err });
     }
@@ -560,6 +568,7 @@ app.put('/events/edit/:id', (req, res) => {
   const { id } = req.params;
   const { title, dateEvent, time, description, classification, link } = req.body;
 
+// Não funciona se não editar em todos os campos
   if (!title || !dateEvent || !time || !description || !classification) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
@@ -588,18 +597,18 @@ app.delete('/events/delete/:id', (req, res) => {
 // **Cursos**
 // Rota POST para criar curso
 app.post('/courses/create', (req, res) => {
-  const { title, dateCourse, time, description, classification, courseType, participantsLimit, link, artistId } = req.body;
+  const { title, dateCourse, time, description, classification, typeCourse, participantsLimit, link, artistId } = req.body;
 
-  if (!title || !dateCourse || !time || !description || !classification || !courseType|| !participantsLimit || !link || !artistId) {
+  if (!title || !dateCourse || !time || !description || !classification || !typeCourse|| !participantsLimit || !link || !artistId) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    INSERT INTO courses (title, dateCourse, time, description, classification, courseType, participantsLimit, link, artistId)
+    INSERT INTO courses (title, dateCourse, time, description, classification, typeCourse, participantsLimit, link, artistId)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [title, dateCourse, time, description, classification, courseType, participantsLimit, link, artistId], (err, result) => {
+  db.query(sql, [title, dateCourse, time, description, classification, typeCourse, participantsLimit, link, artistId], (err, result) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Erro ao criar curso.', error: err });
     }

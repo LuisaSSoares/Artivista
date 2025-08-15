@@ -1,9 +1,12 @@
+// Função para selecionar elementos do dom -> simplifica o querySelector
+// qs (querySelector) recebe um seletor CSS (classes, ids, tags) e o root(basicamente onde o elemento está sendo procurado, chamando o elemento raíz) 
+// Se o root não é informado, a função usa o document, ou seja, busca em todas as páginas que tem o elemento.
 const qs = (sel, root = document) => root.querySelector(sel);
-let page
-document.addEventListener('DOMContentLoaded', () => {
+let page //identifica e página atual . Foi usado principalmente para aplicar o efeito da navBar e menu (se user tiver no index.html ou no feed, "home" ainda estará destacada porque o feed é uma parte da página principal).Páginas dentro de um identificador único
+document.addEventListener('DOMContentLoaded', () => { 
     const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase()
     page =
-    (file === 'index.html' || file === 'feed.html') ? 'home' :
+    (file === 'index.html' || file === 'feed.html') ? 'home' : //verifica se file é igual a index.html ou feed.html. "?" é basicamente um atalho de if/else, no qual significa que, se a condição atribuída for verdadeira, o resultado vai ser "home". ":" determina o que acontece caso for falso.
     file.includes('eventosecursos') ? 'eventos' :
     file.includes('contrateartista') ? 'contrate' :
     file.includes('perfil') ? 'perfil' :
@@ -12,15 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
     file.includes('configuracoes') ? 'configuracoes' :
     'home'
 
+    //Mostra o botão de add conteúdo apenas aos artistas. É recuperado da variável "usuários" dentro do localStorage salvo após o cadastro/login as informações do usuário. Se seu tipo for "artista", o botão é visível.
       const infosUser = JSON.parse(localStorage.getItem('usuario'));
       if (infosUser && infosUser.userType === 'artista') {
         const addContent = document.getElementById('addContent')
         if (addContent) addContent.style.visibility = 'visible'
       }
      
+      //Recebe "filename", que é o nome atribuído a configuração no arquivo multer.js do backend
+      //O Multer é responsável por salvar as fotos no servidor, e o nome do arquivo é guardado no banco de dados
+      //Se filename existir, ele retorna o caminho em que ele foi salvo. Caso contrário, permanece com o icone padrão de perfil (arquivo svg)
       const buildProfileUrl = (filename) =>
       filename ? `http://localhost:3520/uploads/profile/${filename}` : './icons/person-circle.svg';
-
       function setSideProfileIcon(url){
       const secPerfil = Array.from(document.querySelectorAll('.navSections'))
         .find(sec => sec.querySelector('a[href$="perfil.html"]'));
@@ -319,9 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
       indicator.style.width = link.offsetWidth + 'px';
     }
   
-    // posiciona após layout (2 rAF para garantir fontes/medidas)
     requestAnimationFrame(() => requestAnimationFrame(placeIndicator));
-    // reajusta quando redimensionar
     window.addEventListener('resize', placeIndicator);
     const fetchArtists = async () => {
       try {
@@ -336,8 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const data = await response.json();
   
           if (data.success) {
-              const listaContrateArtista = document.getElementById('listaContrateArtista');
-              
+              const listaContrateArtista = document.getElementById('listaContrateArtista');     
               if (listaContrateArtista) {
                   listaContrateArtista.innerHTML = '';
                   data.data.forEach(artist => {
@@ -378,6 +381,10 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       } catch (error) {
           console.error("Erro na requisição:", error);
+          const artistSection = qs('.categorySection');
+          const noPubSpan = qs('.noPublicationSpan');
+          if (artistSection) artistSection.innerHTML = '';
+          if (noPubSpan) noPubSpan.removeAttribute('hidden');
       }
   }
   
@@ -385,7 +392,6 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchArtists();
   }
   });
-
   //Modal Editar Perfil
 const editButton = document.querySelector('.editProfile');
 const modal = document.getElementById('ModalScreen');

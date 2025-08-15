@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Artivista - homepage</title>
+  <title>Artivista</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="icon" href="./icons/Artivista logo.png">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -158,7 +159,12 @@
                         <a href="#agenda"    data-tab="agenda">Programação</a>
                         <span class="indicator"></span> 
                     </div> 
-                    <section class="tabPanel" data-tab="postagens"></section>
+                    <section class="tabPanel" data-tab="postagens">
+                        <div class="noPublicationSpan">
+                            <img src="./icons/brush.svg" alt="">
+                            <span>Você não tem nenhuma publicação ainda.</span>
+                        </div>
+                    </section>
                     <section class="tabPanel" data-tab="sobre" hidden>
                         <div class="aboutProfile">
                             <div class="activityAndHistory">
@@ -221,7 +227,12 @@
                                 </div>
                             </div>   
                     </section>
-                    <section class="tabPanel" data-tab="agenda" ></section>
+                    <section class="tabPanel" data-tab="agenda" >
+                        <div class="noPublicationSpan">
+                            <img src="./icons/brush.svg" alt="">
+                            <span>Você não tem nenhuma publicação ainda.</span>
+                        </div>
+                    </section>
                   </section>
                   
                   <div id="ModalScreen" class="modal" aria-hidden="true">

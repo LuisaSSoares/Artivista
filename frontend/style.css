@@ -1271,6 +1271,18 @@ body {
   border-color: #5F9104;
   box-shadow: 0 0 0 3px rgba(95,145,4,.15);
 }
+
+.noPublicationSpan{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.noPublicationSpan span{
+  font-size: 20px;
+  color: #2C5712;
+}
 /* Campo de foto de perfil */
 .profile-row {
   display: flex;
@@ -1382,6 +1394,10 @@ body {
   justify-content: center;
   gap: 20px;
   
+}
+
+.containerContent .noPublicationSpan{
+  margin-top: 100px;
 }
 
 .contrateArtista {
@@ -1511,6 +1527,7 @@ body {
 .feedTitle div{
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 .feedTitle h1{
   font-weight: lighter;
@@ -1526,6 +1543,11 @@ body {
   width: 55%;
   margin: 0;
   border: 1px solid #609104;
+}
+
+.feedContainer .noPublicationSpan{
+  margin-top: 100px;
+  gap: 20px;
 }
 
 /* Estilização do post (padrão) */
