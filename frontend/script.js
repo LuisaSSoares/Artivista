@@ -6,7 +6,7 @@ let page //identifica e página atual . Foi usado principalmente para aplicar o 
 document.addEventListener('DOMContentLoaded', () => { 
     const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase()
     page =
-    (file === 'index.html' || file === 'feed.html') ? 'home' : //verifica se file é igual a index.html ou feed.html. "?" é basicamente um atalho de if/else, no qual significa que, se a condição atribuída for verdadeira, o resultado vai ser "home". ":" determina o que acontece caso for falso.
+    (file === 'index.html' || file === 'feed.html') ? 'home' : //verifica se file é igual a index.html ou feed.html. "?" (optional change) é basicamente um atalho de if/else, no qual significa que, se a condição atribuída for verdadeira, o resultado vai ser "home". ":" determina o que acontece caso for falso.
     file.includes('eventosecursos') ? 'eventos' :
     file.includes('contrateartista') ? 'contrate' :
     file.includes('perfil') ? 'perfil' :
@@ -21,17 +21,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const addContent = document.getElementById('addContent')
         if (addContent) addContent.style.visibility = 'visible'
       }
-     
+
       //Recebe "filename", que é o nome atribuído a configuração no arquivo multer.js do backend
       //O Multer é responsável por salvar as fotos no servidor, e o nome do arquivo é guardado no banco de dados
       //Se filename existir, ele retorna o caminho em que ele foi salvo. Caso contrário, permanece com o icone padrão de perfil (arquivo svg)
       const buildProfileUrl = (filename) =>
       filename ? `http://localhost:3520/uploads/profile/${filename}` : './icons/person-circle.svg';
+
+      // Função que vai receber a url completa do endereço da imagem e inseri-la no menu (barra lateral)
       function setSideProfileIcon(url){
-      const secPerfil = Array.from(document.querySelectorAll('.navSections'))
-        .find(sec => sec.querySelector('a[href$="perfil.html"]'));
-      const imgMenu = secPerfil?.querySelector('div > img'); 
-      if (!imgMenu) return;
+      const secPerfil = Array.from(document.querySelectorAll('.navSections')) //pega todas as seções do menu lateral (navSection) e as salva em um Array, para poder usar o .find
+        .find(sec => sec.querySelector('a[href$="perfil.html"]')); //procura e devolve a primeira página da seção que tenha perfil.html ($=atributo do href). Como resultado, secPerfil é a primeira sessão que recebe perfil.html
+      const imgMenu = secPerfil?.querySelector('div > img');  //busca o campo de img na div apenas se secPerfil existir. Como resultado, imgMenu é a img do avatar do menu
+      if (!imgMenu) return; //
       imgMenu.src = url;
       if (url && !/person-circle\.svg$/i.test(url)) {
         imgMenu.classList.add('avatarIcon');  
@@ -45,6 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inicioLink) {
         const isCriacao = file.includes('criacaoconteudo')
         inicioLink.textContent = isCriacao ? 'Voltar ao início' : 'Início'
+      }
+      const meuPerfilLink = document.querySelector('a[href="./perfil.html"]');
+      const userType = localStorage.getItem('userType');
+  
+      if (meuPerfilLink) {
+        meuPerfilLink.addEventListener('click', function(event) {
+          // Verifica se o tipo de usuário é "guest"
+          if (userType === 'guest') {
+            event.preventDefault(); // Impede o redirecionamento
+            // Exibe o modal
+            const guestLoginModal = new bootstrap.Modal(document.getElementById('guestLoginModal'));
+            guestLoginModal.show();
+          }
+        });
       }
 
     const menuLinks = document.querySelectorAll('.navSections a');

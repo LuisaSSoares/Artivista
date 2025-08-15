@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnEntrar = document.querySelector('.entrar');
     const emailInput = document.getElementById('email');
     const senhaInput = document.getElementById('senha');
+    const continueWithoutLoginLink = document.getElementById('continueWithoutLogin'); 
   
     // Redireciona para cadastro
     btnCadastrar.addEventListener('click', function () {
@@ -23,6 +24,16 @@ document.addEventListener('DOMContentLoaded', function () {
     formElement.addEventListener('submit', function (event) {
       event.preventDefault();
       realizarLogin();
+    });
+
+    //Evento do link "continuarv sem login"
+    continueWithoutLoginLink.addEventListener('click', function () {
+      // Limpa todos os dados do usuário anterior
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('usuario');
+      // Define o userType como 'guest'
+      localStorage.setItem('userType', 'guest');
     });
   
     function realizarLogin() {

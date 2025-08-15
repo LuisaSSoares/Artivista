@@ -236,6 +236,52 @@ body {
   color: #fff;
 }
 
+/* Botão Google */
+.btnGoogle{
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #D8C7C7;
+  width: auto;
+  gap: 15px;
+  color: #747171;
+}
+
+.btnGoogle img{
+  height: 40px;
+  width: 40px;
+}
+
+/* Modal user guess (quando user entra sem fazer login) */
+#guestLoginModal {
+  z-index: 1055 !important;
+}
+
+#guestLoginModal .modal-dialog {
+  transform: translateY(-100%); /* O conteúdo do modal começa acima */
+  transition: transform 0.5s ease-out; /* Define a animação de descida */
+}
+
+#guestLoginModal.show .modal-dialog {
+  transform: translateY(0);
+}
+
+#guestLoginModal.show {
+  opacity: 1 !important;
+}
+.btn-primary{
+  background-color: #5c8d2a;
+}
+
+.btn-primary:hover{
+  background-color: #2C5712;
+  border-color: #2C5712;
+}
+
+.btn-primary:active {
+  background-color: #2C5712 !important;
+  border-color: #2C5712;
+}
+
 /* Infos artista */
 .artistaTitulo h1{
   font-family: "Julius Sans One", sans-serif;
