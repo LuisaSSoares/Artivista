@@ -61,31 +61,48 @@
 
             </div>
             <div class="containerContent">
-                <h1 id="createTitle">O que você deseja criar?</h1>
-                <div class="containerCreate">
-                    <div class="optionCreate">
-                        <a href="criarPost.html">
-                            <img src="./icons/postage-fill.svg" alt="">
-                            <h2>Criar Postagem</h2>
-                            <p>Mostre suas criações no seu feed</p>
-                        </a>
-                    </div>
-                    <div class="optionCreate">
-                        <a href="criarEvento.html">
-                            <img src="./icons/ticket-detailed.svg" alt="">
-                            <h2>Criar evento</h2>
-                            <p>Divulgue eventos culturais e artísticos</p>
-                        </a>
-                    </div>
-                    <div class="optionCreate">
-                        <a href="criarCurso.html">
-                            <img src="./icons/easel2-fill.svg" alt="">
-                            <h2>Criar Curso</h2>
-                            <p>Compartilhe oportunidades de aprendizado artístico</p>
-                        </a>
-                    </div>
+                <div class="createPostTitle">
+                  <h1 id="createTitle">Faça sua publicação</h1>
+                  <hr>                    
                 </div>
-            </div> 
+
+                <div class="postDivider">
+                    <div>
+                        <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+                        <label for="imageUpload" class="imagePlaceholder">
+                            Adicione uma<br>imagem ou mais
+                        </label>
+                        <div class="postOption">
+                            <p>Bloquear comentários</p>
+                                <input type="checkbox" id="blockComments">
+                                <label for="blockComments"></label>
+                        </div>
+                        <div class="postOption">
+                            <p>Destacar na página de serviços</p>
+                                <input type="checkbox" id="highlightServicePage">
+                                <label for="highlightServicePage"></label>
+                        </div>
+                    </div>
+                    <div class="postInfos">
+                        <div>
+                            <p>Título da postagem:</p>
+                            <label for="titlePost">
+                                <input type="text" name="titlePost" id="titlePost" placeholder="Dê um título ao seu trabalho">
+                            </label>
+                        </div>
+
+                        <div>
+                            <p>Descrição:</p>
+                            <label for="descriptionPost">
+                                <textarea name="descriptionPost" id="descriptionPost" rows="6" placeholder="Insira uma descrição"></textarea>
+                            </label>
+                        </div>
+
+
+                    </div>                        
+                </div>
+            </div>
+        </div> 
 
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
