@@ -411,6 +411,7 @@ app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
   const { title, description, artSection, artistId } = req.body;
   console.log(req.body);
 
+  // Verificações básicas
   if (!title || !artistId) {
     return res.status(400).json({ success: false, message: 'Título e artistId são obrigatórios.' });
   }
@@ -419,62 +420,87 @@ app.post('/feed/upload', uploadFeed.array('media', 5), (req, res) => {
     return res.status(400).json({ success: false, message: 'Nenhum arquivo enviado.' });
   }
 
-  // Insere os dados do post na tabela posts
-  const sqlPost = `INSERT INTO posts (title, description, artSection, artistId) VALUES (?, ?, ?, ?)`;
-
-  db.query(sqlPost, [title, description, artSection, artistId], (err, result) => {
+  // Corrige o artistId para o da tabela artists (relacionado ao userId)
+  const sqlFindArtist = 'SELECT id FROM artists WHERE userId = ?';
+  db.query(sqlFindArtist, [artistId], (err, result) => {
     if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao criar post.' });
+      console.error('Erro ao buscar artista:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao buscar artista.' });
     }
 
-    const postId = result.insertId;
+    if (result.length === 0) {
+      return res.status(400).json({ success: false, message: 'Perfil de artista não encontrado.' });
+    }
 
-    // Prepara os nomes dos arquivos para a tabela imageAndVideo (máx 5)
-    const files = req.files.slice(0, 5); // garante no máximo 5
-    const images = [null, null, null, null, null];
+    const realArtistId = result[0].id;
 
-    files.forEach((file, i) => {
-      images[i] = file.filename;
-    });
-
-    const sqlImages = `INSERT INTO imageAndVideo (id_post, img1, img2, img3, img4, img5) VALUES (?, ?, ?, ?, ?, ?)`;
-
-    db.query(sqlImages, [postId, ...images], (err2) => {
-      if (err2) {
-        return res.status(500).json({ success: false, message: 'Erro ao salvar as mídias do post.' });
+    // Insere os dados do post na tabela posts
+    const sqlPost = `INSERT INTO posts (title, description, artSection, artistId) VALUES (?, ?, ?, ?)`;
+    db.query(sqlPost, [title, description, artSection, realArtistId], (errPost, resultPost) => {
+      if (errPost) {
+        console.error('Erro ao criar post:', errPost);
+        return res.status(500).json({ success: false, message: 'Erro ao criar post.' });
       }
 
-      res.status(201).json({ success: true, message: 'Post criado com sucesso.', postId });
+      const postId = resultPost.insertId;
+
+      // Prepara as mídias (máx. 5 arquivos)
+      const files = req.files.slice(0, 5);
+      const images = [null, null, null, null, null];
+      files.forEach((file, i) => { images[i] = file.filename; });
+
+      const sqlImages = `INSERT INTO imageAndVideo (id_post, img1, img2, img3, img4, img5) VALUES (?, ?, ?, ?, ?, ?)`;
+      db.query(sqlImages, [postId, ...images], (errImgs) => {
+        if (errImgs) {
+          console.error('Erro ao salvar mídias:', errImgs);
+          return res.status(500).json({ success: false, message: 'Erro ao salvar as mídias do post.' });
+        }
+
+        res.status(201).json({ success: true, message: 'Post criado com sucesso.', postId });
+      });
     });
   });
 });
 
-//Rota GET para listar as fotos postados 
+
+// Rota GET para listar as fotos postadas com informações do artista
 app.get('/feed/list', (req, res) => {
   const sql = `
-    SELECT 
-      p.id, p.title, p.description, p.artSection, p.artistId,
-      i.img1, i.img2, i.img3, i.img4, i.img5
-    FROM posts p
-    LEFT JOIN imageAndVideo i ON p.id = i.id_post
-    ORDER BY p.id DESC
-  `;
+  SELECT 
+    p.id, p.title, p.description, p.artSection, p.createdAt,
+    a.id AS artistId, a.activity1, a.activity2,
+    u.id AS userId, u.name, u.userName, u.email, u.profileImage,
+    i.img1, i.img2, i.img3, i.img4, i.img5
+  FROM posts p
+  JOIN artists a ON p.artistId = a.id
+  JOIN users u ON a.userId = u.id
+  LEFT JOIN imageAndVideo i ON p.id = i.id_post
+  ORDER BY p.id DESC
+`;
 
   db.query(sql, (err, results) => {
     if (err) {
       return res.status(500).json({ success: false, message: 'Erro ao buscar posts.' });
     }
 
-    // Transformar colunas img1...img5 em array de imagens, removendo nulos
     const posts = results.map(row => {
-      const images = [row.img1, row.img2, row.img3, row.img4, row.img5].filter(Boolean);
+      const media = [row.img1, row.img2, row.img3, row.img4, row.img5].filter(Boolean);
       return {
         id: row.id,
         title: row.title,
         description: row.description,
         artSection: row.artSection,
-        artistId: row.artistId,
-        media: images
+        createdAt: row.createdAt,
+        media,
+        artist: {
+          id: row.userId,
+          name: row.name,
+          userName: row.userName,
+          email: row.email,
+          profileImage: row.profileImage,
+          activity1: row.activity1,
+          activity2: row.activity2
+        }
       };
     });
 

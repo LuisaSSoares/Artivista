@@ -1,113 +1,149 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Artivista</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
-  <link rel="icon" href="./icons/Artivista logo.png">
-  <link rel="stylesheet" href="./style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artivista</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="./icons/Artivista logo.png">
+    <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
-  <div class="backgroundHomepage"></div>
-        <div class="boxContainers">
-            <div class="containerMenu">
-                <img src="./components/ArtivistaLogo.png" id="logoMenu" alt="logo do Artivista">
-                <div class="navSections">
-                    <div>
-                        <img src="./icons/house-fill.svg" alt="">
-                        <a href="./index.html">Início </a>                        
-                    </div>
-                    <img src="./icons/chevron-right.svg" alt="">
+    <div class="backgroundHomepage"></div>
+    <div class="boxContainers">
+        <div class="containerMenu">
+            <img src="./components/ArtivistaLogo.png" id="logoMenu" alt="logo do Artivista">
+            <div class="navSections">
+                <div>
+                    <img src="./icons/house-fill.svg" alt="">
+                    <a href="./index.html">Início </a>
                 </div>
-
-                <div class="navSections">
-                    <div>
-                        <img src="./icons/person-circle.svg" alt="">
-                        <a href="./perfil.html">Minha conta </a>
-                    </div>
-                    <img src="./icons/chevron-right.svg" alt="">
-                </div>
-                <div class="navSections">
-                    <div>
-                        <img src="./icons/chat-dots.svg" alt="">
-                        <a href="./conversas.html">Conversas</a>
-                    </div>
-                    <img src="./icons/chevron-right.svg" alt="">
-                </div>
-                <div class="navSections">
-                    <div>
-                        <img src="./icons/bell-fill.svg" alt="">
-                        <a href="./notificacoes.html">Notificações </a>                        
-                    </div>
-                    <img src="./icons/chevron-right.svg" alt="">
-                </div>
-                <div class="navSections">
-                    <div>
-                        <img src="./icons/gear-fill.svg" alt="">
-                        <a href="./configuracoes.html">Configurações </a>
-                    </div>
-                    <img src="./icons/chevron-right.svg" alt="">
-                </div>
-                <div class="addContent" id="addContent">
-                    <a href="criacaoConteudo.html">
-                        <p>Criar novo conteúdo</p>
-                        <img src="./icons/plus-circle-fill.svg" alt="">
-                    </a>
-                </div>                    
-
+                <img src="./icons/chevron-right.svg" alt="">
             </div>
-            <div class="containerContent">
-                <div class="createPostTitle">
-                  <h1 id="createTitle">Faça sua publicação</h1>
-                  <hr>                    
+
+            <div class="navSections">
+                <div>
+                    <img src="./icons/person-circle.svg" alt="">
+                    <a href="./perfil.html">Minha conta </a>
                 </div>
+                <img src="./icons/chevron-right.svg" alt="">
+            </div>
+            <div class="navSections">
+                <div>
+                    <img src="./icons/chat-dots.svg" alt="">
+                    <a href="./conversas.html">Conversas</a>
+                </div>
+                <img src="./icons/chevron-right.svg" alt="">
+            </div>
+            <div class="navSections">
+                <div>
+                    <img src="./icons/bell-fill.svg" alt="">
+                    <a href="./notificacoes.html">Notificações </a>
+                </div>
+                <img src="./icons/chevron-right.svg" alt="">
+            </div>
+            <div class="navSections">
+                <div>
+                    <img src="./icons/gear-fill.svg" alt="">
+                    <a href="./configuracoes.html">Configurações </a>
+                </div>
+                <img src="./icons/chevron-right.svg" alt="">
+            </div>
+            <div class="addContent" id="addContent">
+                <a href="criacaoConteudo.html">
+                    <p>Criar novo conteúdo</p>
+                    <img src="./icons/plus-circle-fill.svg" alt="">
+                </a>
+            </div>
 
-                <div class="postDivider">
-                    <div>
-                        <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
-                        <label for="imageUpload" class="imagePlaceholder">
-                            Adicione uma<br>imagem ou mais
-                        </label>
-                        <div class="postOption">
-                            <p>Bloquear comentários</p>
-                                <input type="checkbox" id="blockComments">
-                                <label for="blockComments"></label>
-                        </div>
-                        <div class="postOption">
-                            <p>Destacar na página de serviços</p>
-                                <input type="checkbox" id="highlightServicePage">
-                                <label for="highlightServicePage"></label>
-                        </div>
-                    </div>
-                    <div class="postInfos">
-                        <div>
-                            <p>Título da postagem:</p>
-                            <label for="titlePost">
-                                <input type="text" name="titlePost" id="titlePost" placeholder="Dê um título ao seu trabalho">
-                            </label>
-                        </div>
+        </div>
+        <div class="containerContent">
+            <div class="createPostTitle">
+                <h1>Faça sua publicação</h1>
+                <hr>
+            </div>
 
-                        <div>
-                            <p>Descrição:</p>
-                            <label for="descriptionPost">
-                                <textarea name="descriptionPost" id="descriptionPost" rows="6" placeholder="Insira uma descrição"></textarea>
-                            </label>
-                        </div>
+            <div class="postDivider">
+                <div>
+                    <input type="file" id="imageUpload" accept="image/*,video/*" multiple style="display: none;">
+                    <label for="imageUpload" class="imagePlaceholder" id="uploadArea">
+                        Adicione uma<br>imagem ou mais
+                    </label>
 
-                        <button type="submit" class="submitPost" id="submitPost">
-                            Publicar
+                    <div id="previewCarousel" class="carousel slide" data-bs-ride="carousel" style="display:none;">
+                        <div class="carousel-inner" id="carouselInner"></div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#previewCarousel"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
                         </button>
-                    </div>                        
+                        <button class="carousel-control-next" type="button" data-bs-target="#previewCarousel"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Próximo</span>
+                        </button>
+                    </div>
+
+                    <div class="postOption">
+                        <p>Bloquear comentários</p>
+                        <input type="checkbox" id="blockComments">
+                        <label for="blockComments"></label>
+                    </div>
+                    <div class="postOption">
+                        <p>Destacar na página de serviços</p>
+                        <input type="checkbox" id="highlightServicePage">
+                        <label for="highlightServicePage"></label>
+                    </div>
+                </div>
+                <div class="postInfosCreate">
+                    <div>
+                        <p>Título da postagem:</p>
+                        <label for="titlePost">
+                            <input type="text" name="titlePost" id="titlePost"
+                                placeholder="Dê um título ao seu trabalho">
+                        </label>
+                    </div>
+
+                    <div>
+                        <p>Descrição:</p>
+                        <label for="descriptionPost">
+                            <textarea name="descriptionPost" id="descriptionPost" rows="6"
+                                placeholder="Insira uma descrição"></textarea>
+                        </label>
+                    </div>
+
+                    <label for="secao" id="postCategory">Classifique sua postagem:</label>
+                    <select id="secao">
+                        <option value="">Selecione uma categoria</option>
+                        <option value="musica-audiovisual">Música e Audiovisual</option>
+                        <option value="artes-plasticas">Artes Plásticas</option>
+                        <option value="artes-cenicas">Artes Cênicas</option>
+                        <option value="literatura">Literatura</option>
+                    </select>
+
+                    <button type="submit" class="submitPost" id="submitPost">
+                        Publicar
+                    </button>
                 </div>
             </div>
-        </div> 
+        </div>
+    </div>
 
-  </main>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
-  <script src="./script.js"></script>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+    <script src="./script.js"></script>
+    <script src="./posts.js"></script>
+
 </body>
 </html>

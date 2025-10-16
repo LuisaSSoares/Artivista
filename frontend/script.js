@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addContent) addContent.style.visibility = 'visible'
       }
 
+      
       //Recebe "filename", que é o nome atribuído a configuração no arquivo multer.js do backend
       //O Multer é responsável por salvar as fotos no servidor, e o nome do arquivo é guardado no banco de dados
       //Se filename existir, ele retorna o caminho em que ele foi salvo. Caso contrário, permanece com o icone padrão de perfil (arquivo svg)
@@ -275,9 +276,92 @@ document.addEventListener('DOMContentLoaded', () => {
           })
           .catch(err => console.warn('Falha ao carregar perfil:', err));
       }
+      if (viewedId) {
+        carregarPostagensUsuario(parseInt(viewedId));
+      }
+    }
+// --- Exibe postagens do usuário logado na aba "Postagens" ---
+async function carregarPostagensUsuario(userId) {
+  const container = document.getElementById('userPostsContainer');
+  if (!container) return;
+
+  try {
+    const res = await fetch('http://localhost:3520/feed/list');
+    const data = await res.json();
+
+    if (!data.success || !data.posts.length) {
+      container.innerHTML = `
+        <div class="noPublicationSpan">
+          <img src="./icons/emoji-frown.svg" alt="">
+          <span>Ainda sem postagens.</span>
+        </div>`;
+      return;
     }
 
-    
+    const postsUsuario = data.posts.filter(p => p.artist.id === userId);
+
+    if (!postsUsuario.length) {
+      container.innerHTML = `
+        <div class="noPublicationSpan">
+          <img src="./icons/emoji-frown.svg" alt="">
+          <span>Você ainda não publicou nada.</span>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = '';
+    container.classList.add('photoGrid');
+
+    postsUsuario.forEach(post => {
+      const previewDesc =
+        post.description.length > 80
+          ? post.description.slice(0, 80) + '...'
+          : post.description;
+
+      const carouselId = `carousel-${post.id}`;
+      const midias = post.media
+        .map((file, i) => {
+          const ext = file.split('.').pop().toLowerCase();
+          const isVideo = ['mp4', 'mov', 'webm', 'avi'].includes(ext);
+          return `
+            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+              ${isVideo
+                ? `<video src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" controls muted></video>`
+                : `<img src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" alt="midia">`}
+            </div>`;
+        })
+        .join('');
+
+      const card = document.createElement('div');
+      const dataFormatada = new Date(post.createdAt).toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+      card.classList.add('photoCard');
+      card.innerHTML = `
+        <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">${midias}</div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+        <div class="photoInfo">
+        <span class="dataPost" style="color: #DCEEC8; font-size: 10px">Publicado em ${dataFormatada}</span>
+          <h4>${post.title}</h4>
+          <p>${previewDesc}</p>
+          <div class="photoInfo">
+        </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  } catch (err) {
+    console.error('Erro ao carregar postagens do usuário:', err);
+    container.innerHTML = `<p>Erro ao carregar postagens.</p>`;
+  }
+}
     const nav = document.querySelector('.navBar');
     if (!nav) return;
     if (nav.dataset.scope === 'perfil') {  //Se se essa navBar for a do perfil (tem data-scope="perfil"), recupera a dataTab (os links de navegação do perfil) e as tabPanel (a seção de conteúdo delas)
@@ -431,6 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (page === 'contrate') {
       fetchArtists(); //Se pagina for contrate, a função é chamada
   }
+
+  
   });
   //Modal Editar Perfil
 const editButton = document.querySelector('.editProfile');
