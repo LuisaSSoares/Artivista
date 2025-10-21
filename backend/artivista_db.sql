@@ -30,8 +30,9 @@ id int not null primary key auto_increment,
 title varchar(100),
 description varchar(225),
 artSection varchar(100), 
+createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 artistId int,
-foreign key (artistId) references artists(id)
+foreign key (artistId) references artists(id) on delete cascade
 );
 
 create table imageAndVideo(
@@ -54,7 +55,7 @@ classification enum ('livre', '12 anos', '14 anos', '16 anos', '18 anos ou mais'
 typeEvent enum ('gratuito', 'pago'),
 link varchar(255), 
 artistId int,
-foreign key (artistId) references artists(id)
+foreign key (artistId) references artists(id) on delete cascade
 );
 
 create table courses(
@@ -68,7 +69,7 @@ typeCourse enum ('gratuito', 'pago'),
 participantsLimit int, 
 link varchar(255), 
 artistId int,
-foreign key (artistId) references artists(id) 
+foreign key (artistId) references artists(id) on delete cascade
 );
 
 create table chat(
@@ -76,7 +77,7 @@ id int not null auto_increment primary key,
 message varchar(255), 
 sendIn datetime default current_timestamp, 
 userId int,
-foreign key (userId) references users(id) 
+foreign key (userId) references users(id) on delete cascade
 );
 
 create table notifications(
@@ -84,23 +85,23 @@ id int not null primary key auto_increment,
 alert varchar(255), 
 sendData datetime default current_timestamp, 
 userId int,
-foreign key (userId) references users(id)
+foreign key (userId) references users(id) on delete cascade
 );
 
 create table likes(
 id int not null primary key auto_increment,
 postId int,
 userId int,
-foreign key (userId) references users(id),
-foreign key (postId) references posts(id)
+foreign key (userId) references users(id) on delete cascade,
+foreign key (postId) references posts(id) on delete cascade
 );
 
 create table favorites(
 id int not null primary key auto_increment,
 postId int,
 userId int,
-foreign key (userId) references users(id),
-foreign key (postId) references posts(id)
+foreign key (userId) references users(id) on delete cascade,
+foreign key (postId) references posts(id) on delete cascade
 );
 
 create table comments(
@@ -109,8 +110,8 @@ content text,
 sendData datetime default current_timestamp,
 postId int,
 userId int,
-foreign key (userId) references users(id),
-foreign key (postId) references posts(id)
+foreign key (userId) references users(id) on delete cascade,
+foreign key (postId) references posts(id) on delete cascade
 );
 
 

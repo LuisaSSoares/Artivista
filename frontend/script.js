@@ -241,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (histP) {
           histP.textContent = (data?.historia_arte && data.historia_arte.trim())? data.historia_arte: 'Compartilhe sua história com a arte';
           }
+          inicializarHistoriaComArte();
+        
       }
   
       if (infosUser) { //Se o objeto do localStorage existir, envia todas as chaves dele para a função renderProfile e exibe as informações no perfil.
@@ -278,12 +280,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (viewedId) {
         carregarPostagensUsuario(parseInt(viewedId));
+        atualizarPostagensCurtidas();
+        atualizarComentariosFeitos();
+        atualizarContagemFavoritosPorSecao();
       }
     }
 // --- Exibe postagens do usuário logado na aba "Postagens" ---
 async function carregarPostagensUsuario(userId) {
   const container = document.getElementById('userPostsContainer');
   if (!container) return;
+
+  //Recupera o ID do usuário logado para verificar a propriedade do post
+  const infosUser = JSON.parse(localStorage.getItem('usuario'));
+  // Converte para número, se existir
+  const loggedInUserId = infosUser ? parseInt(infosUser.id) : null;
+  // Verifica se o usuário logado é o dono do perfil que está sendo visualizado
+  const isOwner = loggedInUserId === userId;
 
   try {
     const res = await fetch('http://localhost:3520/feed/list');
@@ -303,14 +315,17 @@ async function carregarPostagensUsuario(userId) {
     if (!postsUsuario.length) {
       container.innerHTML = `
         <div class="noPublicationSpan">
-          <img src="./icons/emoji-frown.svg" alt="">
-          <span>Você ainda não publicou nada.</span>
-        </div>`;
+          <img src="./icons/brush.svg" alt="">
+          <span>Você não tem nenhuma publicação ainda.</span>
+        </div>`; // Usei a mensagem e ícone de "perfil.html"
       return;
     }
 
     container.innerHTML = '';
-    container.classList.add('photoGrid');
+    // Adiciona a classe photoGrid para garantir o layout correto dos posts do usuário
+    container.classList.add('photoGrid'); 
+
+    const videoExtensions = ['mp4', 'mov', 'webm', 'avi'];
 
     postsUsuario.forEach(post => {
       const previewDesc =
@@ -318,48 +333,283 @@ async function carregarPostagensUsuario(userId) {
           ? post.description.slice(0, 80) + '...'
           : post.description;
 
-      const carouselId = `carousel-${post.id}`;
-      const midias = post.media
-        .map((file, i) => {
-          const ext = file.split('.').pop().toLowerCase();
-          const isVideo = ['mp4', 'mov', 'webm', 'avi'].includes(ext);
-          return `
-            <div class="carousel-item ${i === 0 ? 'active' : ''}">
-              ${isVideo
-                ? `<video src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" controls muted></video>`
-                : `<img src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" alt="midia">`}
-            </div>`;
-        })
-        .join('');
-
-      const card = document.createElement('div');
       const dataFormatada = new Date(post.createdAt).toLocaleDateString('pt-BR', {
         day: '2-digit', month: '2-digit', year: 'numeric'
       });
+      
+      const card = document.createElement('div');
       card.classList.add('photoCard');
-      card.innerHTML = `
-        <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner">${midias}</div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-          </button>
-        </div>
-        <div class="photoInfo">
-        <span class="dataPost" style="color: #DCEEC8; font-size: 10px">Publicado em ${dataFormatada}</span>
-          <h4>${post.title}</h4>
-          <p>${previewDesc}</p>
-          <div class="photoInfo">
-        </div>
-        </div>
-      `;
+
+      let actionButtons = '';
+      if (isOwner) {
+        actionButtons = `
+          <div class="post-actions">
+            <button class="edit-post-btn" onclick="editarPost(${post.id}, '${post.title.replace(/'/g, "\\'")}', '${post.description.replace(/'/g, "\\'")}', '${post.artSection}')">
+              <img src="./icons/pencil-square.svg" alt="Editar Postagem">
+            </button>
+            <button class="delete-post-btn" data-post-id="${post.id}" onclick="abrirModalExcluir(${post.id}, '${post.title.replace(/'/g, "\\'")}')">
+              <img src="./icons/trash.svg" alt="Excluir Postagem">
+            </button>
+          </div>
+        `;
+      }
+
+      // Lógica para posts com carrossel ou mídia única (adaptada do feed.js)
+      if (post.media.length === 1) {
+          // Caso de Mídia Única
+          const file = post.media[0];
+          // O .some em `videoExtensions` não é ideal para verificar o final da string, 
+          // mas seguiremos a lógica adaptada do feed.js para compatibilidade.
+          const isVideo = videoExtensions.some(ext => file.toLowerCase().includes(`.${ext}`));
+
+          card.innerHTML = `
+            <div class="mediaContainer">
+              ${actionButtons} ${isVideo
+                ? `<video src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" controls muted></video>`
+                : `<img src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" alt="midia">`}
+            </div>
+            <div class="photoInfo">
+              <span class="dataPost" style="color: #DCEEC8; font-size: 10px">Publicado em ${dataFormatada}</span>
+              <h4>${post.title}</h4>
+              <p>${previewDesc}</p>
+              <div class="postReactPerfil">
+              <button class="btn-like" data-id="${post.id}">
+                <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
+                <p class="contadorLikes"></p>
+              </button>
+
+              <button class="btn-comment" data-id="${post.id}">
+              <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
+              <p class="contadorComentarios"></p>
+              </button>
+
+              <button class="btn-favorite" data-id="${post.id}">
+              <img src="./icons/bookmark-star.svg" alt="Favoritar">
+              </button>
+            </div>
+          </div>
+            </div>
+          `;
+      } else {
+          // Caso de Múltiplas Mídias (Carrossel)
+          const carouselId = `carousel-${post.id}`;
+          const midias = post.media
+            .map((file, i) => {
+              const isVideo = videoExtensions.some(ext => file.toLowerCase().includes(`.${ext}`));
+              return `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                  ${isVideo
+                    ? `<video src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" controls muted></video>`
+                    : `<img src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" alt="midia">`}
+                </div>`;
+            })
+            .join('');
+
+          card.innerHTML = `
+            <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+            ${actionButtons}<div class="carousel-inner">${midias}</div>
+              <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+              </button>
+              <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+              </button>
+            </div>
+            <div class="photoInfo">
+            <span class="dataPost" style="color: #DCEEC8; font-size: 10px">Publicado em ${dataFormatada}</span>
+              <h4>${post.title}</h4>
+              <p>${previewDesc}</p>
+              <div class="postReactPerfil">
+              <button class="btn-like" data-id="${post.id}">
+                <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
+                <p class="contadorLikes"></p>
+              </button>
+              <button class="btn-comment" data-id="${post.id}">
+              <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
+              <p class="contadorComentarios"></p>
+              </button>
+
+              <button class="btn-favorite" data-id="${post.id}">
+              <img src="./icons/bookmark-star.svg" alt="Favoritar">
+              </button>
+            </div>
+          </div>
+            </div>
+          `;
+      }
+      // Fim da lógica de carrossel/mídia única
+      
       container.appendChild(card);
+      // Atualiza contador de postagens na aba "Postagens"
+      const postCountEl = document.getElementById('postCount');
+      if (postCountEl) {
+        postCountEl.textContent = `(${postsUsuario.length})`;
+      }
     });
+    if (container.querySelectorAll('.photoCard').length) {
+      ativarCurtidasPerfil(); // só ativa curtidas quando os cards já existem no DOM
+      atualizarContadoresComentariosPerfil(); // conta comentários de cada post
+      atualizarComentariosFeitos(); // conta comentários feitos pelo próprio usuário
+      marcarFavoritosPerfil();
+      ativarFavoritosPerfil()
+    }
   } catch (err) {
     console.error('Erro ao carregar postagens do usuário:', err);
     container.innerHTML = `<p>Erro ao carregar postagens.</p>`;
+  }
+}
+
+
+async function ativarCurtidasPerfil() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario || !usuario.id) return;
+
+  // Buscar posts curtidos pelo usuário logado
+  let likedPosts = [];
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/liked-posts`);
+    const data = await res.json();
+    if (data.success) likedPosts = data.posts.map(p => p.id);
+  } catch (err) {
+    console.error("Erro ao carregar curtidas do usuário:", err);
+  }
+
+  // Pega todos os botões de curtir do perfil
+  const likeButtons = document.querySelectorAll(".btn-like");
+
+  likeButtons.forEach(async (button) => {
+    const postId = button.getAttribute("data-id");
+    const heartIcon = button.querySelector(".heart-icon");
+    const likeCountEl = button.querySelector(".contadorLikes");
+
+    // Atualiza contador de likes
+    async function atualizarContador() {
+      try {
+        const res = await fetch(`http://localhost:3520/post/likes/${postId}`);
+        const data = await res.json();
+        if (data.success) {
+          likeCountEl.textContent = data.likes || 0;
+        } else {
+          likeCountEl.textContent = "0";
+        }
+      } catch (err) {
+        console.error("Erro ao atualizar contador:", err);
+        likeCountEl.textContent = "0";
+      }
+    }
+
+    // Estado inicial do botão (caso o próprio usuário tenha curtido)
+    if (likedPosts.includes(parseInt(postId))) {
+      button.classList.add("liked");
+    }
+
+    await atualizarContador();
+
+    // Clique no botão
+    button.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (!usuario || !usuario.id) {
+        alert("Você precisa estar logado para curtir postagens.");
+        return;
+      }
+
+      const isLiked = button.classList.contains("liked");
+      heartIcon.classList.add("animate");
+      setTimeout(() => heartIcon.classList.remove("animate"), 200);
+
+      try {
+        if (isLiked) {
+          // Descurtir
+          const res = await fetch("http://localhost:3520/post/unlike", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postId, userId: usuario.id }),
+          });
+          const data = await res.json();
+          if (data.success) button.classList.remove("liked");
+        } else {
+          // Curtir
+          const res = await fetch("http://localhost:3520/post/like", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postId, userId: usuario.id }),
+          });
+          const data = await res.json();
+          if (data.success) button.classList.add("liked");
+        }
+      } catch (err) {
+        console.error("Erro ao curtir/descurtir:", err);
+      }
+
+      atualizarContador();
+      atualizarPostagensCurtidas();
+    });
+  });
+}
+
+async function atualizarPostagensCurtidas() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario || !usuario.id) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/liked-posts`);
+    const data = await res.json();
+
+    if (data.success) {
+      const qtdCurtidas = data.posts.length;
+      const camposCurtidas = document.querySelectorAll(".activityContainer .postsReact div:first-child p");
+      camposCurtidas.forEach(p => p.textContent = `${qtdCurtidas} post${qtdCurtidas !== 1 ? 'agens' : 'agem'} curtid${qtdCurtidas !== 1 ? 'as' : 'a'}`);
+    }
+  } catch (err) {
+    console.error("Erro ao contar postagens curtidas:", err);
+  }
+}
+//Função que conta o numero de comentarios em um post (no perfil do artista)
+async function atualizarContadoresComentariosPerfil() {
+  const posts = document.querySelectorAll(".photoCard");
+
+  for (const post of posts) {
+    const postId = post.querySelector(".btn-comment")?.getAttribute("data-id");
+    const contadorEl = post.querySelector(".contadorComentarios");
+    if (!postId || !contadorEl) continue;
+
+    try {
+      const res = await fetch(`http://localhost:3520/comments/${postId}`);
+      const data = await res.json();
+
+      if (data.success) {
+        const total = data.comments.length;
+        contadorEl.textContent = total; // sempre mostra 0 se não houver comentários
+      } else {
+        contadorEl.textContent = "0";
+      }
+    } catch (err) {
+      console.error("Erro ao contar comentários:", err);
+      contadorEl.textContent = "0";
+    }
+  }
+}
+// --- Atualiza a quantidade total de comentários feitos pelo usuário ---
+async function atualizarComentariosFeitos() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario || !usuario.id) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/comments/user/${usuario.id}`);
+    const data = await res.json();
+    if (!data.success) return;
+
+    const qtd = data.comments.length; // <- total de comentários (sem deduplicar por post)
+
+    if (qtd > 0) {
+      const camposComentarios = document.querySelectorAll(".activityContainer .postsReact div:nth-child(2) p");
+      camposComentarios.forEach(p => {
+        p.textContent = `${qtd} comentário${qtd !== 1 ? 's' : ''} feito${qtd !== 1 ? 's' : ''}`;
+      });
+    }
+    // se qtd === 0, não mexe no texto (mantém o que já está na tela)
+  } catch (err) {
+    console.error("Erro ao contar comentários feitos:", err);
   }
 }
     const nav = document.querySelector('.navBar');
@@ -399,8 +649,21 @@ async function carregarPostagensUsuario(userId) {
           // move barrinha
           const link = links.find(a => a.dataset.tab === tabName) || links[0];
           moveIndicatorTo(link);
+
+          // --- FECHA curtidos ao mudar de aba ---
+          const perfilRoot = document.querySelector('#perfilArtista:not([hidden])') || document.querySelector('#perfilComum:not([hidden])');
+          if (!perfilRoot) return;
+
+          const likedContainer = perfilRoot.querySelector("#likedPostsContainer");
+          const aboutProfile = perfilRoot.querySelector(".aboutProfile");
+
+          // se o container de curtidos estiver aberto, esconde e restaura o sobre o perfil
+          if (likedContainer && !likedContainer.hidden) {
+            likedContainer.hidden = true;
+            if (aboutProfile) aboutProfile.hidden = false;
+          }
         }
-      
+        
         // clique nas abas
         nav.addEventListener('click', (e) => {
           const a = e.target.closest('a[data-tab]');  // Pega o elemento "a" mais próximo com atributo data-tab, mesmo que tenha clicado em um filho (ícone, texto etc.)
@@ -515,8 +778,6 @@ async function carregarPostagensUsuario(userId) {
   if (page === 'contrate') {
       fetchArtists(); //Se pagina for contrate, a função é chamada
   }
-
-  
   });
   //Modal Editar Perfil
 const editButton = document.querySelector('.editProfile');
@@ -646,3 +907,808 @@ confirmBtn?.addEventListener('click', async (e) => {
     alert('Não foi possível atualizar. Tente novamente.');
   }
 });
+
+// Função pra abrir modal de exclusão de posts no perfil
+let postSelecionado = null;
+
+function abrirModalExcluir(postId, titulo) {
+  postSelecionado = postId;
+  const modal = document.getElementById("modalExcluirPost");
+  const tituloEl = document.getElementById("tituloPostModal");
+
+  if (tituloEl) tituloEl.textContent = titulo || "";
+
+  // Mostra modal com classe .show (CSS controla a visibilidade)
+  modal.classList.add("show");
+}
+
+// === Botão CANCELAR ===
+document.getElementById("cancelarExclusao")?.addEventListener("click", () => {
+  const modal = document.getElementById("modalExcluirPost");
+  modal.classList.remove("show"); // esconde o modal
+  postSelecionado = null;
+});
+
+// === Botão CONFIRMAR EXCLUSÃO ===
+document.getElementById("confirmarExclusao")?.addEventListener("click", async () => {
+  if (!postSelecionado) return;
+
+  try {
+    const resposta = await fetch(`http://localhost:3520/feed/delete/${postSelecionado}`, {
+      method: "DELETE"
+    });
+    const json = await resposta.json();
+
+    if (json.success) {
+      alert("Postagem excluída com sucesso!");
+      // Remove o card visualmente
+      document.querySelector(`[data-post-id="${postSelecionado}"]`)?.closest('.photoCard')?.remove();
+    } else {
+      alert("Erro ao excluir postagem: " + (json.message || ""));
+    }
+  } catch (e) {
+    console.error("Erro ao excluir postagem:", e);
+    alert("Erro ao excluir postagem.");
+  }
+
+  // Esconde o modal e limpa seleção
+  const modal = document.getElementById("modalExcluirPost");
+  modal.classList.remove("show");
+  postSelecionado = null;
+});
+
+function editarPost(id) {
+  fetch(`http://localhost:3520/feed/list`)
+    .then(r => r.json())
+    .then(({ posts }) => {
+      const post = posts.find(p => p.id === id);
+      if (!post) return alert("Postagem não encontrada.");
+
+      // salva TUDO que a página de edição precisa
+      localStorage.setItem("postEdicao", JSON.stringify({
+        id: post.id,
+        title: post.title,
+        description: post.description,
+        artSection: post.artSection,
+        media: post.media.map(m => `http://localhost:3520/uploads/feed/${m}`)
+      }));
+
+      // abre a tela de criação (que vai entrar no modo edição)
+      window.location.href = "criarPost.html";
+    })
+    .catch(err => {
+      console.error("Erro ao buscar post:", err);
+      alert("Erro ao carregar post para edição.");
+    });
+}
+
+function inicializarHistoriaComArte() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario || !usuario.id) return;
+
+  const root = document.querySelector('#perfilArtista:not([hidden]), #perfilComum:not([hidden])');
+  if (!root) return;
+
+  const textHistory = root.querySelector('#textHistory');
+  const plusButtons = Array.from(root.querySelectorAll('#btnAddHistory'));
+  const container =
+    plusButtons[0]?.closest('.historyContent') || textHistory?.closest('.historyContent');
+
+  if (!container || !textHistory) return;
+
+  // Limpeza defensiva (idempotente)
+  container.querySelector("#btnSaveHistory")?.remove();
+  container.querySelector(".counter")?.remove();
+  container.querySelector(".historyActions")?.remove();
+
+  const historiaSalva = typeof usuario.historia_arte === "string" && usuario.historia_arte.trim() !== "";
+
+  if (historiaSalva) {
+    plusButtons.forEach(btn => btn.remove());
+    textHistory.textContent = usuario.historia_arte;
+    if (!container.querySelector(".historyActions")) montarAcoes(textHistory);
+  } else {
+    textHistory.textContent = "Compartilhe sua história com a arte";
+
+    let btnAdd = container.querySelector("#btnAddHistory");
+    if (!btnAdd) {
+      btnAdd = document.createElement("button");
+      btnAdd.id = "btnAddHistory";
+      btnAdd.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0V8H10a.5.5 0 0 0 0-1H8.5z"/>
+        </svg>`;
+      container.prepend(btnAdd);
+    }
+    if (!btnAdd.dataset.listenerAdded) {
+      btnAdd.dataset.listenerAdded = "true";
+      btnAdd.addEventListener("click", () => montarEditor(""));
+    }
+  }
+
+  // Watchdog para impedir que o "+" reapareça quando há história
+  if (historiaSalva && !container.__historyObserverAttached) {
+    const obs = new MutationObserver(() => {
+      container.querySelectorAll("#btnAddHistory").forEach(b => b.remove());
+      dedupUi();
+    });
+    obs.observe(container, { childList: true, subtree: true });
+    container.__historyObserverAttached = true;
+  }
+
+  function dedupUi() {
+    const actions = container.querySelectorAll(".historyActions");
+    actions.forEach((n, i) => { if (i > 0) n.remove(); });
+    const counters = container.querySelectorAll(".counter");
+    counters.forEach((n, i) => { if (i > 0) n.remove(); });
+    const saves = container.querySelectorAll("#btnSaveHistory");
+    saves.forEach((n, i) => { if (i > 0) n.remove(); });
+  }
+
+  function limparUiEdicao() {
+    // remove tudo que possa estar sobrando da edição anterior
+    container.querySelectorAll("#btnSaveHistory, .counter, input[data-history-input]").forEach(el => el.remove());
+    // não remove .historyActions aqui (quem chama decide)
+  }
+
+  function montarEditor(valor = "") {
+    // limpar antes de montar
+    limparUiEdicao();
+    container.querySelectorAll("#btnAddHistory").forEach(b => b.remove());
+    container.querySelector(".historyActions")?.remove();
+
+    // resolve o <p> ATUAL na hora de editar (nada de variável “fechada”)
+    const currentP = container.querySelector('#textHistory');
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 255;
+    input.placeholder = "Compartilhe sua história com a arte";
+    input.value = valor;
+    input.setAttribute('data-history-input', 'true');
+
+    const counter = document.createElement("span");
+    counter.className = "counter";
+    const atualizarContador = () => {
+      const len = input.value.replace(/\s/g, "").length;
+      counter.textContent = `${len}/255`;
+    };
+    atualizarContador();
+    input.addEventListener("input", atualizarContador);
+
+    const btnSave = document.createElement("button");
+    btnSave.id = "btnSaveHistory";
+    btnSave.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="#DCEEC8" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06l2.75 2.75a.75.75 0 0 0 1.08-.02l3.9-4.9a.75.75 0 0 0-.02-1.08z"/>
+      </svg>`;
+
+    if (currentP) {
+      currentP.replaceWith(input);
+    } else {
+      // se por algum motivo não houver <p>, insere no topo
+      container.prepend(input);
+    }
+    container.append(counter, btnSave);
+    dedupUi();
+
+    btnSave.addEventListener("click", async () => {
+      const historia = input.value.trim();
+      if (!historia) return alert("Digite sua história antes de salvar!");
+
+      try {
+        const res = await fetch(`http://localhost:3520/user/edit/${usuario.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: usuario.name,
+            userName: usuario.userName,
+            bio: usuario.bio || "",
+            historia_arte: historia
+          }),
+        });
+        const data = await res.json();
+        if (!data.success) return alert("Erro ao salvar história.");
+
+        // Atualiza estado local
+        usuario.historia_arte = historia;
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+
+        // Limpa UI de edição e substitui pelo <p> novo (sem duplicar)
+        limparUiEdicao();
+
+        // se sobrou algum #textHistory antigo (não deveria), remove
+        container.querySelectorAll('#textHistory').forEach((el, i) => { if (i > 0) el.remove(); });
+
+        const existente = container.querySelector('#textHistory');
+        if (existente) existente.remove();
+
+        const novoP = document.createElement("p");
+        novoP.id = "textHistory";
+        novoP.textContent = historia;
+        container.append(novoP);
+
+        montarAcoes(novoP);
+
+        // Estado “tem história”: remova qualquer "+"
+        container.querySelectorAll("#btnAddHistory").forEach(b => b.remove());
+        if (!container.__historyObserverAttached) {
+          const obs2 = new MutationObserver(() => {
+            container.querySelectorAll("#btnAddHistory").forEach(b => b.remove());
+            dedupUi();
+          });
+          obs2.observe(container, { childList: true, subtree: true });
+          container.__historyObserverAttached = true;
+        }
+      } catch (err) {
+        console.error("Erro ao salvar história:", err);
+        alert("Erro ao salvar história.");
+      }
+    });
+  }
+
+  function montarAcoes(pRef) {
+    if (container.querySelector(".historyActions")) return; // evita duplicar
+    const actions = document.createElement("div");
+    actions.className = "historyActions";
+
+    const btnEdit = document.createElement("button");
+    btnEdit.className = "btnEditHistory";
+    btnEdit.title = "Editar";
+    btnEdit.innerHTML = `<img src="./icons/pencil-square.svg" alt="Editar">`;
+
+    const btnDelete = document.createElement("button");
+    btnDelete.className = "btnDeleteHistory";
+    btnDelete.title = "Excluir";
+    btnDelete.innerHTML = `<img src="./icons/trash.svg" alt="Excluir">`;
+
+    actions.append(btnEdit, btnDelete);
+    container.append(actions);
+
+    btnEdit.addEventListener("click", () => {
+      actions.remove();
+      // resolve o texto atual do <p> no momento do clique
+      const atual = container.querySelector('#textHistory')?.textContent || usuario.historia_arte || "";
+      montarEditor(atual);
+    });
+
+    btnDelete.addEventListener("click", async () => {
+      if (!confirm("Tem certeza que deseja excluir sua história?")) return;
+      try {
+        const res = await fetch(`http://localhost:3520/user/edit/${usuario.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: usuario.name,
+            userName: usuario.userName,
+            bio: usuario.bio || "",
+            historia_arte: "",
+          }),
+        });
+        const data = await res.json();
+        if (!data.success) return alert("Erro ao excluir história.");
+
+        // Atualiza localStorage
+        usuario.historia_arte = "";
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+
+        // Reset visual completo e limpo
+        actions.remove();
+        // remove qualquer input/botão/contador pendente
+        limparUiEdicao();
+        // remove qualquer <p> #textHistory que exista
+        container.querySelectorAll('#textHistory').forEach(el => el.remove());
+
+        // Cria novamente o <p> padrão
+        const novoTexto = document.createElement("p");
+        novoTexto.id = "textHistory";
+        novoTexto.textContent = "Compartilhe sua história com a arte";
+        container.append(novoTexto);
+
+        // Recria o botão "+"
+        let novoPlus = container.querySelector("#btnAddHistory");
+        if (!novoPlus) {
+          novoPlus = document.createElement("button");
+          novoPlus.id = "btnAddHistory";
+          novoPlus.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8"
+              class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0V8H10a.5.5 0 0 0 0-1H8.5z"/>
+            </svg>`;
+          container.prepend(novoPlus);
+        }
+        if (!novoPlus.dataset.listenerAdded) {
+          novoPlus.dataset.listenerAdded = "true";
+          novoPlus.addEventListener("click", () => montarEditor(""));
+        }
+
+        // Não reinicializa a função toda; apenas limpa a flag do observer
+        if (container.__historyObserverAttached) {
+          delete container.__historyObserverAttached;
+        }
+      } catch (err) {
+        console.error("Erro ao excluir história:", err);
+        alert("Erro ao excluir história.");
+      }
+    });
+  }
+}
+
+// --- Contagem de postagens favoritas por seção ---
+async function atualizarContagemFavoritosPorSecao() {
+  const usuario = JSON.parse(localStorage.getItem('usuario')) || {};
+  const viewedId = new URLSearchParams(location.search).get('id') || usuario.id;
+  if (!viewedId) return;
+
+  // contador base para cada seção
+  const cont = {
+    musicaAudiovisual: 0,
+    artesPlasticas: 0,
+    artesCenicas: 0,
+    literatura: 0
+  };
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${viewedId}/favorites`);
+    const json = await res.json();
+    if (!json?.success || !Array.isArray(json.posts)) return;
+
+    // mapeamento entre o formato da API (kebab-case) e o DOM (camelCase)
+    const mapApiToDom = {
+      'musica-audiovisual': 'musicaAudiovisual',
+      'artes-plasticas': 'artesPlasticas',
+      'artes-cenicas': 'artesCenicas',
+      'literatura': 'literatura'
+    };
+
+    // percorre os posts favoritos e soma por seção
+    json.posts.forEach(post => {
+      const rawSec = (post.artSection || '').trim().toLowerCase();
+      const sec = mapApiToDom[rawSec] || rawSec;
+      if (Object.prototype.hasOwnProperty.call(cont, sec)) {
+        cont[sec]++;
+      }
+    });
+
+    // atualiza o texto dentro das seções do perfil
+    const atualizarUI = () => {
+      const roots = document.querySelectorAll('#perfilComum, #perfilArtista');
+      roots.forEach(root => {
+        root.querySelectorAll('.gpItem[data-section]').forEach(item => {
+          const sec = item.dataset.section;
+          const qtd = cont[sec] || 0;
+          item.dataset.count = qtd;
+          const p = item.querySelector('p');
+          if (p) {
+            p.textContent = (qtd === 1)
+              ? '1 postagem favoritada'
+              : `${qtd} postagens favoritadas`;
+          }
+        });
+      });
+    };
+
+    // garante que o DOM esteja pronto
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      atualizarUI();
+    } else {
+      document.addEventListener('DOMContentLoaded', atualizarUI, { once: true });
+    }
+
+    // debug opcional: ver os valores no console
+    console.log('Favoritos por seção:', cont);
+
+  } catch (err) {
+    console.error('Erro ao contar favoritos por seção:', err);
+  }
+}
+//Função pra marcar os posts favoritos no perfil (ficar amarelo)
+async function marcarFavoritosPerfil() {
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+  if (!usuario?.id) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/favorites`);
+    const data = await res.json();
+
+    if (!data.success || !data.posts) return;
+    const favoritos = data.posts.map(p => p.id);
+    document.querySelectorAll('.btn-favorite').forEach(btn => {
+      const postId = parseInt(btn.dataset.id);
+      const img = btn.querySelector('img');
+      if (favoritos.includes(postId)) {
+        btn.classList.add('favorited');
+        img.src = './icons/bookmark-star-fill.svg'; // amarelo “por dentro”
+      } else {
+        btn.classList.remove('favorited');
+        img.src = './icons/bookmark-star.svg'; // cinza padrão
+      }
+    });
+  } catch (err) {
+    console.error('Erro ao carregar favoritos:', err);
+  }
+}
+
+function ativarFavoritosPerfil() {
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+  if (!usuario?.id) return;
+
+  // estado inicial (icones amarelos para o que já está favoritado)
+  marcarFavoritosPerfil();
+
+  document.querySelectorAll('.btn-favorite').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const postId = btn.getAttribute('data-id'); // precisa do data-id (ver item 2)
+      const img = btn.querySelector('img');
+      const isFavorited = btn.classList.contains('favorited');
+
+      // animação opcional
+      img.classList.add('animate');
+      setTimeout(() => img.classList.remove('animate'), 200);
+
+      try {
+        if (isFavorited) {
+          // remover
+          const res = await fetch('http://localhost:3520/favorites/remove', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId, userId: usuario.id })
+          });
+          const data = await res.json();
+          if (data.success) {
+            btn.classList.remove('favorited');
+            img.src = './icons/bookmark-star.svg';
+            if (typeof atualizarContagemFavoritosPorSecao === 'function') {
+              atualizarContagemFavoritosPorSecao();
+            }
+          } else {
+            console.warn('Erro ao remover favorito:', data.message);
+          }
+        } else {
+          // adicionar
+          const res = await fetch('http://localhost:3520/favorites/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId, userId: usuario.id })
+          });
+          const data = await res.json();
+          if (data.success) {
+            btn.classList.add('favorited');
+            img.src = './icons/bookmark-star-fill.svg';
+            if (typeof atualizarContagemFavoritosPorSecao === 'function') {
+              atualizarContagemFavoritosPorSecao();
+            }
+          } else {
+            console.warn('Erro ao favoritar post:', data.message);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao favoritar/desfavoritar:', err);
+      }
+    });
+  });
+}
+// --- Exibir posts curtidos ---
+// oberva qual seção de perfil está visível agora (comum ou artista)
+function getPerfilRootVisivel() {
+  return document.querySelector('#perfilArtista:not([hidden])')
+      || document.querySelector('#perfilComum:not([hidden])')
+      || document; // fallback
+}
+
+// render dos cards dos posts curtidos (reuso do padrão do feed/perfil)
+function renderCardsCurtidos(container, posts) {
+  container.innerHTML = '';
+  const videoExtensions = ['mp4', 'mov', 'webm', 'avi'];
+
+  posts.forEach(post => {
+    const card = document.createElement('div');
+    card.classList.add('photoCard');
+
+    const dataFormatada = new Date(post.createdAt).toLocaleDateString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric'
+    });
+
+    if (post.media.length === 1) {
+      const file = post.media[0];
+      const isVideo = videoExtensions.some(ext => file.toLowerCase().includes(`.${ext}`));
+      card.innerHTML = `
+        <div class="mediaContainer">
+          ${isVideo
+            ? `<video src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" controls muted></video>`
+            : `<img src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" alt="midia">`}
+        </div>
+        <div class="photoInfo">
+          <span class="dataPost" style="color:#DCEEC8;font-size:10px">Publicado em ${dataFormatada}</span>
+          <h4>${post.title}</h4>
+          <p>${post.description?.length > 80 ? post.description.slice(0,80) + '…' : (post.description || '')}</p>
+          <div class="postReactPerfil">
+          <button class="btn-like" data-id="${post.id}">
+            <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
+            <p class="contadorLikes"></p>
+          </button>
+          <button class="btn-comment" data-id="${post.id}">
+          <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
+          <p class="contadorComentarios"></p>
+          </button>
+
+          <button class="btn-favorite" data-id="${post.id}">
+          <img src="./icons/bookmark-star.svg" alt="Favoritar">
+          </button>
+        </div>
+        </div>
+      `;
+    } else {
+      const carouselId = `carousel-liked-${post.id}`;
+      const midias = post.media.map((file, i) => {
+        const isVideo = videoExtensions.some(ext => file.toLowerCase().includes(`.${ext}`));
+        return `
+          <div class="carousel-item ${i === 0 ? 'active' : ''}">
+            ${isVideo
+              ? `<video src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" controls muted preload="metadata" loop></video>`
+              : `<img src="http://localhost:3520/uploads/feed/${file}" class="d-block w-100" alt="midia">`}
+          </div>`;
+      }).join('');
+      card.innerHTML = `
+        <div id="${carouselId}" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">${midias}</div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#${carouselId}" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#${carouselId}" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+        <div class="photoInfo">
+          <span class="dataPost" style="color:#DCEEC8;font-size:10px">Publicado em ${dataFormatada}</span>
+          <h4>${post.title}</h4>
+          <p>${post.description?.length > 80 ? post.description.slice(0,80) + '…' : (post.description || '')}</p>
+          <div class="postReactPerfil">
+          <button class="btn-like" data-id="${post.id}">
+            <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
+            <p class="contadorLikes"></p>
+          </button>
+          <button class="btn-comment" data-id="${post.id}">
+          <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
+          <p class="contadorComentarios"></p>
+          </button>
+
+          <button class="btn-favorite" data-id="${post.id}">
+          <img src="./icons/bookmark-star.svg" alt="Favoritar">
+          </button>
+        </div>
+        </div>
+      `;
+    }
+
+    container.appendChild(card);
+  });
+}
+
+// --- Funções auxiliares para a aba de curtidos ---
+async function marcarCurtidasAbaCurtidos() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario || !usuario.id) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/liked-posts`);
+    const data = await res.json();
+    if (!data.success) return;
+
+    const likedIds = data.posts.map(p => p.id);
+
+    const cards = document.querySelectorAll("#likedFeedContainer .photoCard");
+    for (const card of cards) {
+      const btnLike = card.querySelector(".btn-like");
+      const heartIcon = btnLike?.querySelector(".heart-icon");
+      const countEl = btnLike?.querySelector(".contadorLikes");
+      const postId = btnLike?.dataset.id;
+      if (!postId) continue;
+
+      // marca visualmente se o usuário curtiu
+      if (likedIds.includes(parseInt(postId))) {
+        btnLike.classList.add("liked");
+        heartIcon.src = "./icons/heart-fill.svg";
+      } else {
+        btnLike.classList.remove("liked");
+        heartIcon.src = "./icons/heart.svg";
+      }
+
+      // atualiza contador de curtidas
+      try {
+        const resLikes = await fetch(`http://localhost:3520/post/likes/${postId}`);
+        const likesData = await resLikes.json();
+        countEl.textContent = likesData.success ? likesData.likes : "0";
+      } catch {
+        countEl.textContent = "0";
+      }
+    }
+
+    // --- comportamento de clique (curtir/descurtir) ---
+    const likeButtons = document.querySelectorAll("#likedFeedContainer .btn-like");
+
+    likeButtons.forEach((button) => {
+      const postId = button.dataset.id;
+      const heartIcon = button.querySelector(".heart-icon");
+      const countEl = button.querySelector(".contadorLikes");
+
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        if (!usuario || !usuario.id) {
+          alert("Você precisa estar logado para curtir postagens.");
+          return;
+        }
+
+        const isLiked = button.classList.contains("liked");
+        heartIcon.classList.add("animate");
+        setTimeout(() => heartIcon.classList.remove("animate"), 200);
+
+        try {
+          if (isLiked) {
+            // --- DESCURTIR (mantém o post na tela, apenas visualmente muda) ---
+            const res = await fetch("http://localhost:3520/post/unlike", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ postId, userId: usuario.id }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              button.classList.remove("liked");
+              heartIcon.src = "./icons/heart.svg";
+            }
+          } else {
+            // --- CURTIR NOVAMENTE ---
+            const res = await fetch("http://localhost:3520/post/like", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ postId, userId: usuario.id }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              button.classList.add("liked");
+              heartIcon.src = "./icons/heart-fill.svg";
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao curtir/descurtir:", err);
+        }
+
+        // atualiza contador de likes do post
+        try {
+          const res = await fetch(`http://localhost:3520/post/likes/${postId}`);
+          const data = await res.json();
+          countEl.textContent = data.success ? data.likes : "0";
+        } catch {
+          countEl.textContent = "0";
+        }
+      });
+    });
+
+    // mantém a função original para compatibilidade
+    ativarCurtidasPerfil();
+  } catch (err) {
+    console.error("Erro ao marcar curtidas na aba curtidos:", err);
+  }
+}
+
+async function atualizarComentariosAbaCurtidos() {
+  const cards = document.querySelectorAll("#likedFeedContainer .photoCard");
+
+  for (const card of cards) {
+    const postId = card.querySelector(".btn-comment")?.dataset.id;
+    const contadorEl = card.querySelector(".contadorComentarios");
+    if (!postId || !contadorEl) continue;
+
+    try {
+      const res = await fetch(`http://localhost:3520/comments/${postId}`);
+      const data = await res.json();
+      contadorEl.textContent = data.success ? data.comments.length : "0";
+    } catch {
+      contadorEl.textContent = "0";
+    }
+  }
+}
+
+async function marcarFavoritosAbaCurtidos() {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario?.id) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/favorites`);
+    const data = await res.json();
+    if (!data.success) return;
+
+    const favoritos = data.posts.map(p => p.id);
+    document.querySelectorAll("#likedFeedContainer .btn-favorite").forEach(btn => {
+      const postId = parseInt(btn.dataset.id);
+      const img = btn.querySelector("img");
+      if (favoritos.includes(postId)) {
+        btn.classList.add("favorited");
+        img.src = "./icons/bookmark-star-fill.svg";
+      } else {
+        btn.classList.remove("favorited");
+        img.src = "./icons/bookmark-star.svg";
+      }
+    });
+
+    // reativa a função padrão de favoritar/desfavoritar
+    ativarFavoritosPerfil();
+  } catch (err) {
+    console.error("Erro ao marcar favoritos na aba curtidos:", err);
+  }
+}
+
+async function atualizarAbaCurtidos() {
+  await marcarCurtidasAbaCurtidos();
+  await atualizarComentariosAbaCurtidos();
+  await marcarFavoritosAbaCurtidos();
+}
+
+
+// abre a telinha "Meus posts curtidos"
+async function exibirPostsCurtidos() {
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+  if (!usuario || !usuario.id) return;
+
+  const root = getPerfilRootVisivel();
+  const aboutProfile = root.querySelector('.aboutProfile');
+  const likedWrap     = root.querySelector('#likedPostsContainer');
+  const grid          = root.querySelector('#likedFeedContainer');
+  const countHeader   = root.querySelector('#likedCountHeader');
+
+  if (!likedWrap || !grid) return;
+
+  // troca de telas
+  if (aboutProfile) aboutProfile.hidden = true;
+  likedWrap.hidden = false;
+  grid.innerHTML = `<p>Carregando…</p>`;
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/liked-posts`);
+    const data = await res.json();
+
+    if (!data.success || !data.posts?.length) {
+      countHeader.textContent = '0';
+      grid.innerHTML = `
+        <div class="noPublicationSpan">
+          <img src="./icons/emoji-frown.svg" alt="">
+          <span>Você ainda não curtiu nenhuma postagem.</span>
+        </div>`;
+      return;
+    }
+
+    countHeader.textContent = data.posts.length;
+    renderCardsCurtidos(grid, data.posts);
+    atualizarAbaCurtidos()
+  } catch (err) {
+    console.error('Erro ao carregar posts curtidos:', err);
+    grid.innerHTML = `<p>Erro ao carregar posts curtidos.</p>`;
+  }
+}
+
+// volta para o aboutProfile
+function voltarParaAbout() {
+  const root = getPerfilRootVisivel();
+  const aboutProfile = root.querySelector('.aboutProfile');
+  const likedWrap     = root.querySelector('#likedPostsContainer');
+  if (aboutProfile) aboutProfile.hidden = false;
+  if (likedWrap) likedWrap.hidden = true;
+}
+
+// listeners globais
+document.addEventListener('click', (e) => {
+  // abrir curtidos
+  if (e.target.closest('.likedPostsTrigger')) {
+    e.preventDefault();
+    exibirPostsCurtidos();
+  }
+  // voltar
+  if (e.target.closest('#btnVoltarAbout')) {
+    e.preventDefault();
+    voltarParaAbout();
+  }
+});
+
+

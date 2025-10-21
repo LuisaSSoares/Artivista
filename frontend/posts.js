@@ -186,7 +186,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
         const data = await res.json();
         if (data.success) {
-          alert("Post publicado com sucesso!");
           window.location.href = `./feed.html?tab=${getFeedTab(artSection)}`;
         } else {
           alert(data.message || "Erro ao publicar o post.");

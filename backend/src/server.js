@@ -12,8 +12,29 @@ const { encrypt, decrypt } = require('./cryptoHelper');
 
 app.use(express.json());
 app.use(cors());
-app.use("/uploads/profile", express.static("src/profile"));
-app.use("/uploads/feed", express.static("src/feed"));
+
+
+const staticOptions = {
+  maxAge: 3600000, // 1h de cache
+  setHeaders: (res, filePath, stat) => {
+    if (stat.isDirectory()) return;
+
+    // Streaming parcial (permite range requests)
+    res.setHeader("Accept-Ranges", "bytes");
+
+    // 🔹 Permite acesso cruzado (necessário pro <video> funcionar)
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Range");
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+
+    // 🔹 Cache (opcional)
+    res.setHeader("Cache-Control", "public, max-age=3600");
+  }
+};
+
+app.use("/uploads/profile", express.static("src/profile", staticOptions));
+app.use("/uploads/feed", express.static("src/feed", staticOptions));
 
 function verificarToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -195,7 +216,8 @@ app.post('/user/login', (req, res) => {
         email: user.email,
         userType: user.userType,
         bio: user.bio,
-        profileImage: user.profileImage
+        profileImage: user.profileImage,
+        historia_arte: user.historia_arte
       }
     });
   });
@@ -509,25 +531,90 @@ app.get('/feed/list', (req, res) => {
 });
 
 //Rota PUT para edição de postagens
-app.put('/feed/edit/:id', (req, res) => {
+app.put('/feed/edit/:id', uploadFeed.array('media', 5), (req, res) => {
   const { id } = req.params;
   const { title, description, artSection } = req.body;
 
-  if (!title) {
-    return res.status(400).json({ success: false, message: 'O título é obrigatório.' });
+  if (!title || !description || !artSection) {
+    return res.status(400).json({
+      success: false,
+      message: 'Campos obrigatórios não preenchidos.'
+    });
   }
 
-  const sql = `UPDATE posts SET title = ?, description = ?, artSection = ? WHERE id = ?`;
+  try {
+    // mídias novas enviadas pelo form
+    const newMedia = req.files ? req.files.map(file => file.filename) : [];
 
-  db.query(sql, [title, description, artSection, id], (err, result) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao editar o post.' });
+    // mídias antigas mantidas (vem no formData como string JSON)
+    let existingMedia = [];
+    if (req.body.existingMedia) {
+      try {
+        existingMedia = JSON.parse(req.body.existingMedia);
+      } catch (error) {
+        console.error("Erro ao parsear existingMedia:", error);
+      }
     }
 
-    res.json({ success: true, message: 'Post atualizado com sucesso.' });
-  });
-});
+    const cleanedExisting = existingMedia.map(src => {
+      if (typeof src === "string") {
+        const filename = src.split("/").pop(); // pega só o nome do arquivo
+        return filename;
+      }
+      return src;
+    });
+    
+    // Junta com novas mídias (nomes de arquivo vindos do multer)
+    const updatedMedia = [...cleanedExisting, ...newMedia].slice(0, 5);
 
+    // atualiza o conteúdo textual do post
+    const sqlUpdatePost = `
+      UPDATE posts 
+      SET title = ?, description = ?, artSection = ?
+      WHERE id = ?
+    `;
+
+    db.query(sqlUpdatePost, [title, description, artSection, id], (err, result) => {
+      if (err) {
+        console.error("Erro ao atualizar post:", err);
+        return res.status(500).json({ success: false, message: 'Erro ao editar o post.' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: 'Postagem não encontrada.' });
+      }
+
+      // monta os valores de imagem (preenche até 5 colunas)
+      const images = [null, null, null, null, null];
+      updatedMedia.forEach((file, i) => { images[i] = file; });
+
+      const sqlUpdateImages = `
+        UPDATE imageAndVideo 
+        SET img1 = ?, img2 = ?, img3 = ?, img4 = ?, img5 = ?
+        WHERE id_post = ?
+      `;
+
+      db.query(sqlUpdateImages, [...images, id], (errImgs) => {
+        if (errImgs) {
+          console.error('Erro ao atualizar mídias:', errImgs);
+          return res.status(500).json({ success: false, message: 'Erro ao atualizar as mídias.' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Post atualizado com sucesso.',
+          updatedMedia
+        });
+      });
+    });
+  } catch (error) {
+    console.error("Erro geral na edição:", error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao processar a edição.'
+    });
+  }
+});
 
 //Rota DELETE para exclusão de postagens
 app.delete('/feed/delete/:id', (req, res) => {
@@ -844,6 +931,22 @@ app.get('/user/:id/liked-posts', (req, res) => {
   });
 });
 
+// Rota GET para contar quantas curtidas um post possui
+app.get('/post/likes/:postId', (req, res) => {
+  const { postId } = req.params;
+
+  const sql = 'SELECT COUNT(*) AS total FROM likes WHERE postId = ?';
+  db.query(sql, [postId], (err, results) => {
+    if (err) {
+      console.error('Erro ao contar curtidas:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao contar curtidas.' });
+    }
+
+    const totalLikes = results[0]?.total || 0;
+    res.json({ success: true, likes: totalLikes });
+  });
+});
+
 //*favoritos **
 //Rota POST pra adicionar uma postagem aos favoritos
 app.post('/favorites/add', (req, res) => {
@@ -883,7 +986,10 @@ app.get('/user/:id/favorites', (req, res) => {
   const { id } = req.params;
 
   const sql = `
-    SELECT p.*, i.img1, i.img2, i.img3, i.img4, i.img5
+    SELECT
+    p.id, p.title, p.description, p.artSection AS artSection,
+    p.artistId, p.createdAt,
+    i.img1, i.img2, i.img3, i.img4, i.img5
     FROM favorites f
     JOIN posts p ON f.postId = p.id
     LEFT JOIN imageAndVideo i ON p.id = i.id_post
@@ -944,6 +1050,22 @@ app.get('/comments/:postId', (req, res) => {
   db.query(sql, [postId], (err, results) => {
     if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
 
+    res.json({ success: true, comments: results });
+  });
+});
+
+// Rota GET para buscar comentários feitos por um usuário específico
+app.get('/comments/user/:userId', (req, res) => {
+  const { userId } = req.params;
+  const sql = `
+    SELECT c.*, p.id AS postId
+    FROM comments c
+    JOIN posts p ON c.postId = p.id
+    WHERE c.userId = ?
+    ORDER BY c.sendData DESC
+  `;
+  db.query(sql, [userId], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar comentários do usuário.' });
     res.json({ success: true, comments: results });
   });
 });

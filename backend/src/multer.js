@@ -46,7 +46,7 @@ function imageAndVideoFilter(req, file, cb) {
 const uploadProfile = multer({ storage: storageProfile, fileFilter:imageOnlyFilter });
 
 // Upload para fotos do feed (permite múltiplas imagens, por exemplo)
-const uploadFeed = multer({ storage: storageFeed, fileFilter:imageAndVideoFilter });
+const uploadFeed = multer({ storage: storageFeed, fileFilter:imageAndVideoFilter});
 
 module.exports = {
     uploadProfile,

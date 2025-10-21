@@ -1060,8 +1060,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 15px;
   gap: 20px;       
 }
+.postsReact div:hover { 
+  background-color: #6fa014; 
+  border-radius: 20px;
+  cursor: pointer;
+}
+
 
 .postsReact p {
   margin: 0;
@@ -1075,7 +1082,11 @@ body {
   border-radius: 20px;
   box-shadow: 0 10px 12px rgba(95, 145, 4, 0.5);
   height: 200px;
-  max-height: 250px;
+  min-height: 250px;
+  max-width: 350px;
+  width: 100%;  
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .historyContainer h3{
@@ -1084,7 +1095,6 @@ body {
 
 .historyContainer div{
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 15px;
 }
@@ -1216,7 +1226,7 @@ body {
 
 .modal {
   position: fixed;
-  z-index: 1;
+  z-index: 10;
   width: 100%;
   height: 100%;
   background-color: rgba(0,0,0,0.5); 
@@ -1471,6 +1481,7 @@ body {
   height: 80px;
   border-radius: 50%;
   border: 3px solid #5F9104;
+  object-fit: cover;
 }
 
 
@@ -1591,10 +1602,6 @@ body {
   border: 1px solid #609104;
 }
 
-.feedContainer .noPublicationSpan{
-  margin-top: 100px;
-  gap: 20px;
-}
 
 /* Estilização do post (padrão) */
 .postCard {
@@ -1642,6 +1649,7 @@ body {
 .postHeader img{
   height: 23px;
   width: 23px;
+  object-fit: cover;
   margin-bottom: auto;
 }
 
@@ -1724,15 +1732,28 @@ body {
   margin-bottom: 10px;
 }
 
-.postComment img{
+.postComment {
+  display: flex;
+  align-items: center;
+  border-radius: 50px;
+  padding: 4px 8px;
+  max-width: 400px;
+}
+
+.profileImageComment{
+  border: 2px solid #2C5712;
+  border-radius: 50%;
+  margin-right: 5px;
   width: 30px;
   height: 30px;
+  object-fit: cover;
 }
+
 
 .postComment input{
   background-color: #DCEEC8;
-  border-radius: 50px;
-  padding: 3px;
+  border-radius: 15px 0 0 15px;
+  padding: 5px;
   border: none;
   font-size: 12px;
   width: 80%;
@@ -1744,7 +1765,31 @@ body {
 }
 .postComment input:focus{
   outline: none; 
-  border: 2px solid #2C5712;
+}
+
+/* Remove a borda quando for o ícone padrão */
+.profileImageComment[src*="person-circle.svg"],
+.postHeader #profileImage[src*="person-circle.svg"] {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.sendCommentBtn{
+  background-color: #609104;
+  border: none;
+  padding: 6px;
+  border-radius:0 15px 15px 0;
+  width: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sendCommentBtn:hover{
+  background-color: #4b7503;
 }
 
 /* Criação de post */
@@ -1781,7 +1826,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  text-align: center;
+  gap: 10px;
   font-size: 18px;
   font-weight: bold;
   color: #fff; 
@@ -1997,17 +2042,24 @@ body {
   border: 2px solid #4a6e21;
 }
 
+/* Adiciona a bolinha preta semi-transparente ao redor do ícone da seta */
+.postCard .carousel-control-prev-icon,
+.postCard .carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.6); /* Preto com 60% de opacidade */
+  border-radius: 50%;
+  width: 35px; /* Aumenta o tamanho da bolinha */
+  height: 35px; /* Aumenta o tamanho da bolinha */
+}
+
 /* Exibição de postagens no perfil do user */
-/* === Photocard Grid no Perfil === */
 .photoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 28px;
   justify-items: center;
-  margin-top: 25px;
 }
 
-.photoCard {
+.photoCard{
   width: 250px;
   height: 250px;
   background: linear-gradient(to bottom, #C3DEA5, #B8D592, #ADCB7F);
@@ -2021,12 +2073,24 @@ body {
   align-items: center;
 }
 
+.photoCard .mediaContainer{
+  margin-top: 5px;
+  width: 90%;
+  height: 70%;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .photoCard:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 18px rgba(0,0,0,0.25);
 }
 
 .photoCard .carousel {
+  margin-top: 5px;
   width: 90%;
   height: 70%;
   border-radius: 10px;
@@ -2097,4 +2161,349 @@ body {
   object-position: center;
   border-radius: 10px;
   transition: transform 0.3s ease;
+}
+
+.carousel > img,
+.carousel > video {
+  width: 70%;              /* mesmo tamanho das imagens do carrossel */
+  max-height: 230px;       /* mesma altura máxima */
+  object-fit: cover;       /* mantém proporção e preenche */
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;          /* centraliza horizontalmente */
+}
+
+/* Estilização dos botões de editar e excluir botões */
+.post-actions {
+    position: absolute;
+    top: 10px; 
+    right: 10px; 
+    z-index: 10; 
+    display: flex;
+    gap: 5px; 
+}
+
+.post-actions button {
+    background-color: rgba(93, 93, 93, 0.6); 
+    border: none;
+    border-radius: 50%; 
+    width: 30px;
+    height: 30px;
+    padding: 8px;
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.post-actions button:hover {
+    background-color: rgba(131, 174, 21, 0.8);
+}
+
+.post-actions img {
+    width: 15px;
+    height: 15px;
+}
+
+/* Modal para excluir posts no perfil*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+
+.modal-overlay.show {
+  display: flex;             
+  opacity: 1;
+}
+
+.modal-box {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease;
+}
+
+.modal-box h3 {
+  margin-bottom: 10px;
+  color: #4b7503;
+  font-weight: bold;
+}
+
+.modal-box p {
+  margin-bottom: 25px;
+  font-size: 16px;
+}
+
+.modal-botoes {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.modal-botoes button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.modal-botoes #cancelarExclusao {
+  background-color: #aaa;
+  color: #fff;
+}
+
+.modal-botoes #cancelarExclusao:hover {
+  background-color: #888;
+}
+
+.modal-botoes .btn-excluir {
+  background-color: #b32020;
+  color: #fff;
+}
+
+.modal-botoes .btn-excluir:hover {
+  background-color: #8a1414;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Reações de postagem - curtida */
+.heart-icon {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.btn-like{
+  display: flex;
+  align-items: center;
+}
+
+.btn-like.active .heart-icon {
+  transform: scale(1.2);
+
+}
+
+.btn-like.liked .heart-icon {
+  content: url('./icons/heart-fill.svg'); /* usa o ícone de coração preenchido */
+  filter: invert(52%) sepia(42%) saturate(725%) hue-rotate(48deg) brightness(90%) contrast(85%);
+  transform: scale(1.15);
+}
+
+.contadorLikes{
+  font-size: 16px;
+  color: #2C5712;
+  font-weight: 600;
+  margin-left: -10px;
+  margin-top: 2px;
+}
+
+.photoInfo .postReactPerfil{
+  display: flex;
+  padding: 5px;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.photoInfo .postReactPerfil button{
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.photoInfo .postReactPerfil img{
+    width: 18px;
+    height: 18px;
+}
+
+.photoInfo  .postReactPerfil button img,
+.photoInfo .postReactPerfil button img {
+  filter: brightness(0) invert(1);
+  border-radius: 0 !important;
+}
+
+.photoInfo .contadorLikes, .photoInfo .contadorComentarios{
+  margin-left: 4px;
+}
+
+/* Comentários em posts */
+.btn-comment{
+  display: flex;
+  align-items: center;
+}
+.contadorComentarios{
+  font-size: 16px;
+  color: #2C5712;
+  font-weight: 600;
+  margin-left: -10px;
+  margin-top: 2px;
+}
+
+/* Ajustando tamanho do feed (tamanhos diferentes para feed do perfil e feed) */
+.feedContainer{
+  height: 60vh;     
+  overflow-y: auto;          /* permite rolar internamente */
+  overflow-x: hidden;        /* evita rolagem lateral */
+}
+
+/* Icone de favoritar posts */
+/* Botão de favorito */
+.btn-favorite img {
+  width: 26px;
+  height: 26px;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* Ícone amarelo (favoritado) */
+.btn-favorite.favorited img {
+  filter: invert(84%) sepia(87%) saturate(4000%) hue-rotate(1deg) brightness(105%) contrast(105%);
+
+}
+
+/* Animação tipo "pulso" */
+.btn-favorite img.animate {
+  transform: scale(1.25);
+}
+
+/* ======= HISTÓRIA COM A ARTE ======= */
+
+.historyContent input {
+  border: none;
+  border-bottom: 2px solid #B8D592;
+  outline: none;
+  font-size: 16px;
+  padding: 4px 6px;
+  width: 100%;
+  max-width: 400px;
+  background: transparent;
+  color: #f0f0f0;
+}
+
+.historyContent p {
+  color: #DCEEC8;
+  text-align: justify;
+  font-size: 15px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;        /* força quebra natural */
+  width: 100%;
+  max-width: 100%;
+}
+
+.historyContent input::placeholder {
+  color: #bcd3b3;
+  font-style: italic;
+}
+
+.counter {
+  font-size: 13px;
+  color: #bcd3b3;
+}
+
+.counter.full {
+  color: #ff6060;
+}
+
+/* Ícone de salvar (substitui o "+") */
+#btnSaveHistory svg {
+  transition: transform 0.2s ease;
+}
+
+#btnSaveHistory:hover svg {
+  transform: scale(1.15);
+}
+
+.historyActions {
+  justify-content: last baseline;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btnEditHistory,
+.btnDeleteHistory {
+  background-color: #4d693b;
+  border: none;
+  color: #DCEEC8;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btnEditHistory:hover {
+  background-color: #5f7f49;
+}
+
+.btnDeleteHistory:hover {
+  background-color: #aa3434;
+}
+
+.likedHeader{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.likedHeader h3{
+  font-size: 25px;
+  font-weight: bold;
+  color: #2C5712;
+}
+
+#likedCountHeader{
+  color: #5F9104;
+}
+
+#btnVoltarAbout{
+  background-color: #4a7200;
+  width: 8vw;
+  padding: 8px;
+  border-radius: 5px;
+  border: none;
+  color: white;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+#btnVoltarAbout:hover{
+  background-color: #3e6615;
+}
+
+/* #likedFeedContainer{
+  display: flex;
+  justify-content: center;
+} */
+
+/* Centraliza o bloco .noPublicationSpan dentro do container que o contém */
+#likedFeedContainer:has(.noPublicationSpan) {
+  position: relative;
+  min-height: 300px; 
+}
+
+#likedFeedContainer .noPublicationSpan{
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.photoInfo .postReactPerfil .btn-favorite img {
+  filter: brightness(0) invert(1);
+}
+
+.photoInfo .postReactPerfil .btn-favorite.favorited img {
+  filter: invert(84%) sepia(87%) saturate(4000%) hue-rotate(1deg) brightness(105%) contrast(105%) !important;
 }

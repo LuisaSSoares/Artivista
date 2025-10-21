@@ -78,7 +78,7 @@
                                 <div class="activityContainer"> 
                                     <p>Atividades:</p>
                                     <div class="postsReact">
-                                        <div>
+                                        <div class="likedPostsTrigger">
                                             <img src="./icons/heart-fill.svg" alt="">
                                             <p>0 postagens curtidas</p>
                                             <img src="./icons/arrow-right-short.svg" alt="">
@@ -91,48 +91,58 @@
                                     </div>
                                 </div>
 
-                            <div class="historyContainer">
-                            <h3>Minha relação com a arte:</h3>  
-                            <div>
-                                <button>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
-                                    </svg>                          
-                                </button>
-                                <p>Compartilhe sua história com a arte</p>
-                            </div>
-                            </div>
+                                <div class="historyContainer">
+                                    <h3>Minha relação com a arte:</h3>  
+                                    <div class="historyContent">
+                                        <button id="btnAddHistory"> 
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
+                                            </svg>                          
+                                        </button>
+                                        <p id="textHistory">Compartilhe sua história com a arte</p>
+                                    </div>
+                                    </div>
                         </div>
                             <div class="galeriaPessoal">
                                 <p>Galeria Pessoal:</p>
                                 <div class="galeriaPessoalContainers">
 
-                                    <div class="gpItem" data-count="0">
+                                    <div class="gpItem" data-count="0" data-section="musicaAudiovisual">
                                         <img src="./icons/musicaEAudiovisual.svg" alt="">
                                         <hr>
                                         <p>0 postagens favoritas</p>
                                     </div>
 
-                                    <div class="gpItem" data-count="0">
+                                    <div class="gpItem" data-count="0" data-section="artesPlasticas">
                                         <img src="./icons/artesPlasticas.svg" alt="">
                                         <hr>
                                         <p>0 postagens favoritas</p>
                                     </div>
 
-                                    <div class="gpItem" data-count="0">
+                                    <div class="gpItem" data-count="0" data-section="artesCenicas">
                                         <img src="./icons/artesCenicas.svg" alt="">
                                         <hr>
                                         <p>0 postagens favoritas</p>
                                     </div>
 
-                                    <div class="gpItem" data-count="0">
+                                    <div class="gpItem" data-count="0" data-section="literatura">
                                         <img src="./icons/literatura.svg" alt="">
                                         <hr>
                                         <p>0 postagens favoritas</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>                                 
+                        </div> 
+                        <div id="likedPostsContainer" hidden>
+                            <div class="likedHeader">
+                              <h3>Meus posts curtidos: <span id="likedCountHeader">0</span></h3>
+                              <button id="btnVoltarAbout">
+                                <img src="./icons/arrow-left.svg" alt="Voltar">
+                                Voltar
+                              </button>
+                            </div>
+                            <div class="feedContainer photoGrid" id="likedFeedContainer"></div>
+                          </div>                                  
                   </section>
 
 
@@ -154,17 +164,19 @@
                         </div>
                     </div>
                     <div class="navBar" data-scope="perfil">
-                        <a href="#postagens" data-tab="postagens" class="active">Postagens</a>
+                        <a href="#postagens" data-tab="postagens" class="active">
+                            Postagens <span id="postCount">(0)</span>
+                        </a>
                         <a href="#sobre"     data-tab="sobre">Sobre o perfil</a>
                         <a href="#agenda"    data-tab="agenda">Programação</a>
                         <span class="indicator"></span> 
                     </div> 
                     <section class="tabPanel" data-tab="postagens">
-                        <div id="userPostsContainer" class="feedContainer">
-                            <div class="noPublicationSpan">
+                        <div id="userPostsContainer" class="feedContainer" style="height: 54vh;">
+                            <!-- <div class="noPublicationSpan">
                                 <img src="./icons/brush.svg" alt="">
                                 <span>Você não tem nenhuma publicação ainda.</span>
-                            </div>                            
+                            </div>                             -->
                         </div>
 
                     </section>
@@ -174,7 +186,7 @@
                                     <div class="activityContainer"> 
                                         <p>Atividades:</p>
                                         <div class="postsReact">
-                                            <div>
+                                            <div class="likedPostsTrigger">
                                                 <img src="./icons/heart-fill.svg" alt="">
                                                 <p>0 postagens curtidas</p>
                                                 <img src="./icons/arrow-right-short.svg" alt="">
@@ -188,47 +200,59 @@
                                     </div>
     
                                 <div class="historyContainer">
-                                <h3>Minha relação com a arte:</h3>  
-                                <div>
-                                    <button>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z"/>
-                                        </svg>                          
-                                    </button>
-                                    <p>Compartilhe sua história com a arte</p>
-                                </div>
+                                    <h3>Minha relação com a arte:</h3>
+                                    <div class="historyContent">
+                                        <button id="btnAddHistory">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="#DCEEC8" class="bi bi-plus-circle-fill"
+                                                viewBox="0 0 16 16">
+                                                <path
+                                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                                            </svg>
+                                        </button>
+                                        <p id="textHistory">Compartilhe sua história com a arte</p>
+                                    </div>
                                 </div>
                             </div>
                                 <div class="galeriaPessoal">
                                     <p>Galeria Pessoal:</p>
                                     <div class="galeriaPessoalContainers">
     
-                                        <div class="gpItem" data-count="0">
+                                        <div class="gpItem" data-count="0" data-section="musicaAudiovisual">
                                             <img src="./icons/musicaEAudiovisual.svg" alt="">
                                             <hr>
                                             <p>0 postagens favoritas</p>
                                         </div>
     
-                                        <div class="gpItem" data-count="0">
+                                        <div class="gpItem" data-count="0" data-section="artesPlasticas">
                                             <img src="./icons/artesPlasticas.svg" alt="">
                                             <hr>
                                             <p>0 postagens favoritas</p>
                                         </div>
     
-                                        <div class="gpItem" data-count="0">
+                                        <div class="gpItem" data-count="0" data-section="artesCenicas">
                                             <img src="./icons/artesCenicas.svg" alt="">
                                             <hr>
                                             <p>0 postagens favoritas</p>
                                         </div>
     
-                                        <div class="gpItem" data-count="0">
+                                        <div class="gpItem" data-count="0" data-section="literatura">
                                             <img src="./icons/literatura.svg" alt="">
                                             <hr>
                                             <p>0 postagens favoritas</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>   
+                            </div> 
+                            <div id="likedPostsContainer" hidden>
+                                <div class="likedHeader">
+                                    <h3>Meus posts curtidos: <span id="likedCountHeader">0</span></h3>
+                                    <button id="btnVoltarAbout">
+                                      <img src="./icons/arrow-left.svg" alt="Voltar">
+                                      Voltar
+                                    </button>
+                                  </div>
+                                <div class="feedContainer photoGrid" id="likedFeedContainer"></div>
+                              </div>  
                     </section>
                     <section class="tabPanel" data-tab="agenda" >
                         <div class="noPublicationSpan">
@@ -274,18 +298,23 @@
                                     </div>
                             </div>  
                                 <label for="ModifyBio" class="field-label">Bio:</label>
-                                <textarea id="ModifyBio" class="field-textarea" maxlength="100"></textarea>
-                            
-
-
-                  
+                                <textarea id="ModifyBio" class="field-textarea" maxlength="100"></textarea>             
                         <button id="Confirm" class="CustomConfirm" type="submit">Confirmar</button>
                       </form>
                     </div>
                   </div>
+                  <div id="modalExcluirPost" class="modal-overlay">
+                    <div class="modal-box">
+                      <h3>Excluir postagem</h3>
+                      <p>Deseja realmente excluir "<span id="tituloPostModal"></span>"?</p>
+                      <div class="modal-botoes">
+                        <button id="cancelarExclusao">Cancelar</button>
+                        <button id="confirmarExclusao" class="btn-excluir">Excluir</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
             </div> 
-
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
   <script src="./script.js"></script>
