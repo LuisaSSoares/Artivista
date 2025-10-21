@@ -1010,6 +1010,7 @@ app.get('/user/:id/favorites', (req, res) => {
         description: post.description,
         artSection: post.artSection,
         artistId: post.artistId,
+        createdAt: post.createdAt,
         media
       };
     });

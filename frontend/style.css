@@ -2465,11 +2465,11 @@ body {
   color: #2C5712;
 }
 
-#likedCountHeader{
+#likedCountHeader, #favoritosCountHeader{
   color: #5F9104;
 }
 
-#btnVoltarAbout{
+#btnVoltarAbout, #btnVoltarGaleria{
   background-color: #4a7200;
   width: 8vw;
   padding: 8px;
@@ -2480,7 +2480,7 @@ body {
   transition: all 0.3s ease;
 }
 
-#btnVoltarAbout:hover{
+#btnVoltarAbout:hover, #btnVoltarGaleria{
   background-color: #3e6615;
 }
 
@@ -2490,12 +2490,12 @@ body {
 } */
 
 /* Centraliza o bloco .noPublicationSpan dentro do container que o contém */
-#likedFeedContainer:has(.noPublicationSpan) {
+#likedFeedContainer:has(.noPublicationSpan), #favoritosFeedContainer:has(.noPublicationSpan) {
   position: relative;
   min-height: 300px; 
 }
 
-#likedFeedContainer .noPublicationSpan{
+#likedFeedContainer .noPublicationSpan, #favoritosFeedContainer .noPublicationSpan{
   position: absolute;
   left: 50%;
   transform: translate(-50%, -50%);

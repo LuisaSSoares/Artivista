@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     file.includes('contrateartista') ? 'contrate' :
     file.includes('perfil') ? 'perfil' :
     file.includes('conversas') ? 'conversas' :
-    file.includes('notificacoes') ? 'notificacoes' :
     file.includes('configuracoes') ? 'configuracoes' :
     'home'
 
@@ -80,10 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
         menuLinks[1]?.classList.add('active');
       } else if (page === 'conversas') {
         menuLinks[2]?.classList.add('active');
-      } else if (page === 'notificacoes') {
-        menuLinks[3]?.classList.add('active');
       } else if (page === 'configuracoes') {
-        menuLinks[4]?.classList.add('active');
+        menuLinks[3]?.classList.add('active');
       }
     }
 
@@ -526,16 +523,25 @@ async function ativarCurtidasPerfil() {
             body: JSON.stringify({ postId, userId: usuario.id }),
           });
           const data = await res.json();
-          if (data.success) button.classList.remove("liked");
+          if (data.success) {
+            button.classList.remove("liked");
+            heartIcon.src = "./icons/heart.svg";
+            // 🔥 Atualiza imediatamente os dados do perfil
+            atualizarPostagensCurtidas();
+          }
         } else {
-          // Curtir
           const res = await fetch("http://localhost:3520/post/like", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ postId, userId: usuario.id }),
           });
           const data = await res.json();
-          if (data.success) button.classList.add("liked");
+          if (data.success) {
+            button.classList.add("liked");
+            heartIcon.src = "./icons/heart-fill.svg";
+            // 🔥 Atualiza imediatamente os dados do perfil
+            atualizarPostagensCurtidas();
+          }
         }
       } catch (err) {
         console.error("Erro ao curtir/descurtir:", err);
@@ -650,18 +656,38 @@ async function atualizarComentariosFeitos() {
           const link = links.find(a => a.dataset.tab === tabName) || links[0];
           moveIndicatorTo(link);
 
-          // --- FECHA curtidos ao mudar de aba ---
-          const perfilRoot = document.querySelector('#perfilArtista:not([hidden])') || document.querySelector('#perfilComum:not([hidden])');
-          if (!perfilRoot) return;
+          // --- FECHA curtidos e favoritos ao mudar de aba ---
+          const perfilRoot = document.querySelector('#perfilArtista:not([hidden])')
+            || document.querySelector('#perfilComum:not([hidden])');
+          if (perfilRoot) {
+            const likedContainer = perfilRoot.querySelector("#likedPostsContainer");
+            const favoritosContainer = perfilRoot.querySelector("#favoritosPorSecaoContainer");
+            const aboutProfile = perfilRoot.querySelector(".aboutProfile");
 
-          const likedContainer = perfilRoot.querySelector("#likedPostsContainer");
-          const aboutProfile = perfilRoot.querySelector(".aboutProfile");
+            // Se curtidos estiver aberto, fecha e restaura "sobre"
+            if (likedContainer && !likedContainer.hidden) {
+              likedContainer.hidden = true;
+              if (aboutProfile) aboutProfile.hidden = false;
+            }
 
-          // se o container de curtidos estiver aberto, esconde e restaura o sobre o perfil
-          if (likedContainer && !likedContainer.hidden) {
-            likedContainer.hidden = true;
-            if (aboutProfile) aboutProfile.hidden = false;
+            // Se favoritos estiver aberto, fecha e restaura "sobre"
+            if (favoritosContainer && !favoritosContainer.hidden) {
+              favoritosContainer.hidden = true;
+              if (aboutProfile) aboutProfile.hidden = false;
+            }
+
+            // --- 🔄 Atualiza conteúdo da aba "Sobre" quando ela for reaberta ---
+            if (tabName === "sobre") {
+              if (typeof atualizarPostagensCurtidas === 'function') atualizarPostagensCurtidas();
+              if (typeof atualizarComentariosFeitos === 'function') atualizarComentariosFeitos();
+              if (typeof atualizarContagemFavoritosPorSecao === 'function') atualizarContagemFavoritosPorSecao();
+
+              if (favoritosContainer) favoritosContainer.hidden = true;
+              if (likedContainer) likedContainer.hidden = true;
+              if (aboutProfile) aboutProfile.hidden = false;
+            }
           }
+
         }
         
         // clique nas abas
@@ -1349,7 +1375,6 @@ function ativarFavoritosPerfil() {
 
       try {
         if (isFavorited) {
-          // remover
           const res = await fetch('http://localhost:3520/favorites/remove', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
@@ -1359,30 +1384,23 @@ function ativarFavoritosPerfil() {
           if (data.success) {
             btn.classList.remove('favorited');
             img.src = './icons/bookmark-star.svg';
-            if (typeof atualizarContagemFavoritosPorSecao === 'function') {
-              atualizarContagemFavoritosPorSecao();
-            }
-          } else {
-            console.warn('Erro ao remover favorito:', data.message);
+            // 🔥 Atualiza contagem imediatamente
+            atualizarContagemFavoritosPorSecao();
           }
         } else {
-          // adicionar
-          const res = await fetch('http://localhost:3520/favorites/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ postId, userId: usuario.id })
-          });
-          const data = await res.json();
-          if (data.success) {
-            btn.classList.add('favorited');
-            img.src = './icons/bookmark-star-fill.svg';
-            if (typeof atualizarContagemFavoritosPorSecao === 'function') {
-              atualizarContagemFavoritosPorSecao();
-            }
-          } else {
-            console.warn('Erro ao favoritar post:', data.message);
-          }
-        }
+  const res = await fetch('http://localhost:3520/favorites/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ postId, userId: usuario.id })
+  });
+  const data = await res.json();
+  if (data.success) {
+    btn.classList.add('favorited');
+    img.src = './icons/bookmark-star-fill.svg';
+    // 🔥 Atualiza contagem imediatamente
+    atualizarContagemFavoritosPorSecao();
+  }
+}
       } catch (err) {
         console.error('Erro ao favoritar/desfavoritar:', err);
       }
@@ -1711,4 +1729,170 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// --- helper: normaliza nome de seção do dataset/BD para a chave canônica
+function normalizarSecao(valor) {
+  if (!valor) return '';
+  const v = valor.toString().trim().toLowerCase();
 
+  // aceita variações com espaço/hífen/acentos
+  const mapas = [
+    { keys: ['musica e audiovisual','música e audiovisual','musica-audiovisual','música-audiovisual','musicaaudiovisual'], canon: 'musicaAudiovisual' },
+    { keys: ['artes plasticas','artes plásticas','artes-plasticas','artes-plásticas','artesplasticas'], canon: 'artesPlasticas' },
+    { keys: ['artes cenicas','artes cênicas','artes-cenicas','artes-cênicas','artescenicas'], canon: 'artesCenicas' },
+    { keys: ['literatura'], canon: 'literatura' },
+  ];
+
+  for (const m of mapas) {
+    if (m.keys.includes(v)) return m.canon;
+  }
+  // se já vier canônico
+  if (['musicaaudiovisual','artesplasticas','artescenicas','literatura'].includes(v.replace(/[^a-z]/g,''))) {
+    const s = v.replace(/[^a-z]/g,'');
+    if (s === 'musicaaudiovisual') return 'musicaAudiovisual';
+    if (s === 'artesplasticas')    return 'artesPlasticas';
+    if (s === 'artescenicas')      return 'artesCenicas';
+    return 'literatura';
+  }
+  return valor; // fallback
+}
+
+// --- mapa para exibir bonito no cabeçalho
+const NOMES_SECOES = {
+  musicaAudiovisual: 'Música e Audiovisual',
+  artesPlasticas: 'Artes Plásticas',
+  artesCenicas: 'Artes Cênicas',
+  literatura: 'Literatura'
+};
+
+// --- Exibe os posts favoritos por seção (Galeria Pessoal) ---
+// --- Exibe os posts favoritos por seção (Galeria Pessoal) ---
+async function exibirFavoritosPorSecao(secaoBruto) {
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  if (!usuario?.id) return;
+
+  const root = document.querySelector("#perfilArtista:not([hidden])")
+            || document.querySelector("#perfilComum:not([hidden])");
+  if (!root) return;
+
+  const containerFavoritos = root.querySelector("#favoritosPorSecaoContainer");
+  const containerAbout = root.querySelector(".aboutProfile");
+  const feedContainer = containerFavoritos.querySelector("#favoritosFeedContainer");
+  const titleHeader = containerFavoritos.querySelector(".likedHeader h3");
+
+  const secao = normalizarSecao(secaoBruto);
+  const nomeLegivel = NOMES_SECOES[secao] || secaoBruto;
+
+  titleHeader.innerHTML = `Postagens favoritadas em ${nomeLegivel}: <span id="favoritosCountHeader">0</span>`;
+  const countHeader = containerFavoritos.querySelector("#favoritosCountHeader");
+
+  containerAbout.hidden = true;
+  containerFavoritos.hidden = false;
+  feedContainer.innerHTML = `
+    <div class="noPublicationSpan">
+      <img src="./icons/brush.svg" alt="">
+      <span>Carregando postagens...</span>
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`http://localhost:3520/user/${usuario.id}/favorites`);
+    const data = await res.json();
+    if (!data.success) throw new Error("Falha ao buscar favoritos.");
+
+    const postsSecao = data.posts.filter(p => normalizarSecao(p.artSection) === secao);
+    countHeader.textContent = postsSecao.length;
+
+    if (!postsSecao.length) {
+      feedContainer.innerHTML = `
+        <div class="noPublicationSpan">
+          <img src="./icons/emoji-frown.svg" alt="">
+          <span>Nenhum post favoritado nesta seção.</span>
+        </div>`;
+      return;
+    }
+
+    // Reuso total da renderização dos curtidos
+    renderCardsCurtidos(feedContainer, postsSecao);
+
+    // Deixa todos os favoritos já ativados (são posts favoritados)
+    feedContainer.querySelectorAll(".btn-favorite").forEach(btn => {
+      btn.classList.add("favorited");
+      const img = btn.querySelector("img");
+      if (img) img.src = "./icons/bookmark-star-fill.svg";
+    });
+
+    // --- Alias temporário do container ---
+    const prevId = feedContainer.id;
+    feedContainer.id = "likedFeedContainer";
+
+    // --- Reutiliza funções já existentes ---
+    await marcarCurtidasAbaCurtidos();             // atualiza curtidas
+    await atualizarComentariosAbaCurtidos();       // atualiza comentários
+    await marcarFavoritosAbaCurtidos();            // atualiza favoritos
+
+    // --- Restaura id original ---
+    feedContainer.id = prevId;
+
+  } catch (err) {
+    console.error("Erro ao exibir favoritos por seção:", err);
+    feedContainer.innerHTML = `
+      <div class="noPublicationSpan">
+        <img src="./icons/emoji-frown.svg" alt="">
+        <span>Erro ao carregar postagens.</span>
+      </div>`;
+  }
+}
+
+// --- Clique nas seções da galeria pessoal ---
+document.addEventListener('click', (e) => {
+  const item = e.target.closest('.gpItem');
+  if (item) {
+    e.preventDefault();
+    const secao = item.dataset.section;
+    exibirFavoritosPorSecao(secao);
+  }
+
+  if (e.target.closest('#btnVoltarGaleria')) {
+    const root = document.querySelector('#perfilArtista:not([hidden])') 
+              || document.querySelector('#perfilComum:not([hidden])');
+    const containerFavoritos = root.querySelector('#favoritosPorSecaoContainer');
+    const containerAbout = root.querySelector('.aboutProfile');
+    if (containerFavoritos) containerFavoritos.hidden = true;
+    if (containerAbout) containerAbout.hidden = false;
+
+    if (typeof atualizarContagemFavoritosPorSecao === 'function') {
+      atualizarContagemFavoritosPorSecao();
+    }
+  }
+});
+
+// Função auxiliar para manter sincronia entre perfil e galeria
+async function sincronizarFavoritosGlobais() {
+  try {
+    // 1️⃣ Atualiza os contadores nas caixinhas de seção (ex: Artes Plásticas, Música etc.)
+    if (typeof atualizarContagemFavoritosPorSecao === 'function') {
+      await atualizarContagemFavoritosPorSecao();
+    }
+
+    // 2️⃣ Atualiza a renderização dos posts curtidos/favoritos dentro do perfil do artista
+    const root = document.querySelector('#perfilArtista:not([hidden])') 
+              || document.querySelector('#perfilComum:not([hidden])');
+    if (root) {
+      const containerFavoritos = root.querySelector('#favoritosPorSecaoContainer');
+      const containerAbout = root.querySelector('.aboutProfile');
+
+      // Se o container de favoritos estiver aberto, força atualização dele
+      if (!containerFavoritos?.hidden && typeof exibirFavoritosPorSecao === 'function') {
+        const secaoAberta = sessionStorage.getItem('secaoFavoritosAberta');
+        if (secaoAberta) await exibirFavoritosPorSecao(secaoAberta);
+      }
+
+      // Se não estiver aberto, apenas atualiza a seção "sobre" com os novos números
+      if (containerAbout && typeof atualizarContagemFavoritosPorSecao === 'function') {
+        await atualizarContagemFavoritosPorSecao();
+      }
+    }
+  } catch (err) {
+    console.error('Erro ao sincronizar favoritos globais:', err);
+  }
+}

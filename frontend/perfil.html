@@ -40,13 +40,6 @@
                 </div>
                 <div class="navSections">
                     <div>
-                        <img src="./icons/bell-fill.svg" alt="">
-                        <a href="./notificacoes.html">Notificações </a>                        
-                    </div>
-                    <img src="./icons/chevron-right.svg" alt="">
-                </div>
-                <div class="navSections">
-                    <div>
                         <img src="./icons/gear-fill.svg" alt="">
                         <a href="./configuracoes.html">Configurações </a>
                     </div>
@@ -58,8 +51,8 @@
                         <img src="./icons/plus-circle-fill.svg" alt="">
                     </a>
                 </div>                    
-
             </div>
+<!-- PERFIL DO USER COMUM -->
             <div class="containerContent">
                 <section id="perfilComum" hidden>
                     <div class="perfilContainer">
@@ -142,10 +135,20 @@
                               </button>
                             </div>
                             <div class="feedContainer photoGrid" id="likedFeedContainer"></div>
-                          </div>                                  
+                        </div> 
+                        <div id="favoritosPorSecaoContainer" hidden>
+                            <div class="likedHeader">
+                              <h3>Postagens favoritas: <span id="favoritosCountHeader">0</span></h3>
+                              <button id="btnVoltarGaleria">
+                                <img src="./icons/arrow-left.svg" alt="Voltar">
+                                Voltar
+                              </button>
+                            </div>
+                            <div class="feedContainer photoGrid" id="favoritosFeedContainer"></div>
+                        </div>                                 
                   </section>
 
-
+<!-- PERFIL DO ARTISTA -->
                   <section id="perfilArtista" hidden>
                     <div class="perfilContainer">
                         <div class="perfilSeparator">
@@ -252,7 +255,17 @@
                                     </button>
                                   </div>
                                 <div class="feedContainer photoGrid" id="likedFeedContainer"></div>
-                              </div>  
+                            </div>  
+                            <div id="favoritosPorSecaoContainer" hidden>
+                                <div class="likedHeader">
+                                  <h3>Postagens favoritas: <span id="favoritosCountHeader">0</span></h3>
+                                  <button id="btnVoltarGaleria">
+                                    <img src="./icons/arrow-left.svg" alt="Voltar">
+                                    Voltar
+                                  </button>
+                                </div>
+                                <div class="feedContainer photoGrid" id="favoritosFeedContainer"></div>
+                            </div>
                     </section>
                     <section class="tabPanel" data-tab="agenda" >
                         <div class="noPublicationSpan">
