@@ -1036,24 +1036,48 @@ app.post('/comments/add', (req, res) => {
   });
 });
 
-// Rota GET para listar comentários de um post
+// Rota GET para listar comentários de um post 
 app.get('/comments/:postId', (req, res) => {
   const { postId } = req.params;
 
   const sql = `
-    SELECT c.*, u.name, u.userName, u.profileImage
+    SELECT 
+      c.id, c.content AS comment, c.sendData,
+      u.id AS userId, u.name, u.userName, u.profileImage, u.userType,
+      a.activity1, a.activity2
     FROM comments c
     JOIN users u ON c.userId = u.id
+    LEFT JOIN artists a ON a.userId = u.id
     WHERE c.postId = ?
     ORDER BY c.sendData DESC
   `;
 
   db.query(sql, [postId], (err, results) => {
-    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
+    }
 
     res.json({ success: true, comments: results });
   });
 });
+// // Rota GET para listar comentários de um post
+// app.get('/comments/:postId', (req, res) => {
+//   const { postId } = req.params;
+
+//   const sql = `
+//     SELECT c.*, u.name, u.userName, u.profileImage
+//     FROM comments c
+//     JOIN users u ON c.userId = u.id
+//     WHERE c.postId = ?
+//     ORDER BY c.sendData DESC
+//   `;
+
+//   db.query(sql, [postId], (err, results) => {
+//     if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar comentários.' });
+
+//     res.json({ success: true, comments: results });
+//   });
+// });
 
 // Rota GET para buscar comentários feitos por um usuário específico
 app.get('/comments/user/:userId', (req, res) => {
@@ -1071,7 +1095,7 @@ app.get('/comments/user/:userId', (req, res) => {
   });
 });
 
-//Rota PUT pra editar o conteúdo do comentário
+// Rota PUT pra editar o conteúdo do comentário
 app.put('/comments/edit/:id', (req, res) => {
   const { id } = req.params;
   const { content } = req.body;
@@ -1080,7 +1104,11 @@ app.put('/comments/edit/:id', (req, res) => {
     return res.status(400).json({ success: false, message: 'O novo conteúdo do comentário é obrigatório.' });
   }
 
-  const sql = `UPDATE comments SET content = ? WHERE id = ?`;
+  const sql = `
+    UPDATE comments 
+    SET content = ?, sendData = NOW() 
+    WHERE id = ?
+  `;
 
   db.query(sql, [content, id], (err) => {
     if (err) {

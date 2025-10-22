@@ -1610,6 +1610,7 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 15px;
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
@@ -1742,6 +1743,7 @@ body {
 
 .profileImageComment{
   border: 2px solid #2C5712;
+  flex-shrink: 0;
   border-radius: 50%;
   margin-right: 5px;
   width: 30px;
@@ -2506,4 +2508,201 @@ body {
 
 .photoInfo .postReactPerfil .btn-favorite.favorited img {
   filter: invert(84%) sepia(87%) saturate(4000%) hue-rotate(1deg) brightness(105%) contrast(105%) !important;
+}
+
+/* ===== 💬 Área de comentários no feed ===== */
+.commentsContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: #edf7e2;
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin-top: 8px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.commentsContainer.semBorda {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.commentItem {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #d3e6c4;
+}
+
+.commentItem:last-child {
+  border-bottom: none;
+}
+
+.commentUserImg {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #5F9104;
+}
+
+.commentInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+.commentHeader {
+  display: flex;
+  align-items: center;
+}
+
+.commentHeader strong {
+  margin-right: 5px;
+  color: #2C5712;
+  font-size: 15px;
+  font-weight: bolder;
+}
+
+
+.commentUsername {
+  font-size: 12px;
+  color: #4b7503;
+}
+
+.commentContent {
+  font-size: 13px;
+  color: #2C5712;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.commentText {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.commentItem {
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.commentsContainer {
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.commentsControls button {
+  margin-top: 15px;
+  background-color: #5F9104;
+  border: none;
+  color: #fff;
+  border-radius: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.commentsControls button:hover {
+  background-color: #4b7503;
+}
+
+.noCommentsMsg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  color: #2C5712;
+}
+
+.noCommentsMsg img {
+  width: 30px;
+  opacity: 0.7;
+}
+
+.commentDate{
+  font-size: 10px;
+}
+
+.postMain {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Ajusta proporções */
+.postMain .carousel {
+  flex: 1;
+  max-width: 50%;
+}
+
+.postMain .postContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.commentActions {
+  display: flex;
+  gap: 15px;
+  margin-left: 16px;
+}
+.commentActions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.commentActions img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(21%) sepia(79%) saturate(259%) hue-rotate(53deg) brightness(91%) contrast(88%);
+  transition: filter 0.2s ease;
+  cursor: pointer;
+}
+
+.commentActions img:hover {
+  filter: brightness(0) saturate(100%) invert(35%) sepia(94%) saturate(325%) hue-rotate(45deg) brightness(94%) contrast(91%);
+}
+
+.editLabel {
+  font-size: 0.8em;
+  color: #666;
+  margin-left: 5px;
+}
+.editField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.editInput {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 3px;
+}
+.editBtns {
+  display: flex;
+  gap: 8px;
+}
+.editBtns button {
+  font-size: 12px;
+  border: none;
+  background: #2C5712;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.editBtns button.cancelEditBtn {
+  background: #aaa;
 }
