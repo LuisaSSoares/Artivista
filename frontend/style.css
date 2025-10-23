@@ -1339,6 +1339,11 @@ body {
   font-size: 20px;
   color: #2C5712;
 }
+
+.noPublicationSpan img{
+  width: 30px; 
+  height: 30px;
+}
 /* Campo de foto de perfil */
 .profile-row {
   display: flex;
@@ -1843,7 +1848,7 @@ body {
 }
 
 /* Opções de postagens */
-.postOption {
+/* .postOption {
   margin-top: 15px;
   display: flex;
   gap: 10px;
@@ -1896,7 +1901,7 @@ body {
 }
 .postOption > input:disabled ~ label:after {
   background-color: rgba(255, 255, 255, 0.3);
-}
+} */
 
 /* Infos de post */
 .postInfosCreate{
@@ -2467,11 +2472,11 @@ body {
   color: #2C5712;
 }
 
-#likedCountHeader, #favoritosCountHeader{
+#likedCountHeader, #favoritosCountHeader, #comentariosCountHeader{
   color: #5F9104;
 }
 
-#btnVoltarAbout, #btnVoltarGaleria{
+#btnVoltarAbout, #btnVoltarGaleria, #btnVoltarComentarios{
   background-color: #4a7200;
   width: 8vw;
   padding: 8px;
@@ -2706,3 +2711,53 @@ body {
 .editBtns button.cancelEditBtn {
   background: #aaa;
 }
+
+.comentarioCard {
+  background-color: white;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+.comentarioHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.commentarioHeaderName{
+  display: flex;
+}
+
+.comentarioFoto {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 1px solid #2C5712;
+  object-fit: cover;
+}
+
+.comentarioCard h5 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: bold;
+  color: #EFA710;
+}
+
+.comentarioCard .username {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.comentarioTexto {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.comentarioData {
+  font-size: 12px;
+  opacity: 0.7;
+}
+

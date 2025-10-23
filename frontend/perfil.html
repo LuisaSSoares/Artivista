@@ -76,11 +76,11 @@
                                             <p>0 postagens curtidas</p>
                                             <img src="./icons/arrow-right-short.svg" alt="">
                                         </div>
-                                        <div>
+                                        <div class="comentariosTrigger">
                                             <img src="./icons/chat-dots-fill.svg" alt="">
                                             <p>0 comentários feitos</p>
                                             <img src="./icons/arrow-right-short.svg" alt="">
-                                        </div>                                      
+                                          </div>                                  
                                     </div>
                                 </div>
 
@@ -136,6 +136,16 @@
                             </div>
                             <div class="feedContainer photoGrid" id="likedFeedContainer"></div>
                         </div> 
+                        <div id="comentariosFeitosContainer" hidden>
+                            <div class="likedHeader">
+                                <h3>Meus comentários feitos: <span id="comentariosCountHeader">0</span></h3>
+                              <button id="btnVoltarComentarios">
+                                <img src="./icons/arrow-left.svg" alt="Voltar">
+                                Voltar
+                              </button>
+                            </div>
+                            <div id="comentariosFeitosLista" class="feedContainer"></div>
+                          </div>
                         <div id="favoritosPorSecaoContainer" hidden>
                             <div class="likedHeader">
                               <h3>Postagens favoritas: <span id="favoritosCountHeader">0</span></h3>
@@ -194,11 +204,11 @@
                                                 <p>0 postagens curtidas</p>
                                                 <img src="./icons/arrow-right-short.svg" alt="">
                                             </div>
-                                            <div>
+                                            <div class="comentariosTrigger">
                                                 <img src="./icons/chat-dots-fill.svg" alt="">
                                                 <p>0 comentários feitos</p>
                                                 <img src="./icons/arrow-right-short.svg" alt="">
-                                            </div>                                      
+                                              </div>                                     
                                         </div>
                                     </div>
     
@@ -255,7 +265,17 @@
                                     </button>
                                   </div>
                                 <div class="feedContainer photoGrid" id="likedFeedContainer"></div>
-                            </div>  
+                            </div> 
+                            <div id="comentariosFeitosContainer" hidden>
+                                <div class="likedHeader">
+                                    <h3>Meus comentários feitos: <span id="comentariosCountHeader">0</span></h3>
+                                  <button id="btnVoltarComentarios">
+                                    <img src="./icons/arrow-left.svg" alt="Voltar">
+                                    Voltar
+                                  </button>
+                                </div>
+                                <div id="comentariosFeitosLista" class="feedContainer"></div>
+                              </div> 
                             <div id="favoritosPorSecaoContainer" hidden>
                                 <div class="likedHeader">
                                   <h3>Postagens favoritas: <span id="favoritosCountHeader">0</span></h3>

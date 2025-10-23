@@ -1765,7 +1765,6 @@ const NOMES_SECOES = {
 };
 
 // --- Exibe os posts favoritos por seção (Galeria Pessoal) ---
-// --- Exibe os posts favoritos por seção (Galeria Pessoal) ---
 async function exibirFavoritosPorSecao(secaoBruto) {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario?.id) return;
@@ -1908,4 +1907,124 @@ document.addEventListener("click", (e) => {
   // Redireciona para o feed com o post e a seção correta
   // Inclui parâmetros na URL que o feed.js pode interpretar
   window.location.href = `feed.html?tab=${section}&post=${postId}&openComments=true`;
+});
+
+// === 💬 Exibir lista de comentários feitos pelo próprio usuário ===
+document.addEventListener("click", async (e) => {
+  const comentariosTrigger = e.target.closest(".comentariosTrigger");
+  const btnVoltarComentarios = e.target.closest("#btnVoltarComentarios");
+
+  // --- Abrir listagem ---
+  if (comentariosTrigger) {
+    e.preventDefault();
+
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario || !usuario.id) return;
+
+    const root =
+      document.querySelector("#perfilArtista:not([hidden])") ||
+      document.querySelector("#perfilComum:not([hidden])");
+
+    const aboutProfile = root.querySelector(".aboutProfile");
+    const containerComentarios = root.querySelector("#comentariosFeitosContainer");
+    const lista = root.querySelector("#comentariosFeitosLista");
+
+    if (!containerComentarios || !lista) {
+      console.warn("Container de comentários não encontrado no DOM.");
+      return;
+    }
+
+    aboutProfile.hidden = true;
+    containerComentarios.hidden = false;
+    lista.innerHTML = `<p style="color:#DCEEC8;">Carregando comentários...</p>`;
+
+    try {
+      const res = await fetch(`http://localhost:3520/comments/user/${usuario.id}`);
+      const data = await res.json();
+
+      if (!data.success || !data.comments?.length) {
+        lista.innerHTML = `
+          <div class="noPublicationSpan">
+            <img src="./icons/chat-dots.svg" alt="" >
+            <span>Nenhum comentário feito ainda.</span>
+          </div>`;
+        return;
+      }
+
+      // --- Montagem visual de cada comentário ---
+      lista.innerHTML = "";
+      data.comments.forEach((c) => {
+        const profileImg = c.profileImage
+          ? `http://localhost:3520/uploads/profile/${c.profileImage}`
+          : "./icons/person-circle.svg";
+      
+        const dataHora = new Date(c.createdAt).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      
+        const editado =
+          c.updatedAt && c.updatedAt !== c.createdAt
+            ? "<span class='editado'>(editado)</span>"
+            : "";
+      
+        const tags =
+          c.userType === "artista"
+            ? `
+              <div class="tagsFeed">
+                ${c.activity1 ? `<span class="tag tag--1">${c.activity1}</span>` : ""}
+                ${c.activity2 ? `<span class="tag tag--2">${c.activity2}</span>` : ""}
+              </div>`
+            : "";
+      
+        const div = document.createElement("div");
+        div.className = "comentarioCard";
+        div.setAttribute("data-comment-id", c.id)
+        div.innerHTML = `
+          <div class="comentarioHeader">
+            <img src="${profileImg}" alt="perfil" class="comentarioFoto">
+            <div>
+              <h5>${c.name}</h5>
+              <p class="username">@${c.userName}</p>
+              ${tags}
+            </div>
+          </div>
+          <p class="comentarioTexto">${c.comment}</p>
+          <span class="comentarioData">${dataHora} ${editado}</span>
+        `;
+        lista.appendChild(div);
+        // Verifica se esse comentário está marcado como editado
+        const editedComments = JSON.parse(localStorage.getItem("editedComments") || "[]");
+        if (editedComments.includes(String(c.id))) {
+          const editLabel = document.createElement("span");
+          editLabel.classList.add("editLabel");
+          editLabel.textContent = " (editado)";
+          const header = div.querySelector(".comentarioHeader h5");
+          if (header) header.appendChild(editLabel);
+        }
+      });
+      const comentariosCountHeader = root.querySelector("#comentariosCountHeader");
+      if (comentariosCountHeader) comentariosCountHeader.textContent = data.comments.length;
+      
+    } catch (err) {
+      console.error("Erro ao carregar comentários:", err);
+      lista.innerHTML = `<p>Erro ao carregar comentários.</p>`;
+    }
+  }
+
+  // --- Voltar ---
+  if (btnVoltarComentarios) {
+    const root =
+      document.querySelector("#perfilArtista:not([hidden])") ||
+      document.querySelector("#perfilComum:not([hidden])");
+
+    const aboutProfile = root.querySelector(".aboutProfile");
+    const containerComentarios = root.querySelector("#comentariosFeitosContainer");
+
+    aboutProfile.hidden = false;
+    containerComentarios.hidden = true;
+  }
 });

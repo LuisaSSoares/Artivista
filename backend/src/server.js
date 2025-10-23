@@ -1082,16 +1082,38 @@ app.get('/comments/:postId', (req, res) => {
 // Rota GET para buscar comentários feitos por um usuário específico
 app.get('/comments/user/:userId', (req, res) => {
   const { userId } = req.params;
+
   const sql = `
-    SELECT c.*, p.id AS postId
+    SELECT 
+      c.id AS id,
+      c.content AS comment,        
+      c.sendData AS createdAt,     
+      c.sendData AS updatedAt,      
+      c.postId,
+      u.name,
+      u.userName,
+      u.profileImage,
+      u.userType,
+      a.activity1,
+      a.activity2
     FROM comments c
-    JOIN posts p ON c.postId = p.id
+    JOIN users u ON c.userId = u.id
+    LEFT JOIN artists a ON a.userId = u.id
     WHERE c.userId = ?
     ORDER BY c.sendData DESC
   `;
+
   db.query(sql, [userId], (err, results) => {
-    if (err) return res.status(500).json({ success: false, message: 'Erro ao buscar comentários do usuário.' });
-    res.json({ success: true, comments: results });
+    if (err) {
+      console.error('Erro ao buscar comentários do usuário:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao buscar comentários do usuário.' });
+    }
+
+    res.json({
+      success: true,
+      comments: results || [],
+      count: results?.length || 0
+    });
   });
 });
 
