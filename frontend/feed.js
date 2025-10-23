@@ -239,6 +239,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erro ao carregar feed:", err);
     feedContainer.innerHTML = `<p>Erro ao carregar postagens.</p>`;
   }
+
+  // ✅ usa o MESMO urlParams (não redeclarar)
+  const openPostId = urlParams.get("post");
+  const openComments = urlParams.get("openComments") === "true";
+
+  if (openPostId && openComments) {
+    // tenta abrir imediatamente
+    let tries = 0;
+    const tryOpen = () => {
+      const postBtn = document.querySelector(`.btn-comment[data-id="${openPostId}"]`);
+      if (postBtn) {
+        postBtn.click(); // abre a lista de comentários
+        return true;
+      }
+      return false;
+    };
+
+    if (!tryOpen()) {
+      // fallback curto caso a UI ainda esteja pintando
+      const timer = setInterval(() => {
+        tries++;
+        if (tryOpen() || tries >= 10) clearInterval(timer);
+      }, 150);
+    }
+  }
 });
 
 //Função para ativar/desativar curtidas com animação e contador interno
@@ -499,6 +524,16 @@ async function carregarComentarios(postId, container, page = 1, append = false) 
       container.insertAdjacentHTML('beforeend', montarComentarioHTML(c));
     });
 
+    const editedComments = JSON.parse(localStorage.getItem("editedComments") || "[]");
+    editedComments.forEach(id => {
+      const comment = container.querySelector(`[data-comment-id="${id}"]`);
+      if (comment && !comment.querySelector(".editLabel")) {
+        const label = document.createElement("span");
+        label.classList.add("editLabel");
+        label.textContent = " (editado)";
+        comment.querySelector(".commentHeader").appendChild(label);
+      }
+    })
 
     // Remove controles antigos para evitar duplicação
     container.querySelectorAll('.commentsControls').forEach(ctrl => ctrl.remove());
@@ -624,14 +659,18 @@ document.addEventListener("click", async (e) => {
 
       if (data.success) {
         const commentTextEl = commentEl.querySelector(".commentText");
-      
-        // Remove qualquer campo de edição existente
         commentEl.querySelector(".editField")?.remove();
-      
-        // Atualiza o texto do comentário sem incluir o input
         commentTextEl.textContent = newText;
       
-        // Adiciona o selo de "editado" se ainda não existir
+        // Marca o comentário como editado no localStorage
+        const id = commentEl.dataset.commentId;
+        const editedComments = JSON.parse(localStorage.getItem("editedComments") || "[]");
+        if (!editedComments.includes(id)) {
+          editedComments.push(id);
+          localStorage.setItem("editedComments", JSON.stringify(editedComments));
+        }
+      
+        // Adiciona o selo "(editado)" se ainda não existir
         if (!commentEl.querySelector(".editLabel")) {
           const editLabel = document.createElement("span");
           editLabel.classList.add("editLabel");
@@ -639,6 +678,7 @@ document.addEventListener("click", async (e) => {
           commentEl.querySelector(".commentHeader").appendChild(editLabel);
         }
       }
+      
       
     } catch (err) {
       console.error("Erro ao editar:", err);

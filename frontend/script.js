@@ -375,7 +375,7 @@ async function carregarPostagensUsuario(userId) {
                 <p class="contadorLikes"></p>
               </button>
 
-              <button class="btn-comment" data-id="${post.id}">
+              <button class="btn-comment" data-id="${post.id}" data-section="${post.artSection}">
               <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
               <p class="contadorComentarios"></p>
               </button>
@@ -421,7 +421,7 @@ async function carregarPostagensUsuario(userId) {
                 <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
                 <p class="contadorLikes"></p>
               </button>
-              <button class="btn-comment" data-id="${post.id}">
+              <button class="btn-comment" data-id="${post.id}" data-section="${post.artSection}">
               <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
               <p class="contadorComentarios"></p>
               </button>
@@ -1446,7 +1446,7 @@ function renderCardsCurtidos(container, posts) {
             <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
             <p class="contadorLikes"></p>
           </button>
-          <button class="btn-comment" data-id="${post.id}">
+          <button class="btn-comment" data-id="${post.id}" data-section="${post.artSection}">
           <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
           <p class="contadorComentarios"></p>
           </button>
@@ -1487,7 +1487,7 @@ function renderCardsCurtidos(container, posts) {
             <img src="./icons/heart.svg" class="heart-icon" alt="Curtir">
             <p class="contadorLikes"></p>
           </button>
-          <button class="btn-comment" data-id="${post.id}">
+          <button class="btn-comment" data-id="${post.id}" data-section="${post.artSection}">
           <img src="./icons/chat-dots.svg" class="comment-icon" alt="">
           <p class="contadorComentarios"></p>
           </button>
@@ -1896,3 +1896,16 @@ async function sincronizarFavoritosGlobais() {
     console.error('Erro ao sincronizar favoritos globais:', err);
   }
 }
+// === 🗨️ Abrir post no feed com comentários abertos ao clicar no chat do perfil ===
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-comment, .btn-chat-perfil");
+  if (!btn) return;
+
+  const postId = btn.dataset.id;
+  const section = btn.dataset.section;
+  if (!postId || !section) return;
+
+  // Redireciona para o feed com o post e a seção correta
+  // Inclui parâmetros na URL que o feed.js pode interpretar
+  window.location.href = `feed.html?tab=${section}&post=${postId}&openComments=true`;
+});
