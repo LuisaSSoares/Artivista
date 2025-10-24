@@ -669,6 +669,7 @@ app.get('/events', (req, res) => {
     SELECT 
       e.id, e.title, e.dateEvent, e.time, e.description, e.classification, 
       e.typeEvent, e.link, e.artistId,
+      u.id AS userId,
       u.name AS artistName
     FROM events e
     JOIN artists a ON e.artistId = a.id
