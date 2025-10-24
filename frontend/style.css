@@ -2761,3 +2761,309 @@ body {
   opacity: 0.7;
 }
 
+/* CRIAÇÃO DE EVENTOS */
+.eventForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+.formGrid {
+  display: flex;
+  gap: 80px;
+}
+
+
+
+.formGroup, .formRow{
+  margin-bottom: 18px;
+}
+
+label {
+  font-weight: bold;
+  color: #2C5712;
+  margin-bottom: 5px;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #c3d7b3;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(95,145,4,0.2);
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #5F9104;
+  box-shadow: 0 0 6px rgba(95,145,4,0.3);
+}
+
+textarea {
+  resize: none;
+  min-height: 120px;
+}
+
+.tagOptions {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.tagOption {
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="date"],
+input[type="time"] {
+  color: #898989; 
+}
+.tagOption:hover {
+  transform: scale(1.03);
+}
+
+/* Quando estiver selecionado (ativo) */
+.tagOption.active {
+  filter: brightness(0.90) saturate(1.05);
+  transform: translateY(-1px);
+}
+
+#gratuito{
+  background-color: #489c17;
+  border: 1px solid #5c8d2a;
+}
+#pago{
+  background-color: #9C5A17;
+  border: 1px solid #7f4812;
+}
+.imagePreview {
+  width: 100%;
+  height: 220px;
+  border-radius: 15px;
+  background: #DCEEC8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 15px;
+  border: 2px dashed #5F9104;
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.submitBtn {
+  width: 100%;
+  background-color: #5F9104;
+  color: #fff;
+  font-weight: bold;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.submitBtn:hover {
+  background-color: #4b7503;
+  transform: scale(1.02);
+}
+
+.imagePreview {
+  margin-top: 20px;
+  background: #E9F3DA;
+  border: 1px solid #C3DEA5;
+  border-radius: 15px;
+  padding: 0;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  width: 50%;
+  height: 250px; /* altura fixa para manter enquadramento */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* garante que a imagem não ultrapasse o contêiner */
+}
+
+.imagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* cobre todo o espaço mantendo proporção */
+  border-radius: 15px;
+}
+
+#listaEventosECursos{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  list-style: none;
+  justify-content: center;
+  gap: 20px;
+}
+
+.eventosECursos{
+  background: linear-gradient(to bottom, #C3DEA5, #9EC16A);
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(56, 95, 54, 0.555);
+  width: 240px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+  justify-content: space-between;
+}
+
+.eventosECursos:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.3);
+}
+
+.headerEventoCurso{
+  background-color: #2C5712;
+  color: #DCEEC8;
+  width: 100%;
+  border-radius: 15px 15px 0 0;
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #9cc868;
+}
+/* Cabeçalho do card */
+.event-content {
+  width: 90%;
+  color: #2C5712;
+  text-align: left;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-title {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.event-description {
+  font-size: 13px;
+  color: #2C5712;
+  line-height: 1.4;
+  text-align: justify;
+  min-height: 60px;
+  text-overflow: ellipsis;
+}
+
+.event-image-container {
+  display: flex;
+  justify-content: center;  /* Centraliza horizontalmente */
+  align-items: center;      /* Centraliza verticalmente */
+  width: 100%;
+  height: 120px;
+  overflow: hidden;
+  border-radius: 10px;
+  background-color: #898989; /* Mantém o fundo neutro */
+}
+
+/* Imagem do evento */
+.event-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  transition: transform 0.4s ease;
+}
+
+.eventosECursos:hover .event-image {
+  transform: scale(1.08);
+}
+
+/* Infos de data e hora */
+.event-details {
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.separatorEventos{
+  display: flex;
+}
+
+.event-date,
+.event-time {
+  align-items: center;
+  gap: 5px;
+}
+
+.event-date img,
+.event-time img {
+  width: 15px;
+  height: 15px;
+}
+
+/* Botão "Adquira seu ingresso" */
+.event-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.btnIngresso {
+  background-color: #2C5712;
+  color: #DCEEC8;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 5px 3px;
+  text-align: center;
+  border-radius: 30px;
+  text-decoration: none;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+}
+
+.btnIngresso:hover {
+  background-color: #5F9104;
+  transform: scale(1.05);
+}
+
+.event-classificacao p {
+  margin: 0;
+  white-space: nowrap;         /* impede quebra de linha */
+  overflow: hidden;            /* esconde o que ultrapassar */
+  text-overflow: ellipsis;     /* adiciona reticências (...) */
+  max-width: 115px; 
+}
+
+.tagEvento {
+  position: relative;
+  left: 80px;
+  background-color: #5F9104;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.event-type {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+  margin-top: 6px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}

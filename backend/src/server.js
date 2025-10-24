@@ -665,13 +665,22 @@ app.post('/events/create', (req, res) => {
 
 //Rota GET para listar eventos
 app.get('/events', (req, res) => {
-  const sql = 'SELECT * FROM events ORDER BY dateEvent ASC';
+  const sql = `
+    SELECT 
+      e.id, e.title, e.dateEvent, e.time, e.description, e.classification, 
+      e.typeEvent, e.link, e.artistId,
+      u.name AS artistName
+    FROM events e
+    JOIN artists a ON e.artistId = a.id
+    JOIN users u ON a.userId = u.id
+    ORDER BY e.dateEvent ASC
+  `;
 
   db.query(sql, (err, results) => {
     if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao buscar eventos.' });
+      console.error("Erro ao listar eventos:", err);
+      return res.status(500).json({ success: false, message: "Erro ao listar eventos." });
     }
-
     res.json({ success: true, events: results });
   });
 });
