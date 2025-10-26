@@ -280,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarPostagensCurtidas();
         atualizarComentariosFeitos();
         atualizarContagemFavoritosPorSecao();
+        carregarEventosArtista(parseInt(viewedId));
       }
     }
 // --- Exibe postagens do usuário logado na aba "Postagens" ---
@@ -2027,4 +2028,349 @@ document.addEventListener("click", async (e) => {
     aboutProfile.hidden = false;
     containerComentarios.hidden = true;
   }
+});
+
+// Função de carregar eventos no perfil do artista 
+async function carregarEventosArtista(userId) {
+  const container = document.getElementById("eventosArtistaContainer");
+  const lista = document.getElementById("listaEventosECursos");
+  const contador = document.getElementById("eventCourseCount");
+  const usuario = JSON.parse(localStorage.getItem('usuario'));
+  const isOwner = usuario && Number(usuario.id) === Number(userId);
+
+  if (!container || !lista || !contador) return;
+
+  try {
+    const res = await fetch("http://localhost:3520/events");
+    const data = await res.json();
+    if (!data.success || !Array.isArray(data.events)) throw new Error("Erro ao listar eventos");
+
+    const eventos = data.events.filter(ev => Number(ev.userId) === Number(userId));
+    contador.textContent = `(${eventos.length})`;
+
+    if (eventos.length === 0) {
+      lista.innerHTML = `
+        <div class="noPublicationSpan">
+          <img src="./icons/emoji-frown.svg" alt="">
+          <span>Este artista ainda não possui eventos ou cursos cadastrados.</span>
+        </div>`;
+      return;
+    }
+
+    lista.innerHTML = "";
+    for (const ev of eventos) {
+      let previewImage = "./img/default-event.png";
+      try {
+        if (ev.link) {
+          const linkRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(ev.link)}`);
+          const linkData = await linkRes.json();
+          previewImage = linkData?.data?.image?.url || previewImage;
+        }
+      } catch (e) {
+        console.warn("Erro no Microlink:", e);
+      }
+
+      const dataBR = ev.dateEvent ? new Date(ev.dateEvent).toLocaleDateString("pt-BR") : "Data indefinida";
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="eventosECursos">
+          <div class="headerEventoCurso">
+            <h3 class="event-title">${ev.title}</h3>
+            <span class="tagEvento">Evento</span>
+            ${isOwner ? `
+            <div class="event-actions">
+            <button class="edit-event-btn"
+            onclick='editarEvento({
+              id: ${ev.id},
+              title: ${JSON.stringify(ev.title)},
+              description: ${JSON.stringify(ev.description)},
+              dateEvent: ${JSON.stringify(ev.dateEvent)},
+              time: ${JSON.stringify(ev.time)},
+              classification: ${JSON.stringify(ev.classification)},
+              typeEvent: ${JSON.stringify(ev.typeEvent)},   
+              link: ${JSON.stringify(ev.link)}              
+            })'>
+      <img src="./icons/pencil-square.svg" alt="Editar evento">
+    </button>
+              <button class="delete-event-btn" onclick="abrirModalExcluirEvento(${ev.id}, '${ev.title.replace(/'/g, "\\'")}')">
+                <img src="./icons/trash.svg" alt="Excluir evento">
+              </button>
+            </div>
+            ` : ''}
+          </div>
+
+          <div class="event-content">
+            <div class="event-image-container">
+              <img src="${previewImage}" alt="Imagem do evento" class="event-image">
+            </div>
+            <p class="event-description">${ev.description || ""}</p>
+
+            <div class="event-details">
+              <div>
+                <div class="event-date">
+                  <img src="./icons/calendar-date-fill.svg" alt="">
+                  <span>${dataBR}</span>
+                </div>
+                <div class="event-time">
+                  <img src="./icons/clock-fill.svg" alt="">
+                  <span>${ev.time || "Horário indefinido"}</span>
+                </div>
+              </div>
+              <div class="event-classificacao">
+                <p><strong>Classificação:</strong> ${ev.classification || "Livre"}</p>
+                <div class="event-type" id="${ev.typeEvent?.toLowerCase() || "indefinido"}">
+                  ${ev.typeEvent || "Indefinido"}
+                </div>
+              </div>
+            </div>
+            ${ev.link ? `
+              <div class="event-button">
+                <a href="${ev.link}" target="_blank" class="btnIngresso">Adquira seu ingresso</a>
+              </div>` : ""}
+          </div>
+        </div>
+      `;
+      lista.appendChild(li);
+    }
+
+    // aplica cores
+    lista.querySelectorAll(".event-type").forEach(tipo => {
+      const tipoId = tipo.id;
+      const card = tipo.closest(".eventosECursos");
+      if (tipoId === "gratuito") card.classList.add("eventoGratuito");
+      else if (tipoId === "pago") card.classList.add("eventoPago");
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar eventos do artista:", err);
+    lista.innerHTML = `
+      <div class="noPublicationSpan">
+        <img src="./icons/emoji-frown.svg" alt="">
+        <span>Erro ao carregar eventos.</span>
+      </div>`;
+    contador.textContent = "(0)";
+  }
+}
+// Função pra EXCLUIR eventos
+let eventoParaExcluir = null;
+
+function abrirModalExcluirEvento(eventId, titulo) {
+  eventoParaExcluir = eventId;
+  const modal = document.getElementById('modalExcluirEvento');
+  const tituloSpan = document.getElementById('tituloEventoModal');
+
+  if (!modal || !tituloSpan) return;
+
+  tituloSpan.textContent = titulo || '';
+  modal.classList.add('show');
+}
+
+// Cancelar exclusão
+document.getElementById('cancelarExclusaoEvento')?.addEventListener('click', () => {
+  const modal = document.getElementById('modalExcluirEvento');
+  modal.classList.remove('show');
+  eventoParaExcluir = null;
+});
+
+// Confirmar exclusão
+document.getElementById('confirmarExclusaoEvento')?.addEventListener('click', async () => {
+  if (!eventoParaExcluir) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/events/delete/${eventoParaExcluir}`, {
+      method: 'DELETE'
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      alert('Evento excluído com sucesso!');
+
+      // 🔄 Atualiza imediatamente em ambas as páginas
+      if (typeof carregarEventos === 'function') carregarEventos(); // eventosECursos.html
+      if (typeof carregarEventosArtista === 'function') {
+        const usuario = JSON.parse(localStorage.getItem("usuario"));
+        if (usuario?.id) carregarEventosArtista(usuario.id); // perfil.html
+      }
+
+      // remove o card do evento atual sem reload
+      document.querySelector(`[data-event-id="${eventoParaExcluir}"]`)?.remove();
+    } else {
+      alert(data.message || 'Erro ao excluir evento.');
+    }
+  } catch (err) {
+    console.error('Erro ao excluir evento:', err);
+    alert('Erro ao excluir evento.');
+  }
+
+  document.getElementById('modalExcluirEvento').classList.remove('show');
+  eventoParaExcluir = null;
+});
+
+// Função pra EDITAR eventos 
+// Envia o usuário para criarEvento.html em modo edição
+function editarEvento(evento) {
+  // Salva os dados do evento selecionado no localStorage
+  localStorage.setItem('eventoEdicao', JSON.stringify(evento));
+
+  // Redireciona para a página de criação de evento com o parâmetro edit
+  window.location.href = `criarEvento.html?edit=${evento.id}`;
+}
+
+// === Modo de edição em criarEvento.html ===
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get('edit');
+
+  if (!editId) return; // não está em modo edição
+
+  const eventoData = JSON.parse(localStorage.getItem('eventoEdicao'));
+  if (!eventoData) return;
+
+  const titleInput = document.getElementById('titleEvent');
+  const descInput = document.getElementById('descriptionEvent');
+  const dateInput = document.getElementById('dateEvent');
+  const timeInput = document.getElementById('timeEvent');
+  const classInput = document.getElementById('classification');
+  const linkInput = document.getElementById('ticketLink');
+  const typeTags = document.querySelectorAll('.tagOption');
+  const submitBtn = document.querySelector('.submitBtn');
+  const pageTitle = document.querySelector('.createPostTitle h1');
+
+  // Preenche os campos com os dados do evento
+  if (titleInput) titleInput.value = eventoData.title || '';
+  if (descInput) descInput.value = eventoData.description || '';
+  if (dateInput) dateInput.value = eventoData.dateEvent?.slice(0,10) || '';
+  if (timeInput) timeInput.value = eventoData.time?.slice(0,5) || '';
+  if (classInput) classInput.value = eventoData.classification || '';
+  if (linkInput) {
+    linkInput.value = eventoData.link || '';
+    linkInput.setAttribute('readonly', true);
+    linkInput.classList.add('disabled');
+  }
+  // === Contador de caracteres na edição de evento ===
+const charCount = document.getElementById("charCount");
+const maxChars = 255;
+
+if (descInput && charCount) {
+  const len = descInput.value.length;
+  charCount.textContent = `${len} / ${maxChars}`;
+  charCount.classList.toggle("limit", len >= maxChars);
+
+  descInput.addEventListener("input", () => {
+    const len = descInput.value.length;
+    charCount.textContent = `${len} / ${maxChars}`;
+    charCount.classList.toggle("limit", len >= maxChars);
+
+    if (len > maxChars) {
+      descInput.value = descInput.value.substring(0, maxChars);
+
+      descInput.setCustomValidity(`O limite de ${maxChars} caracteres foi atingido.`);
+      descInput.reportValidity();
+
+      const clearError = () => {
+        descInput.setCustomValidity('');
+        descInput.removeEventListener('input', clearError);
+      };
+      descInput.addEventListener('input', clearError);
+    }
+  });
+}
+
+  const previewArea = document.getElementById("previewArea");
+
+  // Recupera e exibe a mesma prévia do link original, sem permitir edição
+  if (previewArea && eventoData.link) {
+    previewArea.innerHTML = '<span style="color:#2C5712;">Carregando prévia...</span>';
+  
+    (async () => {
+      try {
+        const res = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(eventoData.link)}`);
+        const data = await res.json();
+        const imageUrl = data?.data?.image?.url;
+  
+        if (imageUrl) {
+          previewArea.innerHTML = `
+            <img 
+              src="${imageUrl}" 
+              alt="Prévia do evento" 
+              class="eventImage"
+              style="width:100%; border-radius:12px; object-fit:cover;">
+          `;
+        } else {
+          previewArea.innerHTML = `<span style="color:#2C5712;">Nenhuma prévia disponível.</span>`;
+        }
+      } catch (err) {
+        console.error("Erro ao recuperar imagem do Microlink:", err);
+        previewArea.innerHTML = `<span style="color:#b32020;">Erro ao carregar imagem de prévia.</span>`;
+      }
+    })(); // ← executa a função assíncrona imediatamente
+  }
+  
+  // Marca o tipo de evento (gratuito/pago) e trava
+  typeTags.forEach(tag => {
+    tag.classList.remove('active');
+    if (tag.dataset.type === eventoData.typeEvent) tag.classList.add('active');
+    tag.style.pointerEvents = 'none'; // trava edição
+  });
+
+  // Atualiza textos da página
+  if (submitBtn) submitBtn.textContent = 'Republicar evento';
+  if (pageTitle) pageTitle.textContent = 'Editar evento';
+
+  // Substitui comportamento do submit
+  const form = document.getElementById('eventForm');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const title = titleInput.value.trim();
+    const description = descInput.value.trim();
+    const dateEvent = dateInput.value;
+    const time = timeInput.value;
+    const classification = classInput.value;
+
+    if (!title || !description || !dateEvent || !time || !classification) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    try {
+      const body = {
+        title,
+        description,
+        dateEvent,
+        time,
+        classification,
+        link: eventoData.link || ''
+      };
+
+      const res = await fetch(`http://localhost:3520/events/edit/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert('Evento atualizado com sucesso!');
+        localStorage.removeItem('eventoEdicao');
+
+        // Atualiza automaticamente as listagens de eventos
+        if (typeof carregarEventos === 'function') carregarEventos();
+        if (typeof carregarEventosArtista === 'function') {
+          const usuario = JSON.parse(localStorage.getItem('usuario'));
+          if (usuario?.id) carregarEventosArtista(usuario.id);
+        }
+
+        window.location.href = 'perfil.html';
+      } else {
+        alert(data.message || 'Erro ao atualizar evento.');
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar evento:', err);
+      alert('Erro ao atualizar evento.');
+    }
+  });
 });

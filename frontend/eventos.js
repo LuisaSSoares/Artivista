@@ -3,6 +3,40 @@ document.addEventListener("DOMContentLoaded", () => {
     const previewArea = document.getElementById("previewArea");
     const tagOptions = document.querySelectorAll(".tagOption");
     const form = document.getElementById("eventForm");
+    // === Contador de caracteres da descrição (cadastro) ===
+  const description = document.getElementById("descriptionEvent");
+  const charCount = document.getElementById("charCount");
+  const maxChars = 255;
+
+  if (description && charCount) {
+    // Contador inicial
+    const len = description.value.length;
+    charCount.textContent = `${len} / ${maxChars}`;
+    charCount.classList.toggle("limit", len >= maxChars);
+
+    description.addEventListener("input", () => {
+      const len = description.value.length;
+      charCount.textContent = `${len} / ${maxChars}`;
+      charCount.classList.toggle("limit", len >= maxChars);
+
+      if (len > maxChars) {
+        // Corta o texto no limite
+        description.value = description.value.substring(0, maxChars);
+
+        // Balão de erro nativo
+        description.setCustomValidity(`O limite de ${maxChars} caracteres foi atingido.`);
+        description.reportValidity();
+
+        // Remove o aviso assim que o usuário editar
+        const clearError = () => {
+          description.setCustomValidity('');
+          description.removeEventListener('input', clearError);
+        };
+        description.addEventListener('input', clearError);
+      }
+    });
+  }
+
   
     let selectedType = "";
   
@@ -42,51 +76,66 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Cadastro do evento ---
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-  
+    
       const usuario = JSON.parse(localStorage.getItem("usuario"));
       if (!usuario || !usuario.id) {
-        alert("Você precisa estar logado para criar um evento.");
+        showFieldError(document.getElementById("titleEvent"), "Você precisa estar logado para criar um evento.");
         return;
       }
-  
+    
+      // --- Coleta de campos ---
+      const title = document.getElementById("titleEvent");
+      const description = document.getElementById("descriptionEvent");
+      const link = document.getElementById("ticketLink");
+      const classification = document.getElementById("classification");
+      const dateEvent = document.getElementById("dateEvent");
+      const time = document.getElementById("timeEvent");
+    
+      // --- Validações visuais com balões ---
+      if (!title.value.trim()) return showFieldError(title, "Digite o título do evento.");
+      if (!description.value.trim()) return showFieldError(description, "Descreva o evento.");
+      if (!link.value.trim()) return showFieldError(link, "Adicione o link do evento (site de ingresso).");
+      if (!classification.value) return showFieldError(classification, "Selecione a classificação indicativa.");
+      if (!selectedType) {
+        const firstTag = document.querySelector(".tagOption");
+        return showFieldError(firstTag, "Escolha o tipo de evento: gratuito ou pago.");
+      }
+      if (!dateEvent.value) return showFieldError(dateEvent, "Escolha a data do evento.");
+      if (!time.value) return showFieldError(time, "Escolha o horário do evento.");
+    
+      // --- Monta e envia ---
       const body = {
-        title: document.getElementById("titleEvent").value,
-        dateEvent: document.getElementById("dateEvent").value,
-        time: document.getElementById("timeEvent").value,
-        description: document.getElementById("descriptionEvent").value,
-        classification: document.getElementById("classification").value,
+        title: title.value.trim(),
+        description: description.value.trim(),
+        link: link.value.trim(),
+        classification: classification.value,
         typeEvent: selectedType,
-        link: document.getElementById("ticketLink").value,
+        dateEvent: dateEvent.value,
+        time: time.value,
         artistId: usuario.id,
       };
-  
+    
       try {
         const res = await fetch("http://localhost:3520/events/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
+          body: JSON.stringify(body),
         });
-  
+    
         const data = await res.json();
-  
         if (data.success) {
-          alert("Evento criado com sucesso!");
           form.reset();
           previewArea.innerHTML = "<span>Prévia da imagem do evento</span>";
           tagOptions.forEach(o => o.classList.remove("active"));
-  
-          // 🔄 Redireciona para a tela inicial
-          setTimeout(() => {
-            window.location.href = "index.html";
-          }, 800);
+          setTimeout(() => window.location.href = "index.html", 800);
         } else {
-          alert(data.message || "Erro ao cadastrar evento.");
+          showFieldError(title, data.message || "Erro ao cadastrar evento.");
         }
       } catch (err) {
-        console.error("Erro ao enviar evento:", err);
-        alert("Erro ao cadastrar evento.");
+        console.error("Erro ao cadastrar evento:", err);
+        showFieldError(title, "Erro ao conectar com o servidor.");
       }
-    });
+    });    
   });
 
 // --- LISTAGEM DOS EVENTOS CADASTRADOS ---

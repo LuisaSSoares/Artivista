@@ -2832,7 +2832,7 @@ input[type="time"] {
 
 /* Quando estiver selecionado (ativo) */
 .tagOption.active {
-  filter: brightness(0.90) saturate(1.05);
+  filter: brightness(0.75) contrast(1.1) saturate(1.05);
   transform: translateY(-1px);
 }
 
@@ -2954,15 +2954,29 @@ input[type="time"] {
   font-weight: 700;
   text-align: center;
   margin-top: 10px;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+/* Trunca a descrição dos eventos para evitar que expanda o container */
+
 
 .event-description {
   font-size: 13px;
   color: #2C5712;
   line-height: 1.4;
   text-align: justify;
-  min-height: 60px;
-  text-overflow: ellipsis;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* limita a 3 linhas exatas */
+  -webkit-box-orient: vertical;
+
+  overflow: hidden; /* corta qualquer coisa além da 3ª linha */
+  white-space: normal; /* permite quebra dentro das linhas */
+  height: calc(1.4em * 3); /* força o container a ter só 3 linhas de altura */
 }
 
 .event-image-container {
@@ -3066,4 +3080,144 @@ input[type="time"] {
   text-align: center;
   margin-top: 6px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Centraliza o .noPublicationSpan na página de Eventos & Cursos */
+.eventosECursosContainer:has(.noPublicationSpan) {
+  position: relative;
+  min-height: 300px; /* Garante altura mínima mesmo sem eventos */
+}
+
+.eventosECursosContainer .noPublicationSpan {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.eventosECursosContainer .noPublicationSpan img {
+  width: 45px;
+  height: 45px;
+}
+
+.eventosECursosContainer .noPublicationSpan span {
+  color: #2C5712;
+  font-size: 18px;
+  font-weight: 600;
+}
+/* === Ações do evento (editar e excluir) === */
+.event-actions {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 15px 16px; /* empurra levemente da borda esquerda */
+}
+
+.event-actions button {
+  width: 25px;
+  height: 25px;
+  border: none;
+  border-radius: 50%; /* 🔵 Torna o botão completamente redondo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color:#747171;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.event-actions button:hover{
+ background-color: rgba(131, 174, 21, 0.8);;
+}
+
+.event-actions img {
+  width: 13px;
+  height: 13px;
+}
+
+.char-counter {
+  font-size: 12px;
+  color: #2C5712;
+  text-align: right;  
+  opacity: 0.8;
+}
+
+.char-counter.limit {
+  color: #b00020; /* vermelho quando atingir o limite */
+  font-weight: bold;
+}
+/* === Modal Excluir Evento (mesma estilização dos posts) === */
+#modalExcluirEvento.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#modalExcluirEvento.show {
+  display: flex;
+}
+
+#modalExcluirEvento .modal-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,.3);
+  animation: scaleIn .3s ease;
+}
+
+#modalExcluirEvento .modal-botoes {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+#modalExcluirEvento .btn-excluir {
+  background: #b32020;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.modal-botoes #cancelarExclusaoEvento {
+  background-color: #aaa;
+  color: #fff;
+}
+
+.modal-botoes #cancelarExclusaoEvento:hover {
+  background-color: #888;
+}
+#modalExcluirEvento .btn-excluir:hover {
+  background-color: #8a1414;
+}
+
+input#ticketLink.disabled[readonly] {
+  background: #f3f3f3;
+  color: #777;
+  cursor: not-allowed;
+}
+.charCount {
+  font-size: 13px;
+  color: #2C5712;
+  display: block;
+  text-align: right;
+  margin-top: 4px;
+}
+.charCount.limit {
+  color: #b32020;
+  font-weight: 600;
 }

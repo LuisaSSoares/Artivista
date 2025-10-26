@@ -181,7 +181,9 @@
                             Postagens <span id="postCount">(0)</span>
                         </a>
                         <a href="#sobre"     data-tab="sobre">Sobre o perfil</a>
-                        <a href="#agenda"    data-tab="agenda">Programação</a>
+                        <a href="#agenda"    data-tab="agenda">
+                            Programação <span id="eventCourseCount">(0)</span>
+                        </a>
                         <span class="indicator"></span> 
                     </div> 
                     <section class="tabPanel" data-tab="postagens">
@@ -287,12 +289,11 @@
                                 <div class="feedContainer photoGrid" id="favoritosFeedContainer"></div>
                             </div>
                     </section>
-                    <section class="tabPanel" data-tab="agenda" >
-                        <div class="noPublicationSpan">
-                            <img src="./icons/brush.svg" alt="">
-                            <span>Você não tem nenhuma publicação ainda.</span>
+                    <section class="tabPanel" data-tab="agenda" hidden>
+                        <div id="eventosArtistaContainer">
+                          <ul id="listaEventosECursos"></ul>
                         </div>
-                    </section>
+                      </section>
                   </section>
                   
                   <div id="ModalScreen" class="modal" aria-hidden="true">
@@ -343,6 +344,16 @@
                       <div class="modal-botoes">
                         <button id="cancelarExclusao">Cancelar</button>
                         <button id="confirmarExclusao" class="btn-excluir">Excluir</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="modalExcluirEvento" class="modal-overlay">
+                    <div class="modal-box">
+                      <h3>Excluir evento</h3>
+                      <p>Você deseja apagar o evento "<span id="tituloEventoModal"></span>"?</p>
+                      <div class="modal-botoes">
+                        <button id="cancelarExclusaoEvento">Cancelar</button>
+                        <button id="confirmarExclusaoEvento" class="btn-excluir">Excluir</button>
                       </div>
                     </div>
                   </div>

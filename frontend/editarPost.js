@@ -23,6 +23,38 @@ document.addEventListener("DOMContentLoaded", () => {
     titleInput.value    = postEdicao.title || "";
     descInput.value     = postEdicao.description || "";
     sectionSelect.value = postEdicao.artSection || "";
+    
+    // === Contador de caracteres (edição de posts) ===
+const charCount = document.getElementById("charCount");
+const maxChars = 225;
+
+if (descInput && charCount) {
+  // Atualiza contador inicial com o valor existente
+  const len = descInput.value.length;
+  charCount.textContent = `${len} / ${maxChars}`;
+  charCount.classList.toggle("limit", len >= maxChars);
+
+  // Atualiza em tempo real
+  descInput.addEventListener("input", () => {
+    const len = descInput.value.length;
+    charCount.textContent = `${len} / ${maxChars}`;
+    charCount.classList.toggle("limit", len >= maxChars);
+
+    if (len > maxChars) {
+      descInput.value = descInput.value.substring(0, maxChars);
+
+      // Mostra balão de erro
+      descInput.setCustomValidity(`O limite de ${maxChars} caracteres foi atingido.`);
+      descInput.reportValidity();
+
+      const clearError = () => {
+        descInput.setCustomValidity('');
+        descInput.removeEventListener('input', clearError);
+      };
+      descInput.addEventListener('input', clearError);
+    }
+  });
+}
   
     // 2) Ajusta o botão
     submitBtn.textContent = "Republicar";

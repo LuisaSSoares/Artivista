@@ -123,6 +123,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const titleInput = document.getElementById("titlePost");
     const descInput = document.getElementById("descriptionPost");
     const sectionSelect = document.getElementById("secao");
+    const charCount = document.getElementById("charCount");
+const maxChars = 225;
+
+if (descInput && charCount) {
+  descInput.addEventListener("input", () => {
+    const len = descInput.value.length;
+    charCount.textContent = `${len} / ${maxChars}`;
+
+    if (len > maxChars) {
+      descInput.value = descInput.value.substring(0, maxChars);
+    }
+
+    charCount.classList.toggle("limit", len >= maxChars);
+  });
+}
   
     submitBtn.addEventListener("click", async (e) => {
       e.preventDefault();
