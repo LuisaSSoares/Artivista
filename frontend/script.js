@@ -870,6 +870,165 @@ async function atualizarComentariosFeitos() {
   if (page === 'contrate') {
       fetchArtists(); //Se pagina for contrate, a função é chamada
   }
+  const searchInput = document.getElementById("buscaHome");
+if (searchInput) {
+  const file = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const isIndex = file === "index.html";
+  const isFeed = file.includes("feed");
+  const isEventos = file.includes("eventosecursos");
+  const isContrate = file.includes("contrateartista");
+
+  let searchContainer;
+  let activeTab = "usuarios";
+
+  function criarLayoutBusca() {
+    searchContainer = document.createElement("div");
+    searchContainer.className = "searchLayout";
+    searchContainer.innerHTML = `
+        <div class="navBar searchNav">
+          <a href="#" data-tab="usuarios" class="active">Usuários</a>
+          <a href="#" data-tab="publicacoes">Publicações</a>
+          <a href="#" data-tab="programacao">Programação</a>
+          <span class="indicator"></span>
+        </div>
+        <div class="searchResults"><div class="searchResultsInner"></div></div>
+      `;
+    document.querySelector(".containerContent").appendChild(searchContainer);
+    posicionarIndicador();
+  }
+  
+
+  function posicionarIndicador() {
+    const nav = searchContainer.querySelector(".searchNav");
+    const indicator = nav.querySelector(".indicator");
+    const activeLink = nav.querySelector("a.active");
+    if (!activeLink) return;
+    indicator.style.left = activeLink.offsetLeft + "px";
+    indicator.style.width = activeLink.offsetWidth + "px";
+  }
+
+  function trocarAba(tab) {
+    activeTab = tab;
+    const navLinks = searchContainer.querySelectorAll(".searchNav a");
+    navLinks.forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
+    posicionarIndicador();
+    
+    // ✅ mantém a barra focada e reaplica a busca com o mesmo termo
+    if (searchInput) {
+      const val = searchInput.value || "";
+      searchInput.focus();
+      // coloca o cursor no fim (evita “perder seleção”)
+      try {
+        const end = val.length;
+        searchInput.setSelectionRange(end, end);
+      } catch {}
+      // reaproveita SEU listener de `input` (re-render imediato conforme a aba)
+      searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  }
+
+  searchInput.addEventListener("focus", () => {
+    if (isIndex) {
+      document.querySelector(".navBar")?.setAttribute("hidden", "true");
+      document.querySelector(".categorySection")?.setAttribute("hidden", "true");
+      if (!document.querySelector(".searchLayout")) criarLayoutBusca();
+    }
+  });
+
+  searchInput.addEventListener("input", async (e) => {
+    const termo = e.target.value.trim();
+    const resultsInner = document.querySelector(".searchResultsInner");
+    if (!resultsInner) return;
+  
+    // Se não houver termo, exibe mensagem e sai
+    if (termo.length === 0) {
+      resultsInner.innerHTML = `<p style="text-align:center; color:#2C5712; margin-top:10px;">Digite algo para buscar.</p>`;
+      return;
+    }
+  
+    // Define a aba ativa e a URL da busca
+    const activeTab = document.querySelector(".searchNav a.active")?.dataset.tab;
+    let url = "";
+  
+    if (activeTab === "usuarios") {
+      url = `http://localhost:3520/search/users?query=${encodeURIComponent(termo)}`;
+    } else if (activeTab === "publicacoes") {
+      url = `http://localhost:3520/search/posts?query=${encodeURIComponent(termo)}`;
+    } else if (activeTab === "programacao") {
+      url = `http://localhost:3520/search/events?query=${encodeURIComponent(termo)}`;
+    }
+  
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+  
+      if (!data.success || !data.results || data.results.length === 0) {
+        resultsInner.innerHTML = `<p style="text-align:center; color:#2C5712; margin-top:10px;">Nenhum resultado encontrado.</p>`;
+        return;
+      }
+  
+      resultsInner.innerHTML = "";
+  
+      data.results.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "resultItem";
+  
+        // === USUÁRIOS ===
+        if (activeTab === "usuarios") {
+          const profileUrl = item.profileImage
+            ? `http://localhost:3520/uploads/profile/${item.profileImage}`
+            : "./icons/person-circle.svg";
+  
+          div.innerHTML = `
+            <div class="resultUser">
+              <img src="${profileUrl}" alt="${item.name}" class="resultProfileImg">
+              <div class="resultInfo">
+                <strong>${item.name}</strong>
+                <span>@${item.userName || "usuário"}</span>
+              </div>
+            </div>
+          `;
+        }
+  
+        // === PUBLICAÇÕES ===
+        else if (activeTab === "publicacoes") {
+          div.innerHTML = `
+            <div class="resultPost">
+              <strong>${item.title}</strong><br>
+              <span>${item.description ? item.description.slice(0, 100) + "..." : "Sem descrição."}</span>
+            </div>
+          `;
+        }
+  
+        // === PROGRAMAÇÃO ===
+        else if (activeTab === "programacao") {
+          div.innerHTML = `
+            <div class="resultEvent">
+              <strong>${item.title}</strong><br>
+              <span>${item.typeEvent || "Evento"}</span>
+            </div>
+          `;
+        }
+  
+        resultsInner.appendChild(div);
+      });
+    } catch (err) {
+      console.error("Erro na busca:", err);
+      resultsInner.innerHTML = `<p style="text-align:center; color:#c00;">Erro ao buscar resultados.</p>`;
+    }
+  });
+  document.addEventListener("click", e => {
+    const link = e.target.closest(".searchNav a");
+    if (link) {
+      e.preventDefault();
+      trocarAba(link.dataset.tab);
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (isIndex && document.querySelector(".searchLayout")) posicionarIndicador();
+  });
+}
   });
   //Modal Editar Perfil
 const editButton = document.querySelector('.editProfile');

@@ -2780,13 +2780,14 @@ body {
   margin-bottom: 18px;
 }
 
-label {
+.formRow label, .formGroup label {
   font-weight: bold;
   color: #2C5712;
   margin-bottom: 5px;
 }
 
-input, textarea, select {
+.formRow input, .formGroup select, .formGroup input {
+  width: 100%;
   padding: 10px 15px;
   border: 1px solid #c3d7b3;
   border-radius: 12px;
@@ -2796,7 +2797,18 @@ input, textarea, select {
   transition: 0.3s;
 }
 
-input:focus, textarea:focus, select:focus {
+.formRow textarea{
+  width: 100%;
+  border: 1px solid #c3d7b3;
+  box-shadow: 0 2px 4px rgba(95,145,4,0.2);
+  padding: 10px 15px;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+ .formRow input:focus, .formRow textarea:focus, .formGroup select:focus, .formGroup input:focus {
   border-color: #5F9104;
   box-shadow: 0 0 6px rgba(95,145,4,0.3);
 }
@@ -3210,3 +3222,55 @@ input#ticketLink.disabled[readonly] {
   font-weight: 600;
 }
 
+/* === 🔍 Resultados de busca === */
+.searchResultsInner {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px 0;
+}
+
+.resultItem {
+  background-color: #EEF8E3;
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.resultItem:hover {
+  background-color: #DCEEC8;
+  transform: scale(1.01);
+}
+
+/* Layout de usuários */
+.resultUser {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resultProfileImg {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #5F9104;
+  box-shadow: 0 4px 8px rgba(95,145,4,.25);
+}
+
+.resultInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.resultInfo strong {
+  color: #2C5712;
+  font-size: 15px;
+}
+
+.resultInfo span {
+  font-size: 13px;
+  color: #4A4A4A;
+}

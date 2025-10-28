@@ -1166,6 +1166,80 @@ app.delete('/comments/delete/:id', (req, res) => {
   });
 });
 
+// Busca de usuários
+app.get('/search/users', (req, res) => {
+  const query = req.query.query?.trim();
+  if (!query) return res.json({ success: false, message: "Termo de busca ausente." });
+
+  const sql = `
+    SELECT id, name, userName, userType, profileImage
+    FROM users
+    WHERE name LIKE ? OR userName LIKE ?
+    ORDER BY name ASC
+  `;
+  const likeQuery = `%${query}%`;
+
+  db.query(sql, [likeQuery, likeQuery], (err, results) => {
+    if (err) {
+      console.error("Erro na busca de usuários:", err);
+      return res.status(500).json({ success: false, message: "Erro ao buscar usuários." });
+    }
+    res.json({ success: true, results });
+  });
+});
+
+// Busca de postagens
+app.get('/search/posts', (req, res) => {
+  const query = req.query.query?.trim();
+  if (!query) return res.json({ success: false, message: "Termo de busca ausente." });
+
+  const sql = `
+    SELECT 
+      p.id, p.title, p.description, p.artSection, p.createdAt,
+      u.name AS artistName, u.userName, u.profileImage
+    FROM posts p
+    JOIN artists a ON p.artistId = a.id
+    JOIN users u ON a.userId = u.id
+    WHERE p.title LIKE ? OR p.description LIKE ? OR u.name LIKE ?
+    ORDER BY p.id DESC
+  `;
+  const likeQuery = `%${query}%`;
+
+  db.query(sql, [likeQuery, likeQuery, likeQuery], (err, results) => {
+    if (err) {
+      console.error("Erro na busca de posts:", err);
+      return res.status(500).json({ success: false, message: "Erro ao buscar posts." });
+    }
+    res.json({ success: true, results });
+  });
+});
+
+// Busca de eventos
+app.get('/search/events', (req, res) => {
+  const query = req.query.query?.trim();
+  if (!query) return res.json({ success: false, message: "Termo de busca ausente." });
+
+  const sql = `
+    SELECT 
+      e.id, e.title, e.dateEvent, e.time, e.typeEvent, e.classification,
+      u.name AS artistName
+    FROM events e
+    JOIN artists a ON e.artistId = a.id
+    JOIN users u ON a.userId = u.id
+    WHERE e.title LIKE ? OR e.description LIKE ? OR u.name LIKE ?
+    ORDER BY e.dateEvent ASC
+  `;
+  const likeQuery = `%${query}%`;
+
+  db.query(sql, [likeQuery, likeQuery, likeQuery], (err, results) => {
+    if (err) {
+      console.error("Erro na busca de eventos:", err);
+      return res.status(500).json({ success: false, message: "Erro ao buscar eventos." });
+    }
+    res.json({ success: true, results });
+  });
+});
+
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`))
 
 
