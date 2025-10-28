@@ -231,6 +231,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       } // Fim do if/else de carrossel
 
       feedContainer.appendChild(postCard);
+      // Após inserir o conteúdo do postCard:
+      const imgPerfil = postCard.querySelector("#profileImage");
+      if (imgPerfil) {
+        imgPerfil.style.cursor = "pointer";
+        imgPerfil.addEventListener("click", () => {
+          // Redireciona para o perfil do usuário clicado
+          window.location.href = `perfil.html?id=${post.artist.id}`;
+        });
+      }
     }
     ativarReacoesDeCurtida();
     ativarComentarios();
@@ -522,6 +531,16 @@ async function carregarComentarios(postId, container, page = 1, append = false) 
     // Renderiza os comentários ordenados
     comentariosOrdenados.forEach(c => {
       container.insertAdjacentHTML('beforeend', montarComentarioHTML(c));
+      const lastComment = container.lastElementChild;
+      if (lastComment) {
+        const profileImgComment = lastComment.querySelector('.profileImageComment');
+        if (profileImgComment) {
+          profileImgComment.style.cursor = "pointer";
+          profileImgComment.addEventListener("click", () => {
+            window.location.href = `perfil.html?id=${c.userId}`;
+          });
+        }
+      }
     });
 
     const editedComments = JSON.parse(localStorage.getItem("editedComments") || "[]");

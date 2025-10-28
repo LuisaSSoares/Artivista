@@ -92,6 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const viewedId =
         new URLSearchParams(location.search).get('id') ||
         (infosUser && infosUser.id);
+      const isOwner = infosUser && parseInt(infosUser.id) === parseInt(viewedId);
+
   
       const setText = (el, txt) => { if (el) el.textContent = txt; }; //Função arrow que  armaneza um elemento (el) e o texto que quero inserir (txt). Se elemento existir, altera o conteúdo de texto desse elemento usando .textContent = txt
       const imgSrc = (filename) =>
@@ -209,9 +211,16 @@ document.addEventListener('DOMContentLoaded', () => {
         setText(qs('#bio', root), data?.bio || 'Nenhuma bio adicionada');
   
         const foto = qs('#perfilPhoto', root); //Busca dentro do root o ID e salva na const "fotos"
-        const urlFoto = imgSrc(data?.profileImage);  // Monta a URL ou usa padrão
-        if (foto) foto.src = urlFoto
-        setSideProfileIcon(urlFoto); // Atualiza ícone lateral
+        const urlFoto = imgSrc(data?.profileImage);
+        if (foto) foto.src = urlFoto;
+        
+        // ✅ só atualiza o menu lateral se for o próprio perfil logado
+        const infosUser = JSON.parse(localStorage.getItem('usuario'));
+        const viewedId = new URLSearchParams(location.search).get('id') || infosUser?.id;
+        const isOwner = infosUser && parseInt(infosUser.id) === parseInt(viewedId);
+        if (isOwner) {
+          setSideProfileIcon(urlFoto);
+        }
 
         // Se for artista, preenche áreas de atuação e links externos
         if (isArtist) {
@@ -275,6 +284,29 @@ document.addEventListener('DOMContentLoaded', () => {
           })
           .catch(err => console.warn('Falha ao carregar perfil:', err));
       }
+      // 🔒 BLOQUEIOS ESPECÍFICOS PARA VISITANTE (não-dono do perfil)
+      if (!isOwner) {
+        // 1) “Atividades” → curtidos e comentários NÃO clicáveis e sem setas
+        const likedTriggers = document.querySelectorAll('.activityContainer .likedPostsTrigger');
+        const commentTriggers = document.querySelectorAll('.activityContainer .comentariosTrigger');
+
+        [...likedTriggers, ...commentTriggers].forEach(el => {
+          // remove setas visuais (os <img> da ponta)
+          el.querySelectorAll('img[src*="arrow-right"]').forEach(img => img.remove());
+          // desativa clique
+          el.style.pointerEvents = 'none';
+          el.title = 'Disponível apenas para o dono do perfil';
+        });
+
+        // 2) Containers de "curtidos" e "comentários feitos" nunca devem abrir para visitantes
+        const likedContainer = document.getElementById('likedPostsContainer');
+        const comentariosContainer = document.getElementById('comentariosFeitosContainer');
+        if (likedContainer) likedContainer.hidden = true;
+        if (comentariosContainer) comentariosContainer.hidden = true;
+
+        // 3) Botão "Editar perfil" não deve aparecer para visitantes
+        document.querySelectorAll('.editProfile').forEach(b => b.hidden = true);
+      }
       if (viewedId) {
         carregarPostagensUsuario(parseInt(viewedId));
         atualizarPostagensCurtidas();
@@ -300,22 +332,31 @@ async function carregarPostagensUsuario(userId) {
     const data = await res.json();
 
     if (!data.success || !data.posts.length) {
+      const message = isOwner
+        ? "Você não tem nenhuma publicação ainda."
+        : "Esse artista ainda não possui postagens.";
+    
       container.innerHTML = `
         <div class="noPublicationSpan">
-          <img src="./icons/emoji-frown.svg" alt="">
-          <span>Ainda sem postagens.</span>
+          <img src="./icons/brush.svg" alt="">
+          <span>${message}</span>
         </div>`;
       return;
     }
+    
 
     const postsUsuario = data.posts.filter(p => p.artist.id === userId);
 
     if (!postsUsuario.length) {
+      const message = isOwner
+        ? "Você não tem nenhuma publicação ainda."
+        : "Esse artista ainda não possui postagens.";
+    
       container.innerHTML = `
         <div class="noPublicationSpan">
           <img src="./icons/brush.svg" alt="">
-          <span>Você não tem nenhuma publicação ainda.</span>
-        </div>`; // Usei a mensagem e ícone de "perfil.html"
+          <span>${message}</span>
+        </div>`;
       return;
     }
 
@@ -557,9 +598,11 @@ async function ativarCurtidasPerfil() {
 async function atualizarPostagensCurtidas() {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario || !usuario.id) return;
+  const viewedId = new URLSearchParams(location.search).get('id');
+  const targetId = viewedId ? parseInt(viewedId) : usuario.id;
 
   try {
-    const res = await fetch(`http://localhost:3520/user/${usuario.id}/liked-posts`);
+    const res = await fetch(`http://localhost:3520/user/${targetId}/liked-posts`);
     const data = await res.json();
 
     if (data.success) {
@@ -600,9 +643,11 @@ async function atualizarContadoresComentariosPerfil() {
 async function atualizarComentariosFeitos() {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario || !usuario.id) return;
+  const viewedId = new URLSearchParams(location.search).get('id');
+  const targetId = viewedId ? parseInt(viewedId) : usuario.id;
 
   try {
-    const res = await fetch(`http://localhost:3520/comments/user/${usuario.id}`);
+    const res = await fetch(`http://localhost:3520/comments/user/${targetId}`)   
     const data = await res.json();
     if (!data.success) return;
 
@@ -785,7 +830,27 @@ async function atualizarComentariosFeitos() {
                               </div>
                           </li>
                       `;
-                      listaContrateArtista.innerHTML += artistCard; //Adiciona card na lista
+                      listaContrateArtista.insertAdjacentHTML('beforeend', artistCard);
+
+                      // 🔗 adiciona clique na imagem de perfil e no botão “Ver perfil”
+                      const lastCard = listaContrateArtista.lastElementChild;
+                      if (lastCard) {
+                        const imgProfile = lastCard.querySelector('.profileImage');
+                        const btnPerfil = lastCard.querySelector('#perfilArtistButton');
+                      
+                        const redirecionarPerfil = () => {
+                          window.location.href = `perfil.html?id=${artist.id}`;
+                        };
+                      
+                        if (imgProfile) {
+                          imgProfile.style.cursor = "pointer";
+                          imgProfile.addEventListener("click", redirecionarPerfil);
+                        }
+                      
+                        if (btnPerfil) {
+                          btnPerfil.addEventListener("click", redirecionarPerfil);
+                        }
+                      }
                   });
               } else {
                   console.error("Erro: O elemento com o ID 'listaContrateArtista' não foi encontrado na página.");
@@ -1009,7 +1074,7 @@ function editarPost(id) {
     });
 }
 
-function inicializarHistoriaComArte() {
+async function inicializarHistoriaComArte() {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario || !usuario.id) return;
 
@@ -1029,6 +1094,33 @@ function inicializarHistoriaComArte() {
   container.querySelector(".historyActions")?.remove();
 
   const historiaSalva = typeof usuario.historia_arte === "string" && usuario.historia_arte.trim() !== "";
+  // --- 🔒 Exibe história correta ao visitar outro perfil ---
+  const viewedId = new URLSearchParams(location.search).get('id');
+  const isOwner = !viewedId || parseInt(viewedId) === parseInt(usuario.id);
+
+  if (!isOwner && viewedId) {
+    try {
+      const res = await fetch(`http://localhost:3520/profile/${viewedId}`);
+      const data = await res.json();
+      const historiaData = data?.data?.historia_arte?.trim() || "";
+
+      // remove botões de adicionar/editar/excluir
+      container.querySelector("#btnAddHistory")?.remove();
+      container.querySelector(".historyActions")?.remove();
+
+      // mostra história do usuário visitado ou mensagem padrão
+      textHistory.textContent = historiaData
+        ? historiaData
+        : "O usuário ainda não compartilhou sua história com a arte.";
+
+      return; // interrompe aqui — visitante não deve editar
+    } catch (err) {
+      console.warn("Erro ao carregar história do perfil visitado:", err);
+      textHistory.textContent = "O usuário ainda não compartilhou sua história com a arte.";
+      return;
+    }
+  }
+
 
   if (historiaSalva) {
     plusButtons.forEach(btn => btn.remove());
@@ -1769,6 +1861,9 @@ const NOMES_SECOES = {
 async function exibirFavoritosPorSecao(secaoBruto) {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   if (!usuario?.id) return;
+  const viewedId = new URLSearchParams(location.search).get('id');
+  const isOwner = !viewedId || parseInt(viewedId) === parseInt(usuario.id);
+  const targetId = isOwner ? usuario.id : parseInt(viewedId);
 
   const root = document.querySelector("#perfilArtista:not([hidden])")
             || document.querySelector("#perfilComum:not([hidden])");
@@ -1795,7 +1890,7 @@ async function exibirFavoritosPorSecao(secaoBruto) {
   `;
 
   try {
-    const res = await fetch(`http://localhost:3520/user/${usuario.id}/favorites`);
+    const res = await fetch(`http://localhost:3520/user/${targetId}/favorites`);
     const data = await res.json();
     if (!data.success) throw new Error("Falha ao buscar favoritos.");
 
@@ -2049,14 +2144,22 @@ async function carregarEventosArtista(userId) {
     contador.textContent = `(${eventos.length})`;
 
     if (eventos.length === 0) {
+      const viewedId = new URLSearchParams(location.search).get("id");
+      const usuario = JSON.parse(localStorage.getItem("usuario"));
+      const isOwner = !viewedId || parseInt(viewedId) === parseInt(usuario.id);
+    
+      const message = isOwner
+        ? "Você não tem nenhum evento ou curso cadastrado."
+        : "Este artista ainda não possui eventos ou cursos cadastrados.";
+    
       lista.innerHTML = `
         <div class="noPublicationSpan">
-          <img src="./icons/emoji-frown.svg" alt="">
-          <span>Este artista ainda não possui eventos ou cursos cadastrados.</span>
+          <img src="./icons/brush.svg" alt="Sem eventos">
+          <span>${message}</span>
         </div>`;
       return;
     }
-
+    
     lista.innerHTML = "";
     for (const ev of eventos) {
       let previewImage = "./img/default-event.png";

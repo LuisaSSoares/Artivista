@@ -2787,7 +2787,6 @@ label {
 }
 
 input, textarea, select {
-  width: 100%;
   padding: 10px 15px;
   border: 1px solid #c3d7b3;
   border-radius: 12px;
@@ -3083,12 +3082,11 @@ input[type="time"] {
 }
 
 /* Centraliza o .noPublicationSpan na página de Eventos & Cursos */
-.eventosECursosContainer:has(.noPublicationSpan) {
+#listaEventosECursos:has(.noPublicationSpan) {
   position: relative;
-  min-height: 300px; /* Garante altura mínima mesmo sem eventos */
 }
 
-.eventosECursosContainer .noPublicationSpan {
+#listaEventosECursos .noPublicationSpan {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -3101,16 +3099,6 @@ input[type="time"] {
   gap: 10px;
 }
 
-.eventosECursosContainer .noPublicationSpan img {
-  width: 45px;
-  height: 45px;
-}
-
-.eventosECursosContainer .noPublicationSpan span {
-  color: #2C5712;
-  font-size: 18px;
-  font-weight: 600;
-}
 /* === Ações do evento (editar e excluir) === */
 .event-actions {
   display: flex;
@@ -3221,3 +3209,4 @@ input#ticketLink.disabled[readonly] {
   color: #b32020;
   font-weight: 600;
 }
+
