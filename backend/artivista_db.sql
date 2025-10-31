@@ -62,15 +62,19 @@ create table courses(
 id int not null auto_increment primary key,
 title varchar(100),
 dateCourse date, 
-time varchar(45), 
+startTime varchar(45), 
+endTime  VARCHAR(45),
 description varchar(255),
 classification enum ('livre', '12 anos', '14 anos', '16 anos', '18 anos ou mais'),
 typeCourse enum ('gratuito', 'pago'),
-participantsLimit int, 
+modeCourse ENUM('online', 'presencial'),
+durationValue int,
+durationUnit ENUM('dia', 'semana', 'mês', 'ano'),
 link varchar(255), 
 artistId int,
 foreign key (artistId) references artists(id) on delete cascade
 );
+
 
 create table chat(
 id int not null auto_increment primary key, 

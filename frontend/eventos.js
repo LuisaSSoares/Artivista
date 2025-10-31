@@ -135,7 +135,24 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Erro ao cadastrar evento:", err);
         showFieldError(title, "Erro ao conectar com o servidor.");
       }
-    });    
+    });
+    const eventoDestacadoId = localStorage.getItem("eventoDestacado");
+    if (eventoDestacadoId) {
+      // espera o carregamento da lista
+      setTimeout(() => {
+        const card = document.querySelector(`[data-id="${eventoDestacadoId}"]`);
+        if (card) {
+          card.classList.add("eventoDestacado");
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+  
+          // remove destaque após animação
+          setTimeout(() => {
+            card.classList.remove("eventoDestacado");
+            localStorage.removeItem("eventoDestacado");
+          }, 2500);
+        }
+      }, 1000);
+    }    
   });
 
 // --- LISTAGEM DOS EVENTOS CADASTRADOS ---
@@ -194,7 +211,7 @@ async function carregarEventos() {
               <p class="event-description">${evento.description}</p>
       
               <div class="event-details">
-                <div>
+                <div class="event-elements">
                   <div class="event-date">
                     <img src="./icons/calendar-date-fill.svg" alt="Ícone de calendário">
                     <span>${new Date(evento.dateEvent).toLocaleDateString("pt-BR")}</span>
@@ -206,7 +223,7 @@ async function carregarEventos() {
                 </div>
       
                 <div>
-                  <div class="event-classificacao">
+                  <div class="event-classificacao event-elements">
                     <p><strong>Classificação:</strong> ${evento.classification}</p>
                     <div class="event-type" id="${evento.typeEvent.toLowerCase()}">
                     ${evento.typeEvent}
@@ -222,6 +239,7 @@ async function carregarEventos() {
           </div>
         `;    
         listaEventos.appendChild(item);
+        item.setAttribute("data-id", evento.id);
       }      
   } catch (err) {
     console.error("Erro ao carregar eventos:", err);
@@ -235,6 +253,26 @@ async function carregarEventos() {
 }
 
 // 🔄 Executa automaticamente na página de eventos
+// 🔄 Executa automaticamente na página de eventos
 if (window.location.pathname.includes("eventosECursos.html")) {
-  carregarEventos();
+  carregarEventos().then(() => {
+    const eventoDestacadoId = localStorage.getItem("eventoDestacado");
+    if (eventoDestacadoId) {
+      setTimeout(() => {
+        const card = document.querySelector(`[data-id="${eventoDestacadoId}"]`);
+        if (card) {
+          // destaque visual
+          card.classList.add("eventoDestacado");
+          // rolagem suave até o evento
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // remove o destaque e limpa storage
+          setTimeout(() => {
+            card.classList.remove("eventoDestacado");
+            localStorage.removeItem("eventoDestacado");
+          }, 2500);
+        }
+      }, 800); // tempo pra garantir carregamento
+    }
+  });
 }

@@ -313,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarComentariosFeitos();
         atualizarContagemFavoritosPorSecao();
         carregarEventosArtista(parseInt(viewedId));
+        carregarCursosDoArtista(parseInt(viewedId));
       }
     }
 // --- Exibe postagens do usuário logado na aba "Postagens" ---
@@ -871,164 +872,142 @@ async function atualizarComentariosFeitos() {
       fetchArtists(); //Se pagina for contrate, a função é chamada
   }
   const searchInput = document.getElementById("buscaHome");
-if (searchInput) {
-  const file = (location.pathname.split("/").pop() || "index.html").toLowerCase();
-  const isIndex = file === "index.html";
-  const isFeed = file.includes("feed");
-  const isEventos = file.includes("eventosecursos");
-  const isContrate = file.includes("contrateartista");
-
-  let searchContainer;
-  let activeTab = "usuarios";
-
-  function criarLayoutBusca() {
-    searchContainer = document.createElement("div");
-    searchContainer.className = "searchLayout";
-    searchContainer.innerHTML = `
-        <div class="navBar searchNav">
-          <a href="#" data-tab="usuarios" class="active">Usuários</a>
-          <a href="#" data-tab="publicacoes">Publicações</a>
-          <a href="#" data-tab="programacao">Programação</a>
-          <span class="indicator"></span>
-        </div>
+  if (searchInput) {
+    const file = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+    const isIndex = file === "index.html";
+  
+    let searchContainer;
+    function criarLayoutBusca() {
+      searchContainer = document.createElement("div");
+      searchContainer.className = "searchLayout";
+      searchContainer.innerHTML = `
         <div class="searchResults"><div class="searchResultsInner"></div></div>
       `;
-    document.querySelector(".containerContent").appendChild(searchContainer);
-    posicionarIndicador();
-  }
-  
-
-  function posicionarIndicador() {
-    const nav = searchContainer.querySelector(".searchNav");
-    const indicator = nav.querySelector(".indicator");
-    const activeLink = nav.querySelector("a.active");
-    if (!activeLink) return;
-    indicator.style.left = activeLink.offsetLeft + "px";
-    indicator.style.width = activeLink.offsetWidth + "px";
-  }
-
-  function trocarAba(tab) {
-    activeTab = tab;
-    const navLinks = searchContainer.querySelectorAll(".searchNav a");
-    navLinks.forEach(a => a.classList.toggle("active", a.dataset.tab === tab));
-    posicionarIndicador();
-    
-    // ✅ mantém a barra focada e reaplica a busca com o mesmo termo
-    if (searchInput) {
-      const val = searchInput.value || "";
-      searchInput.focus();
-      // coloca o cursor no fim (evita “perder seleção”)
-      try {
-        const end = val.length;
-        searchInput.setSelectionRange(end, end);
-      } catch {}
-      // reaproveita SEU listener de `input` (re-render imediato conforme a aba)
-      searchInput.dispatchEvent(new Event("input", { bubbles: true }));
-    }
-  }
-
-  searchInput.addEventListener("focus", () => {
-    if (isIndex) {
-      document.querySelector(".navBar")?.setAttribute("hidden", "true");
-      document.querySelector(".categorySection")?.setAttribute("hidden", "true");
-      if (!document.querySelector(".searchLayout")) criarLayoutBusca();
-    }
-  });
-
-  searchInput.addEventListener("input", async (e) => {
-    const termo = e.target.value.trim();
-    const resultsInner = document.querySelector(".searchResultsInner");
-    if (!resultsInner) return;
-  
-    // Se não houver termo, exibe mensagem e sai
-    if (termo.length === 0) {
-      resultsInner.innerHTML = `<p style="text-align:center; color:#2C5712; margin-top:10px;">Digite algo para buscar.</p>`;
-      return;
+      document.querySelector(".containerContent").appendChild(searchContainer);
     }
   
-    // Define a aba ativa e a URL da busca
-    const activeTab = document.querySelector(".searchNav a.active")?.dataset.tab;
-    let url = "";
+    searchInput.addEventListener("focus", () => {
+      if (isIndex) {
+        document.querySelector(".navBar")?.setAttribute("hidden", "true");
+        document.querySelector(".categorySection")?.setAttribute("hidden", "true");
+        if (!document.querySelector(".searchLayout")) criarLayoutBusca();
+      }
+    });
   
-    if (activeTab === "usuarios") {
-      url = `http://localhost:3520/search/users?query=${encodeURIComponent(termo)}`;
-    } else if (activeTab === "publicacoes") {
-      url = `http://localhost:3520/search/posts?query=${encodeURIComponent(termo)}`;
-    } else if (activeTab === "programacao") {
-      url = `http://localhost:3520/search/events?query=${encodeURIComponent(termo)}`;
-    }
+    searchInput.addEventListener("input", async (e) => {
+      const termo = e.target.value.trim();
+      const resultsInner = document.querySelector(".searchResultsInner");
+      if (!resultsInner) return;
   
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-  
-      if (!data.success || !data.results || data.results.length === 0) {
-        resultsInner.innerHTML = `<p style="text-align:center; color:#2C5712; margin-top:10px;">Nenhum resultado encontrado.</p>`;
+      if (termo.length === 0) {
+        resultsInner.innerHTML = `<p style="text-align:center; color:#2C5712; margin-top:10px;">Digite algo para buscar.</p>`;
         return;
       }
   
-      resultsInner.innerHTML = "";
+      const url = `http://localhost:3520/search/users?query=${encodeURIComponent(termo)}`;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
   
-      data.results.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "resultItem";
+        if (!data.success || !data.results || data.results.length === 0) {
+          resultsInner.innerHTML = `<p style="text-align:center; color:#2C5712; margin-top:10px;">Nenhum usuário encontrado.</p>`;
+          return;
+        }
   
-        // === USUÁRIOS ===
-        if (activeTab === "usuarios") {
+        resultsInner.innerHTML = "";
+        data.results.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "resultItem";
+  
+          const usuarioLogado = JSON.parse(localStorage.getItem('usuario'));
+          if (usuarioLogado && parseInt(item.id) === parseInt(usuarioLogado.id)) return;
+  
           const profileUrl = item.profileImage
             ? `http://localhost:3520/uploads/profile/${item.profileImage}`
             : "./icons/person-circle.svg";
+  
+          const tag1 = item.activity1 ? `<span class="tag tag--1">${item.activity1}</span>` : "";
+          const tag2 = item.activity2 ? `<span class="tag tag--2">${item.activity2}</span>` : "";
   
           div.innerHTML = `
             <div class="resultUser">
               <img src="${profileUrl}" alt="${item.name}" class="resultProfileImg">
               <div class="resultInfo">
-                <strong>${item.name}</strong>
-                <span>@${item.userName || "usuário"}</span>
+                <div class="userHeader">
+                  <strong>${item.name}</strong>
+                  <div class="tagsInline">${tag1}${tag2}</div>
+                </div>
+                <span>@${item.userName || "usuario"}</span>
               </div>
             </div>
           `;
-        }
+          div.addEventListener("click", () => {
+            window.location.href = `./perfil.html?id=${item.id}`;
+          });
   
-        // === PUBLICAÇÕES ===
-        else if (activeTab === "publicacoes") {
-          div.innerHTML = `
-            <div class="resultPost">
-              <strong>${item.title}</strong><br>
-              <span>${item.description ? item.description.slice(0, 100) + "..." : "Sem descrição."}</span>
-            </div>
-          `;
-        }
+          resultsInner.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Erro na busca:", err);
+        resultsInner.innerHTML = `<p style="text-align:center; color:#c00;">Erro ao buscar usuários.</p>`;
+      }
+    });
+  }
   
-        // === PROGRAMAÇÃO ===
-        else if (activeTab === "programacao") {
-          div.innerHTML = `
-            <div class="resultEvent">
-              <strong>${item.title}</strong><br>
-              <span>${item.typeEvent || "Evento"}</span>
-            </div>
-          `;
-        }
-  
-        resultsInner.appendChild(div);
-      });
-    } catch (err) {
-      console.error("Erro na busca:", err);
-      resultsInner.innerHTML = `<p style="text-align:center; color:#c00;">Erro ao buscar resultados.</p>`;
-    }
-  });
-  document.addEventListener("click", e => {
-    const link = e.target.closest(".searchNav a");
-    if (link) {
-      e.preventDefault();
-      trocarAba(link.dataset.tab);
-    }
-  });
+// === 🧩 BUSCAS LOCAIS (Feed, Eventos e Contrate Artista) ===
+if (searchInput) {
+// --- EVENTOS E CURSOS ---
+  if (file === "eventosecursos.html") {
+  const lista = document.getElementById("listaEventosECursos");
 
-  window.addEventListener("resize", () => {
-    if (isIndex && document.querySelector(".searchLayout")) posicionarIndicador();
+  searchInput.addEventListener("input", () => {
+    const termo = searchInput.value.trim().toLowerCase();
+    const eventos = lista?.querySelectorAll("li") || [];
+
+    eventos.forEach(ev => {
+      const titulo = ev.querySelector(".event-title, .eventTitle")?.textContent.toLowerCase() || "";
+      const descricao = ev.querySelector(".event-description, .eventDesc")?.textContent.toLowerCase() || "";
+      const tipo = ev.querySelector(".event-type")?.textContent.toLowerCase() || "";
+      const classificacao = ev.querySelector(".event-classificacao")?.textContent.toLowerCase() || "";
+      const artista = ev.querySelector(".event-autor")?.textContent.toLowerCase() || "";
+      const tagEvento = ev.querySelector(".tagEvento")?.textContent.toLowerCase() || "";
+      const tags = Array.from(ev.querySelectorAll(".tagsInline span"))
+                        .map(t => t.textContent.toLowerCase())
+                        .join(" ");
+
+      let corresponde = [titulo, descricao, tipo, classificacao, artista, tags, tagEvento]
+                        .some(t => t.includes(termo));
+
+      // garante que “evento” e “curso” filtrem corretamente
+      if (!corresponde) {
+        if (termo.includes("evento") && tagEvento.includes("evento")) corresponde = true;
+        if (termo.includes("curso") && tagEvento.includes("curso")) corresponde = true;
+      }
+
+      ev.style.display = corresponde || termo === "" ? "" : "none";
+    });
   });
 }
+  // --- CONTRATE UM ARTISTA ---
+  else if (file === "contrateartista.html") {
+    const lista = document.getElementById("listaContrateArtista");
+    searchInput.addEventListener("input", () => {
+      const termo = searchInput.value.trim().toLowerCase();
+      const artistas = lista?.querySelectorAll("li") || [];
+      artistas.forEach(a => {
+        const nome = a.querySelector(".nomeArtista")?.textContent.toLowerCase() || "";
+        const user = a.querySelector(".nomeUserArtista")?.textContent.toLowerCase() || "";
+        const bio = a.querySelector(".bioArtista")?.textContent.toLowerCase() || "";
+        const tags = Array.from(a.querySelectorAll(".artistAreas .tag"))
+                          .map(t => t.textContent.toLowerCase())
+                          .join(" ");
+        const corresponde = [nome, user, bio, tags].some(t => t.includes(termo));
+        a.style.display = corresponde || termo === "" ? "" : "none";
+      });
+    });
+  }
+}
+
   });
   //Modal Editar Perfil
 const editButton = document.querySelector('.editProfile');
@@ -2369,7 +2348,7 @@ async function carregarEventosArtista(userId) {
             <p class="event-description">${ev.description || ""}</p>
 
             <div class="event-details">
-              <div>
+              <div class="event-elements">
                 <div class="event-date">
                   <img src="./icons/calendar-date-fill.svg" alt="">
                   <span>${dataBR}</span>
@@ -2379,7 +2358,7 @@ async function carregarEventosArtista(userId) {
                   <span>${ev.time || "Horário indefinido"}</span>
                 </div>
               </div>
-              <div class="event-classificacao">
+              <div class="event-classificacao event-elements">
                 <p><strong>Classificação:</strong> ${ev.classification || "Livre"}</p>
                 <div class="event-type" id="${ev.typeEvent?.toLowerCase() || "indefinido"}">
                   ${ev.typeEvent || "Indefinido"}
@@ -2636,3 +2615,148 @@ if (descInput && charCount) {
     }
   });
 });
+
+async function carregarCursosDoArtista(artistId) {
+  try {
+    const lista = document.getElementById("listaEventosECursos"); // ✅ unifica com eventos
+    if (!lista) return;
+
+    const usuario = JSON.parse(localStorage.getItem('usuario'));
+    const res = await fetch("http://localhost:3520/courses");
+    const data = await res.json();
+
+    if (!data.success || !Array.isArray(data.courses) || data.courses.length === 0) {
+      return;
+    }
+
+    // Filtra cursos do artista logado
+    const cursosDoArtista = data.courses.filter(curso => curso.artistId == artistId);
+
+    for (const curso of cursosDoArtista) {
+      let imageUrl = "";
+      try {
+        const linkRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(curso.link)}`);
+        const linkData = await linkRes.json();
+        imageUrl = linkData?.data?.image?.url || "./img/default-event.png";
+      } catch {
+        imageUrl = "./img/default-event.png";
+      }
+
+      const item = document.createElement("li");
+      const isOwner = usuario && parseInt(usuario.id) === parseInt(curso.artistId);
+
+      item.innerHTML = `
+        <div class="eventosECursos">
+          <div class="headerEventoCurso">
+            <h3 class="event-title">${curso.title}</h3>
+            <span class="tagEvento tagCurso">Curso</span>
+            ${isOwner ? `
+      <div class="event-actions">
+        <button class="edit-event" onclick="editarCurso(${curso.id})">
+          <img src="./icons/pencil-square.svg" alt="Editar">
+        </button>
+        <button class="delete-event" onclick="abrirModalExcluirCurso(${curso.id}, '${curso.title}')">
+          <img src="./icons/trash.svg" alt="Excluir">
+        </button>
+      </div>` : ""}
+          </div>
+
+          <div class="event-content">
+            <div class="event-image-container">
+              <img src="${imageUrl}" alt="Imagem do curso" class="event-image">
+            </div>
+
+            <p class="event-description">${curso.description}</p>
+
+            <div class="event-details">
+            <div class="event-elements">
+              <div class="event-date">
+                <img src="./icons/calendar-date-fill.svg" alt="Ícone de calendário">
+                <span>${new Date(curso.dateCourse).toLocaleDateString("pt-BR")}</span>
+              </div>
+              <div class="event-time">
+                <img src="./icons/clock-fill.svg" alt="Ícone de relógio">
+                <span>${curso.startTime} - ${curso.endTime}</span>
+              </div>
+            </div>
+            <div>
+              <div class="event-classificacao event-elements">
+                <p><strong>Classificação:</strong> ${curso.classification}</p>
+                <div class="event-duration">
+                <p><strong>Duração:</strong> ${curso.durationValue} ${curso.durationUnit}(s)</p>
+              </div>
+              </div>
+              <div class="event-type" id="${curso.typeCourse.toLowerCase()}">${curso.typeCourse}</div>
+              <div class="event-type" id="${curso.modeCourse?.toLowerCase()}">${curso.modeCourse || ''}</div>
+            </div>
+          </div>
+
+            <div class="event-button">
+              <a href="${curso.link}" target="_blank" class="btnIngresso">Acesse o curso</a>
+            </div>
+          </div>
+        </div>
+      `;
+      lista.appendChild(item);
+    }
+
+    setTimeout(() => {
+      const total = document.querySelectorAll("#listaEventosECursos .eventosECursos").length;
+      const countEl = document.getElementById("eventCourseCount");
+      if (countEl) countEl.textContent = `(${total})`;
+    }, 300);
+
+  } catch (err) {
+    console.error("Erro ao carregar cursos do artista:", err);
+  }
+}
+// === ABRIR MODAL DE EXCLUSÃO DE CURSO ===
+function abrirModalExcluirCurso(cursoId, tituloCurso) {
+  const modal = document.getElementById("modalExcluirCurso");
+  const tituloSpan = document.getElementById("tituloCursoModal");
+
+  if (tituloSpan) tituloSpan.textContent = tituloCurso || "este curso";
+
+  modal.classList.add("show");
+
+  // Armazena ID temporariamente no dataset do botão confirmar
+  const confirmarBtn = document.getElementById("confirmarExclusaoCurso");
+  confirmarBtn.dataset.id = cursoId;
+}
+// === CONFIRMAR E CANCELAR EXCLUSÃO DE CURSO ===
+
+// Cancelar exclusão
+document.getElementById("cancelarExclusaoCurso")?.addEventListener("click", () => {
+  document.getElementById("modalExcluirCurso").classList.remove("show");
+});
+
+// Confirmar exclusão
+document.getElementById("confirmarExclusaoCurso")?.addEventListener("click", async (e) => {
+  const cursoId = e.target.dataset.id;
+  if (!cursoId) return;
+
+  try {
+    const res = await fetch(`http://localhost:3520/courses/delete/${cursoId}`, {
+      method: "DELETE",
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      alert("Curso excluído com sucesso!");
+      document.getElementById("modalExcluirCurso").classList.remove("show");
+      window.location.reload();
+    } else {
+      alert(data.message || "Erro ao excluir curso.");
+    }
+  } catch (err) {
+    console.error("Erro ao excluir curso:", err);
+    alert("Erro ao excluir curso.");
+  }
+});
+// === EDITAR CURSO ===
+function editarCurso(cursoId) {
+  // Salva o ID do curso no localStorage para reutilizar na página criarCurso
+  localStorage.setItem("cursoEditandoId", cursoId);
+  // Redireciona para a página de criação de curso (modo edição)
+  window.location.href = "criarCurso.html?modo=editar";
+}

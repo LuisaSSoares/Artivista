@@ -720,33 +720,47 @@ app.delete('/events/delete/:id', (req, res) => {
 // **Cursos**
 // Rota POST para criar curso
 app.post('/courses/create', (req, res) => {
-  const { title, dateCourse, time, description, classification, typeCourse, participantsLimit, link, artistId } = req.body;
+  const {title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link, artistId } = req.body;
 
-  if (!title || !dateCourse || !time || !description || !classification || !typeCourse|| !participantsLimit || !link || !artistId) {
+  if (!title || !dateCourse || !startTime || !endTime || !description || !classification || !typeCourse || !modeCourse || !durationValue || !durationUnit || !link || !artistId) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    INSERT INTO courses (title, dateCourse, time, description, classification, typeCourse, participantsLimit, link, artistId)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO courses (
+      title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link, artistId
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(sql, [title, dateCourse, time, description, classification, typeCourse, participantsLimit, link, artistId], (err, result) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao criar curso.', error: err });
+  db.query(
+    sql, 
+    [title, dateCourse, startTime, endTime, description, classification,typeCourse, modeCourse, durationValue, durationUnit, link, artistId], 
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: 'Erro ao criar curso.', error: err });
+      }
+      res.status(201).json({ success: true, message: 'Curso criado com sucesso.', courseId: result.insertId });
     }
-
-    res.status(201).json({ success: true, message: 'Curso criado com sucesso.', courseId: result.insertId });
-  });
+  );
 });
 
 // Rota GET para listar todos os cursos
 app.get('/courses', (req, res) => {
-  const sql = 'SELECT * FROM courses ORDER BY dateCourse ASC';
+  const sql = `
+    SELECT 
+      c.*,
+      u.name AS artistName
+    FROM courses c
+    JOIN artists a ON c.artistId = a.id
+    JOIN users u ON a.userId = u.id
+    ORDER BY c.dateCourse ASC
+  `;
 
   db.query(sql, (err, results) => {
     if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao buscar cursos.' });
+      console.error("Erro ao buscar cursos:", err);
+      return res.status(500).json({ success: false, message: "Erro ao buscar cursos." });
     }
 
     res.json({ success: true, courses: results });
@@ -756,24 +770,27 @@ app.get('/courses', (req, res) => {
 // Rota PUT para editar curso
 app.put('/courses/edit/:id', (req, res) => {
   const { id } = req.params;
-  const { title, dateCourse, time, description, classification, participantsLimit, link } = req.body;
+  const { title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link } = req.body;
 
-  if (!title || !dateCourse || !time || !description || !classification || !participantsLimit || !link) {
+  if (!title || !dateCourse || !startTime || !endTime || !description || !classification || !typeCourse || !modeCourse || !durationValue || !durationUnit || !link) {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    UPDATE courses SET title = ?, dateCourse = ?, time = ?, description = ?, classification = ?, participantsLimit = ?, link = ?
+    UPDATE courses SET title = ?, dateCourse = ?, startTime = ?, endTime = ?, description = ?, classification = ?, typeCourse = ?, modeCourse = ?, durationValue = ?, durationUnit = ?, link = ?
     WHERE id = ?
   `;
 
-  db.query(sql, [title, dateCourse, time, description, classification, participantsLimit, link, id], (err, result) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao editar curso.' });
+  db.query(
+    sql, 
+    [title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link, id], 
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: 'Erro ao editar curso.' });
+      }
+      res.json({ success: true, message: 'Curso atualizado com sucesso.' });
     }
-
-    res.json({ success: true, message: 'Curso atualizado com sucesso.' });
-  });
+  );
 });
 
 // Rota DELETE para remover curso
@@ -1166,20 +1183,24 @@ app.delete('/comments/delete/:id', (req, res) => {
   });
 });
 
-// Busca de usuários
+
+// Busca de usuários (com 2 tags de atuação)
 app.get('/search/users', (req, res) => {
   const query = req.query.query?.trim();
   if (!query) return res.json({ success: false, message: "Termo de busca ausente." });
 
+  const like = `%${query}%`;
   const sql = `
-    SELECT id, name, userName, userType, profileImage
-    FROM users
-    WHERE name LIKE ? OR userName LIKE ?
-    ORDER BY name ASC
+    SELECT 
+      u.id, u.name, u.userName, u.userType, u.profileImage,
+      a.activity1, a.activity2
+    FROM users u
+    LEFT JOIN artists a ON a.userId = u.id
+    WHERE u.name LIKE ? OR u.userName LIKE ? OR a.activity1 LIKE ? OR a.activity2 LIKE ?
+    ORDER BY u.name ASC
   `;
-  const likeQuery = `%${query}%`;
 
-  db.query(sql, [likeQuery, likeQuery], (err, results) => {
+  db.query(sql, [like, like, like, like], (err, results) => {
     if (err) {
       console.error("Erro na busca de usuários:", err);
       return res.status(500).json({ success: false, message: "Erro ao buscar usuários." });
@@ -1188,55 +1209,83 @@ app.get('/search/users', (req, res) => {
   });
 });
 
-// Busca de postagens
+// Busca de postagens (com autor e mídias)
 app.get('/search/posts', (req, res) => {
   const query = req.query.query?.trim();
   if (!query) return res.json({ success: false, message: "Termo de busca ausente." });
 
+  const like = `%${query}%`;
   const sql = `
     SELECT 
-      p.id, p.title, p.description, p.artSection, p.createdAt,
-      u.name AS artistName, u.userName, u.profileImage
+      p.id, p.title, p.description, p.artSection,
+      u.name, u.userName, u.profileImage,
+      a.activity1, a.activity2,
+      i.img1, i.img2, i.img3, i.img4, i.img5
     FROM posts p
     JOIN artists a ON p.artistId = a.id
     JOIN users u ON a.userId = u.id
+    LEFT JOIN imageAndVideo i ON p.id = i.id_post
     WHERE p.title LIKE ? OR p.description LIKE ? OR u.name LIKE ?
-    ORDER BY p.id DESC
+    ORDER BY p.createdAt DESC
   `;
-  const likeQuery = `%${query}%`;
 
-  db.query(sql, [likeQuery, likeQuery, likeQuery], (err, results) => {
+  db.query(sql, [like, like, like], (err, results) => {
     if (err) {
-      console.error("Erro na busca de posts:", err);
+      console.error("Erro ao buscar posts:", err);
       return res.status(500).json({ success: false, message: "Erro ao buscar posts." });
     }
     res.json({ success: true, results });
   });
 });
 
-// Busca de eventos
-app.get('/search/events', (req, res) => {
+// Busca de eventos (todas as infos + autor, foto e tags de atuação)
+app.get('/search/events', async (req, res) => {
   const query = req.query.query?.trim();
-  if (!query) return res.json({ success: false, message: "Termo de busca ausente." });
+  if (!query)
+    return res.json({ success: false, message: "Termo de busca ausente." });
 
+  const like = `%${query}%`;
   const sql = `
     SELECT 
-      e.id, e.title, e.dateEvent, e.time, e.typeEvent, e.classification,
-      u.name AS artistName
+      e.id, e.title, e.description, e.classification, e.typeEvent,
+      e.dateEvent, e.time, e.link,
+      u.name AS artistName, u.userName, u.profileImage,
+      a.activity1, a.activity2
     FROM events e
     JOIN artists a ON e.artistId = a.id
     JOIN users u ON a.userId = u.id
-    WHERE e.title LIKE ? OR e.description LIKE ? OR u.name LIKE ?
-    ORDER BY e.dateEvent ASC
+    WHERE e.title LIKE ? 
+       OR e.description LIKE ? 
+       OR u.name LIKE ? 
+       OR a.activity1 LIKE ? 
+       OR a.activity2 LIKE ?
+    ORDER BY e.dateEvent ASC, e.time ASC
   `;
-  const likeQuery = `%${query}%`;
 
-  db.query(sql, [likeQuery, likeQuery, likeQuery], (err, results) => {
+  db.query(sql, [like, like, like, like, like], async (err, results) => {
     if (err) {
       console.error("Erro na busca de eventos:", err);
       return res.status(500).json({ success: false, message: "Erro ao buscar eventos." });
     }
-    res.json({ success: true, results });
+
+    // 🔎 Recupera imagem de preview do link de cada evento
+    const enhancedResults = await Promise.all(results.map(async (ev) => {
+      let imagePreview = null;
+
+      try {
+        if (ev.link) {
+          const metaRes = await fetch(`https://api.microlink.io?url=${encodeURIComponent(ev.link)}`);
+          const metaData = await metaRes.json();
+          imagePreview = metaData?.data?.image?.url || null;
+        }
+      } catch (e) {
+        console.warn("Erro ao obter imagem preview:", e.message);
+      }
+
+      return { ...ev, imagePreview };
+    }));
+
+    res.json({ success: true, results: enhancedResults });
   });
 });
 

@@ -1653,8 +1653,6 @@ body {
 }
 
 .postHeader img{
-  height: 23px;
-  width: 23px;
   object-fit: cover;
   margin-bottom: auto;
 }
@@ -2929,11 +2927,12 @@ input[type="time"] {
   box-shadow: 0 4px 12px rgba(56, 95, 54, 0.555);
   width: 240px;
   text-align: center;
+  min-height: 460px; /* mantém padrão sem forçar espaço interno */
+  justify-content: flex-start; /* impede o espaçamento excessivo */
   display: flex;
   flex-direction: column;
   align-items: center;
   transition: transform 0.3s ease;
-  justify-content: space-between;
 }
 
 .eventosECursos:hover {
@@ -2952,12 +2951,14 @@ input[type="time"] {
 /* Cabeçalho do card */
 .event-content {
   width: 90%;
+  flex-grow: 1; 
   color: #2C5712;
   text-align: left;
-  padding: 8px;
+  padding: 3px;
   display: flex;
+  justify-content: space-between;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .event-title {
@@ -3016,15 +3017,18 @@ input[type="time"] {
 
 /* Infos de data e hora */
 .event-details {
-  font-size: 12px;
+  font-size: 11px;
   display: flex;
   justify-content: space-between;
 }
 
-.separatorEventos{
-  display: flex;
-}
 
+.event-elements{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+}
 .event-date,
 .event-time {
   align-items: center;
@@ -3041,8 +3045,9 @@ input[type="time"] {
 .event-button {
   width: 100%;
   display: flex;
+  margin-top: auto;
+  padding-bottom: 15px;
   justify-content: center;
-  margin-top: 12px;
 }
 
 .btnIngresso {
@@ -3050,7 +3055,7 @@ input[type="time"] {
   color: #DCEEC8;
   font-weight: 600;
   font-size: 14px;
-  padding: 5px 3px;
+  padding: 5px 10px;
   text-align: center;
   border-radius: 30px;
   text-decoration: none;
@@ -3084,7 +3089,7 @@ input[type="time"] {
 }
 .event-type {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 5px;
   border-radius: 20px;
   font-weight: 600;
   color: white;
@@ -3272,5 +3277,291 @@ input#ticketLink.disabled[readonly] {
 
 .resultInfo span {
   font-size: 13px;
-  color: #4A4A4A;
+}
+
+.userHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tagsInline {
+  display: flex;
+  gap: 7px;
+}
+
+.tagsInline span{
+  padding: 2px 5px;
+  font-size: 10px;
+}
+
+
+
+.postResult {
+  background: #C3DEA5;
+  border-radius: 20px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.postHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.userSide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.postProfileImg {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #5F9104;
+  object-fit: cover;
+}
+
+.userLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.userLine .arroba {
+  color: #444;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.sectionName {
+  background-color: #5F9104;
+  color: white;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+/* Estrutura dos posts na aba de pesquisa do index */
+
+.postResultPesquisa {
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+
+}
+
+.postBodyPesquisa {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.mediaBoxPesquisa {
+  flex: 1 1 50%;
+  max-width: 480px;
+  min-width: 340px;
+}
+
+.mediaBoxPesquisa img.midiaSolo,
+.mediaBoxPesquisa video.midiaSolo {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.infoBoxPesquisa {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 260px;
+}
+
+.infoBoxPesquisa h3 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #2C5712;
+  margin: 0;
+}
+
+.infoBoxPesquisa p {
+  font-size: 15px;
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Ajuste dos carrosséis */
+.mediaBoxPesquisa .carousel {
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mediaBoxPesquisa .carousel-item img,
+.mediaBoxPesquisa .carousel-item video {
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.postBodyPesquisa .mediaBoxPesquisa .carousel-item img,
+.postBodyPesquisa .mediaBoxPesquisa .carousel-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+/* Eventos e cursos na aba de pesquisa do index*/
+.searchLayout .eventResult {
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.searchLayout .eventHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.searchLayout .eventArtist {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchLayout .eventProfileImg {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.searchLayout .eventArtistInfo .lineUser {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.searchLayout .eventArtistInfo .arroba {
+  color: #2C5712;
+  font-size: 12px;
+}
+
+.searchLayout .tagsInline {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.searchLayout .badgeEvento {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #5F9104;
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.searchLayout .eventBody {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 14px;
+}
+
+.searchLayout .eventCover {
+  width: 220px;
+  height: 220px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.searchLayout .eventText .eventTitle {
+  font-size: 18px;
+  margin: 0 0 6px 0;
+  color: #1f3d0d;
+}
+
+.searchLayout .eventText .eventDesc {
+  color: #2C5712;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.searchLayout .eventInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 10px;
+}
+
+.searchLayout .infoChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: white;
+  color: #2C5712;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.searchLayout .infoChip.gratuito { background: #489c17; border: 1px solid #5c8d2a; color: white;}
+.searchLayout .infoChip.pago { background: #9C5A17; border:1px solid #7f4812; color: white;}
+.eventoDestacado {
+  animation: eventoHighlight 2.5s ease-out;
+}
+
+@keyframes eventoHighlight {
+  0% { box-shadow: 0 0 0 rgba(239, 167, 16, 0); transform: scale(1); }
+  30% {transform: scale(1.10); }
+  100% { box-shadow: 0 0 0 rgba(239, 167, 16, 0); transform: scale(1); }
+}
+
+/* CURSOS */
+#online{
+  background-color: #ff6060;
+  border: 1px solid #eb3c3c;
+}
+
+#presencial{
+  background-color: #EFA710;
+  border: 1px solid #ac7808;
+}
+
+.durationInputs{
+  display: flex;
+  gap: 15px;
+}
+#durationUnit{
+  background-color: #4b7503;
+  padding: 5px;
+  color: white;
+  border: none;
+  border-radius: 10px;
+}
+
+.tagCurso{
+  background-color: #787D12;
+}
+.eventosECursos p {
+  margin-bottom: 0; /* ou outro valor menor, tipo 0.5rem */
+}
+
+#cancelarExclusaoCurso{
+  background-color: #aaa;
+  color: #fff;
 }

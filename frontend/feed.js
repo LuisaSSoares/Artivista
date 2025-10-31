@@ -6,6 +6,22 @@ function buildProfileUrl(filename) {
 document.addEventListener("DOMContentLoaded", async () => {
   const urlParams = new URLSearchParams(window.location.search);
   let tab = urlParams.get("tab");
+  const postId = urlParams.get("post");
+  if (tab) {
+    const allSections = document.querySelectorAll("section[data-tab]");
+    allSections.forEach(sec => sec.hidden = true);
+  
+    const selectedSection = document.querySelector(`section[data-tab="${tab}"]`);
+    if (selectedSection) selectedSection.hidden = false;
+  }
+  
+  if (postId) {
+    setTimeout(() => {
+      const post = document.querySelector(`[data-id="${postId}"]`);
+      if (post) post.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 1000);
+  }
+  
 
   // Normaliza o formato para camelCase (para bater com o HTML)
   const tabMap = {
@@ -272,6 +288,37 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (tryOpen() || tries >= 10) clearInterval(timer);
       }, 150);
     }
+  }
+  // === 🔍 Filtro local de pesquisa no feed ===
+  const searchInput = document.getElementById("buscaHome");
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      const termo = searchInput.value
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      // identifica a seção atualmente visível
+      const feedSection = document.querySelector("section[data-tab]:not([hidden])");
+      if (!feedSection) return;
+
+      const posts = feedSection.querySelectorAll(".postCard, .postMain");
+      posts.forEach(post => {
+        const titulo = post.querySelector(".postInfos h3")?.textContent
+          ?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || "";
+        const descricao = post.querySelector(".postInfos p")?.textContent
+          ?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || "";
+        const artista = post.querySelector("#name")?.textContent
+          ?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") || "";
+        const tags = Array.from(post.querySelectorAll(".tagsFeed .tag"))
+          .map(t => t.textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+          .join(" ");
+
+        const corresponde = [titulo, descricao, artista, tags].some(t => t.includes(termo));
+        post.style.display = corresponde || termo === "" ? "" : "none";
+      });
+    });
   }
 });
 
