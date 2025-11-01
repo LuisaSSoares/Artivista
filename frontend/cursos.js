@@ -1,5 +1,5 @@
 // === CADASTRO DE CURSOS ===
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("eventForm");
     const title = document.getElementById("titleEvent");
     const description = document.getElementById("descriptionEvent");
@@ -144,6 +144,81 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.location.pathname.includes("eventosECursos.html")) {
       carregarCursos();
     }
+    // === 🔁 VERIFICA SE ESTÁ EM MODO DE EDIÇÃO ===
+const params = new URLSearchParams(window.location.search);
+const modoEdicao = params.get("modo") === "editar";
+const cursoId = localStorage.getItem("cursoEditandoId");
+
+if (modoEdicao && cursoId) {
+  try {
+    const res = await fetch(`http://localhost:3520/courses/${cursoId}`);
+    const data = await res.json();
+
+    if (data.success && data.course) {
+      const curso = data.course;
+
+      // Preenche campos
+      document.getElementById("titleEvent").value = curso.title;
+      document.getElementById("descriptionEvent").value = curso.description;
+      document.getElementById("classification").value = curso.classification;
+      const dateField = document.getElementById("dateEvent");
+      if (curso.dateCourse) {
+        const dataISO = new Date(curso.dateCourse);
+        const dataFormatada = dataISO.toISOString().split("T")[0]; // mantém só YYYY-MM-DD
+        dateField.value = dataFormatada;
+      }      document.getElementById("startTime").value = curso.startTime;
+      document.getElementById("endTime").value = curso.endTime;
+      document.getElementById("durationValue").value = curso.durationValue ?? "";
+      document.getElementById("durationUnit").value = curso.durationUnit ?? "";
+
+      // Exibe imagem prévia do link
+      const previewArea = document.getElementById("previewArea");
+      try {
+        const linkRes = await fetch(`https://api.microlink.io/?url=${encodeURIComponent(curso.link)}`);
+        const linkData = await linkRes.json();
+        const imageUrl = linkData?.data?.image?.url;
+        if (imageUrl) {
+          previewArea.innerHTML = `<img src="${imageUrl}" alt="Prévia do curso">`;
+        }
+      } catch {
+        previewArea.innerHTML = `<span>Não foi possível carregar a prévia.</span>`;
+      }
+
+      // Desativa campos não editáveis
+      document.getElementById("dateEvent").disabled = true;
+      document.getElementById("ticketLink").disabled = true;
+      // === Recupera tipo e modalidade salvos ===
+        typeOptions.forEach(tag => {
+            if (tag.dataset.type === curso.typeCourse) {
+                tag.classList.add("active");
+            } else {
+                tag.classList.remove("active");
+            }
+            tag.disabled = true; // impede alterações
+        });
+
+        modeOptions.forEach(tag => {
+            if (tag.dataset.mode === curso.modeCourse) {
+                tag.classList.add("active");
+            } else {
+                tag.classList.remove("active");
+            }
+            tag.disabled = true; // impede alterações
+        });
+
+
+      // Troca o texto e comportamento do botão
+      const btnSubmit = document.querySelector(".submitBtn");
+      btnSubmit.textContent = "Republicar curso";
+      btnSubmit.onclick = async (e) => {
+        e.preventDefault();
+        await republicarCurso(cursoId);
+      };
+    }
+  } catch (err) {
+    console.error("Erro ao carregar curso para edição:", err);
+  }
+}
   });
   
   // === FUNÇÃO DE LISTAGEM DE CURSOS ===
@@ -225,4 +300,42 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Erro ao carregar cursos:", err);
     }
   }
+
+  async function republicarCurso(id) {
+    const title = document.getElementById("titleEvent").value.trim();
+    const description = document.getElementById("descriptionEvent").value.trim();
+    const classification = document.getElementById("classification").value;
+  
+    // novos (mantêm editáveis)
+    const startTime = document.getElementById("startTime").value;
+    const endTime   = document.getElementById("endTime").value;
+    const durationValue = document.getElementById("durationValue").value;
+    const durationUnit  = document.getElementById("durationUnit").value;
+  
+    const body = {
+      title,
+      description,
+      classification,
+      startTime,
+      endTime,
+      durationValue,
+      durationUnit
+    };
+  
+    const res = await fetch(`http://localhost:3520/courses/edit/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+  
+    const data = await res.json();
+    if (data.success) {
+      alert("Curso republicado com sucesso!");
+      localStorage.removeItem("cursoEditandoId");
+      window.location.href = "perfil.html";
+    } else {
+      alert(data.message || "Erro ao republicar curso.");
+    }
+  }
+  
   

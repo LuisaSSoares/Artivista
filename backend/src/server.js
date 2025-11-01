@@ -767,31 +767,50 @@ app.get('/courses', (req, res) => {
   });
 });
 
+// === Rota GET para buscar 1 curso por ID ===
+app.get('/courses/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'SELECT * FROM courses WHERE id = ?';
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error('Erro ao buscar curso:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao buscar curso.' });
+    }
+
+    if (results.length === 0)
+      return res.status(404).json({ success: false, message: 'Curso não encontrado.' });
+
+    res.json({ success: true, course: results[0] });
+  });
+});
+
+
+
 // Rota PUT para editar curso
 app.put('/courses/edit/:id', (req, res) => {
   const { id } = req.params;
-  const { title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link } = req.body;
+  const { title, description, classification, startTime, endTime, durationValue, durationUnit } = req.body;
 
-  if (!title || !dateCourse || !startTime || !endTime || !description || !classification || !typeCourse || !modeCourse || !durationValue || !durationUnit || !link) {
-    return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  if (!title || !description || !classification) {
+    return res.status(400).json({ success: false, message: 'Campos obrigatórios devem ser preenchidos.' });
   }
 
   const sql = `
-    UPDATE courses SET title = ?, dateCourse = ?, startTime = ?, endTime = ?, description = ?, classification = ?, typeCourse = ?, modeCourse = ?, durationValue = ?, durationUnit = ?, link = ?
+    UPDATE courses 
+    SET title = ?, description = ?, classification = ?, startTime = ?, endTime = ?, durationValue = ?, durationUnit = ?
     WHERE id = ?
   `;
 
-  db.query(
-    sql, 
-    [title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link, id], 
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ success: false, message: 'Erro ao editar curso.' });
-      }
-      res.json({ success: true, message: 'Curso atualizado com sucesso.' });
+  db.query(sql, [title, description, classification, startTime, endTime, durationValue, durationUnit, id], (err, result) => {
+    if (err) {
+      console.error("Erro ao editar curso:", err);
+      return res.status(500).json({ success: false, message: 'Erro ao editar curso.' });
     }
-  );
+    res.json({ success: true, message: 'Curso atualizado com sucesso.' });
+  });
 });
+
 
 // Rota DELETE para remover curso
 app.delete('/courses/delete/:id', (req, res) => {
