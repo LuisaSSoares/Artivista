@@ -255,53 +255,81 @@ const atividades = [
       sugestoesLista.style.display = "none";
     }
   });
+  const servicoCheckbox = document.getElementById('servico');
+  const telefoneContainer = document.getElementById('telefoneContainer');
+  const telefoneInput = document.getElementById('telefone');
+if (telefoneInput) {
+  telefoneInput.addEventListener('input', (e) => {
+    let v = e.target.value.replace(/\D/g, ''); // remove tudo que não for número
+    if (v.length > 11) v = v.slice(0, 11); // limita a 11 dígitos
 
-  async function salvarArtista() {
-    const userId = localStorage.getItem('userId');
-    const service = document.getElementById('servico').checked ? 'sim' : 'não';
-  
-    const activity1 = selecionadas[0] || null;
-    const activity2 = selecionadas[1] || null;
-  
-    const areaInput = document.getElementById('buscaArea');
-  
-    if (!activity1) {
-      areaInput.setCustomValidity("Por favor, informe ao menos uma área de atuação.");
-      areaInput.reportValidity();
-      return;
-    } else {
-      areaInput.setCustomValidity("");
+    if (v.length > 6) {
+      e.target.value = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+    } else if (v.length > 2) {
+      e.target.value = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+    } else if (v.length > 0) {
+      e.target.value = `(${v}`;
     }
-  
-    const dadosArtista = {
-      service,
-      userId,
-      activity1,
-      activity2,
-      links: linksExternos
-    };
-  
-    try {
-      const response = await fetch('http://localhost:3520/artist/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`},
-        body: JSON.stringify(dadosArtista)
-      });
-  
-      let data = {};
-      const contentType = response.headers.get("content-type");
-  
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      }
-  
-      if (response.ok) {
-        window.location.href = 'index.html';
-      } else {
-        alert('Erro: ' + (data.message || 'Erro ao cadastrar artista.'));
-      }
-    } catch (error) {
-      alert('Erro na requisição: ' + error.message);
-    }
+  });
+}
+
+if (servicoCheckbox && telefoneContainer) {
+  servicoCheckbox.addEventListener('change', () => {
+    telefoneContainer.style.display = servicoCheckbox.checked ? 'block' : 'none';
+  });
+}
+
+async function salvarArtista() {
+  const userId = localStorage.getItem('userId');
+  const service = document.getElementById('servico').checked ? 'sim' : 'não';
+  const phone = document.getElementById('telefone')?.value.trim() || null; // ✅ novo
+
+  const activity1 = selecionadas[0] || null;
+  const activity2 = selecionadas[1] || null;
+
+  const areaInput = document.getElementById('buscaArea');
+
+  if (!activity1) {
+    areaInput.setCustomValidity("Por favor, informe ao menos uma área de atuação.");
+    areaInput.reportValidity();
+    return;
+  } else {
+    areaInput.setCustomValidity("");
   }
-  
+
+  // ✅ envia telefone só se o artista ativar a venda de serviço
+  const dadosArtista = {
+    service,
+    phone: service === 'sim' ? phone : null,
+    userId,
+    activity1,
+    activity2,
+    links: linksExternos
+  };
+
+  try {
+    const response = await fetch('http://localhost:3520/artist/register', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('authToken')}`
+      },
+      body: JSON.stringify(dadosArtista)
+    });
+
+    let data = {};
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      data = await response.json();
+    }
+
+    if (response.ok) {
+      window.location.href = 'index.html';
+    } else {
+      alert('Erro: ' + (data.message || 'Erro ao cadastrar artista.'));
+    }
+  } catch (error) {
+    alert('Erro na requisição: ' + error.message);
+  }
+}

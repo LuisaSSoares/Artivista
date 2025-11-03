@@ -2919,6 +2919,8 @@ input[type="time"] {
   list-style: none;
   justify-content: center;
   gap: 20px;
+  height: 40vh;
+  overflow-y: auto;
 }
 
 .eventosECursos{
@@ -3105,7 +3107,6 @@ input[type="time"] {
 
 #listaEventosECursos .noPublicationSpan {
   position: absolute;
-  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -3564,4 +3565,335 @@ input#ticketLink.disabled[readonly] {
 #cancelarExclusaoCurso{
   background-color: #aaa;
   color: #fff;
+}
+
+#telefone{
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid #2C5712;
+}
+
+.perfilBox {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border-radius: 15px;
+  background:radial-gradient(
+    circle at bottom,#C3DEA5 70%, #a2c76d 80%,#5F9104 100%)
+}
+
+.perfilBox img {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  border: 1px solid #2C5712;
+  object-fit: cover;
+}
+
+.perfilInfo {
+  display: flex;
+  gap: 6px;
+  color: #2C5712;
+  align-items: flex-start;
+}
+.tipoPerfil {
+  align-items: center;
+  justify-content: center;
+  background: #7E7E7E;
+  color: white;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 4px 14px;
+  box-shadow: 0 3px 6px rgba(95,145,4,0.4);
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+#nomeUsuario{
+  font-weight: 600;
+}
+#btnTornarArtista {
+  margin-left: auto;
+  background: #2C5712;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.configSection {
+  margin-top: 25px;
+  color: #2C5712;
+}
+
+.configSection h3{
+  font-weight: 600;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.toggle input {
+  display: none;
+}
+
+.toggle .slider {
+  width: 40px;
+  height: 20px;
+  border-radius: 20px;
+  background: #ccc;
+  position: relative;
+  transition: 0.3s;
+}
+
+.toggle input:checked + .slider {
+  background: #5F9104;
+}
+
+.toggle .slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: 0.3s;
+}
+
+.toggle input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.configActions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.configActions button {
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  font-size: 15px;
+  transition: all 0.25s ease-in-out;
+}
+
+
+.btnSalvar {
+  width: 80%;
+  background: #5F9104;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+.btnSalvar:hover {
+  background-color: #4a7403;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(95, 145, 4, 0.4);
+}
+
+.btnSair {
+  width: 50%;
+  background: #888;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+}
+.btnSair:hover {
+  background-color: #bcbcbc;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(150, 150, 150, 0.4);
+}
+
+.btnExcluir {
+  width: 50%;
+  background: #E53E10;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+}
+.btnExcluir:hover {
+  background-color: #8b1414;
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(166, 25, 25, 0.4);
+}
+
+.configSection h1{
+  display: flex;
+  justify-self: center;
+  color: #2C5712;
+  font-weight: 500;
+  padding: 15px;
+}
+.configSection hr{
+  color: #6fa014;
+}
+
+
+.linksList .linkItem {
+  display: flex;
+  text-decoration: none;
+  align-items: center;
+  gap: 6px;
+  background-color: #e5f1d8;
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: #2C5712;
+  transition: background-color 0.25s ease;
+}
+
+.linksList .linkItem:hover {
+  background-color: #d8e9c5;
+}
+
+.linksList .linkItem img {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.linksList .removeLinkBtn {
+  color: #2C5712;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.linksList .removeLinkBtn:hover {
+  color: #a61919;
+  transform: scale(1.15) translateY(-1px);
+}
+
+.btnAddLink {
+  background-color: #5F9104;
+  color: #fff;
+  display: flex;
+  border: none;
+  align-items: center;
+  gap: 10px;
+  border-radius: 20px;
+  padding: 6px 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+}
+
+.btnAddLink img{
+  filter: brightness(0) invert(1);
+  height: 20px;
+  width: 20px;
+}
+
+.btnAddLink:hover {
+  background-color: #4A7503;
+  transform: scale(1.05);
+}
+#linksExternosContainer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  flex-direction: row;
+}
+.modalAddLink {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;    
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+
+.modalAddLink.show {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+}
+.modalAddLink .modal-content {
+  background: #f6f9f3;
+  border-radius: 16px;
+  width: 40vw;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  animation: slideUp .3s ease;
+  padding: 20px;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modalAddLink h3 {
+  color: #2C5712;
+  font-size: 18px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+.modalAddLink input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #b4ce9a;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+.modalAddLink .modal-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  gap: 20px;
+}
+.modalAddLink button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  cursor: pointer;
+}
+#cancelarAddLink { background: #888; color: #fff; }
+#salvarAddLink { background: #5F9104; color: #fff; }
+
+#cancelarAddLink:hover{
+  background-color: #5A5A5A;
+}
+#salvarAddLink:hover{
+  background-color: #3e6615;
+}
+
+#cancelarExclusao{
+  background-color: #888; 
+  color: white;
+}
+#cancelarExclusao:hover{
+  background-color: #5A5A5A;
+}
+#confirmarExclusao{
+  background:#a61919;
+  color:white;
+}
+#confirmarExclusao:hover{
+  background-color: #6e1010;
 }

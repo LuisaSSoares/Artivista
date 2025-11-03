@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     file.includes('eventosecursos') ? 'eventos' :
     file.includes('contrateartista') ? 'contrate' :
     file.includes('perfil') ? 'perfil' :
-    file.includes('conversas') ? 'conversas' :
+    // file.includes('conversas') ? 'conversas' :
     file.includes('configuracoes') ? 'configuracoes' :
     'home'
 
@@ -77,10 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
         menuLinks[0]?.classList.add('active'); //Primeiro link do menu (início) é destacado (como forma padrão)
       } else if (page === 'perfil') {
         menuLinks[1]?.classList.add('active');
-      } else if (page === 'conversas') {
-        menuLinks[2]?.classList.add('active');
       } else if (page === 'configuracoes') {
-        menuLinks[3]?.classList.add('active');
+        menuLinks[2]?.classList.add('active');
       }
     }
 
@@ -189,6 +187,35 @@ document.addEventListener('DOMContentLoaded', () => {
           a.appendChild(span);
           wrap.appendChild(a);
         });
+        // === Inserir botão do WhatsApp se o artista vende serviço ===
+        if (root && root.dataset.service === 'sim' && root.dataset.phone) {
+          const whatsapp = document.createElement('a');
+          whatsapp.href = `https://wa.me/55${root.dataset.phone.replace(/\D/g, '')}`;
+          whatsapp.target = '_blank';
+          whatsapp.rel = 'noopener noreferrer';
+          whatsapp.className = 'linkItem whatsappLink';
+
+          // Função para formatar número (00) 00000-0000
+          const formatarTelefone = (num) => {
+            const v = num.replace(/\D/g, '');
+            if (v.length >= 11)
+              return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7, 11)}`;
+            if (v.length >= 10)
+              return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6, 10)}`;
+            return num;
+          };
+
+          const telefoneFormatado = formatarTelefone(root.dataset.phone);
+
+          whatsapp.innerHTML = `
+    <img src="https://www.google.com/s2/favicons?sz=64&domain_url=https://whatsapp.com" 
+         alt="WhatsApp" 
+         style="width:16px; height:16px; margin-right:8px;">
+    <span>WhatsApp: ${telefoneFormatado}</span>
+  `;
+          wrap.appendChild(whatsapp);
+        }
+
       }
       
       // --- Função para renderizar perfil entre comum e artista com base nas infos do perfil (data)
@@ -204,6 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
         //Define a "raiz" (root) onde os elementos serão preenchidos. Se for artista, usa o container do artista, se não usa o do user comum
         const root = isArtist ? secArtista : secComum;
         if (!root) return; //Se não encontrar o container, para a função
+
+        if (root) {
+          root.dataset.service = data.service || 'não';
+          root.dataset.phone = data.phone || '';
+        }
 
         // Preenche o nome, username e bio.
         setText(qs('#nomeUsuario', root), data?.name || 'Usuário'); //Busca dentro do root o ID, pega o nome do user logado no data e substitui o texto. Caso não existir, mantém o 'Usuário"
@@ -279,6 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
               profileImage: data.profileImage,
               activity1: data.activity1,
               activity2: data.activity2,
+              service: data.service, // ✅ adiciona isto
+              phone: data.phone,     // ✅ e isto
               links: [data.link1, data.link2, data.link3].filter(Boolean) //Junta os links externos em um array, removendo valores nulos/vazios
             });
           })
@@ -314,6 +348,20 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarContagemFavoritosPorSecao();
         carregarEventosArtista(parseInt(viewedId));
         carregarCursosDoArtista(parseInt(viewedId));
+      }
+      if (!isOwner) {
+        const navBar = document.querySelector('.navBar');
+        const indicator = navBar?.querySelector('.indicator');
+        const activeLink = navBar?.querySelector('a.active') || navBar?.querySelector('a');
+      
+        if (navBar && indicator && activeLink) {
+          // garante que o link ativo fique preto e o indicador verde apareça
+          activeLink.classList.add('active');
+          const rect = activeLink.getBoundingClientRect();
+          const navRect = navBar.getBoundingClientRect();
+          indicator.style.left = `${rect.left - navRect.left}px`;
+          indicator.style.width = `${rect.width}px`;
+        }
       }
     }
 // --- Exibe postagens do usuário logado na aba "Postagens" ---
@@ -2431,7 +2479,10 @@ document.getElementById('confirmarExclusaoEvento')?.addEventListener('click', as
       if (typeof carregarEventos === 'function') carregarEventos(); // eventosECursos.html
       if (typeof carregarEventosArtista === 'function') {
         const usuario = JSON.parse(localStorage.getItem("usuario"));
-        if (usuario?.id) carregarEventosArtista(usuario.id); // perfil.html
+        if (usuario?.id) {
+          carregarEventosArtista(usuario.id);
+          carregarCursosDoArtista(usuario.id); 
+        } // perfil.html
       }
 
       // remove o card do evento atual sem reload
@@ -2618,10 +2669,26 @@ if (descInput && charCount) {
 
 async function carregarCursosDoArtista(artistId) {
   try {
-    const lista = document.getElementById("listaEventosECursos"); // ✅ unifica com eventos
+    const lista = document.getElementById("listaEventosECursos");
     if (!lista) return;
 
     const usuario = JSON.parse(localStorage.getItem('usuario'));
+
+    // 🔍 Corrige o artistId (caso userId ≠ artistId)
+    if (artistId) {
+      try {
+        const resArt = await fetch("http://localhost:3520/artists");
+        const dataArt = await resArt.json();
+
+        if (dataArt.success && Array.isArray(dataArt.artists)) {
+          const artista = dataArt.artists.find(a => a.userId == artistId);
+          if (artista) artistId = artista.id; // ✅ usa o ID real
+        }
+      } catch (err) {
+        console.error("Erro ao buscar ID do artista:", err);
+      }
+    }
+
     const res = await fetch("http://localhost:3520/courses");
     const data = await res.json();
 
@@ -2629,9 +2696,16 @@ async function carregarCursosDoArtista(artistId) {
       return;
     }
 
-    // Filtra cursos do artista logado
-    const cursosDoArtista = data.courses.filter(curso => curso.artistId == artistId);
-
+    // ✅ Agora esse filtro vai funcionar pra todos
+    const viewedUserId =
+    new URLSearchParams(location.search).get('id') ||
+    JSON.parse(localStorage.getItem('usuario'))?.id;
+  
+  // Filtre pelos cursos cujo DONO (userId) é o usuário do perfil
+  const cursosDoArtista = data.courses.filter(
+    (curso) => String(curso.userId) === String(viewedUserId)
+  );
+  
     for (const curso of cursosDoArtista) {
       let imageUrl = "";
       try {
@@ -2643,7 +2717,7 @@ async function carregarCursosDoArtista(artistId) {
       }
 
       const item = document.createElement("li");
-      const isOwner = usuario && parseInt(usuario.id) === parseInt(curso.artistId);
+      const isOwner = usuario && String(usuario.id) === String(curso.userId);
 
       item.innerHTML = `
         <div class="eventosECursos">
@@ -2651,14 +2725,14 @@ async function carregarCursosDoArtista(artistId) {
             <h3 class="event-title">${curso.title}</h3>
             <span class="tagEvento tagCurso">Curso</span>
             ${isOwner ? `
-      <div class="event-actions">
-        <button class="edit-event" onclick="editarCurso(${curso.id})">
-          <img src="./icons/pencil-square.svg" alt="Editar">
-        </button>
-        <button class="delete-event" onclick="abrirModalExcluirCurso(${curso.id}, '${curso.title}')">
-          <img src="./icons/trash.svg" alt="Excluir">
-        </button>
-      </div>` : ""}
+              <div class="event-actions">
+                <button class="edit-event" onclick="editarCurso(${curso.id})">
+                  <img src="./icons/pencil-square.svg" alt="Editar">
+                </button>
+                <button class="delete-event" onclick="abrirModalExcluirCurso(${curso.id}, '${curso.title}')">
+                  <img src="./icons/trash.svg" alt="Excluir">
+                </button>
+              </div>` : ""}
           </div>
 
           <div class="event-content">
@@ -2669,27 +2743,27 @@ async function carregarCursosDoArtista(artistId) {
             <p class="event-description">${curso.description}</p>
 
             <div class="event-details">
-            <div class="event-elements">
-              <div class="event-date">
-                <img src="./icons/calendar-date-fill.svg" alt="Ícone de calendário">
-                <span>${new Date(curso.dateCourse).toLocaleDateString("pt-BR")}</span>
+              <div class="event-elements">
+                <div class="event-date">
+                  <img src="./icons/calendar-date-fill.svg" alt="Ícone de calendário">
+                  <span>${new Date(curso.dateCourse).toLocaleDateString("pt-BR")}</span>
+                </div>
+                <div class="event-time">
+                  <img src="./icons/clock-fill.svg" alt="Ícone de relógio">
+                  <span>${curso.startTime} - ${curso.endTime}</span>
+                </div>
               </div>
-              <div class="event-time">
-                <img src="./icons/clock-fill.svg" alt="Ícone de relógio">
-                <span>${curso.startTime} - ${curso.endTime}</span>
+              <div>
+                <div class="event-classificacao event-elements">
+                  <p><strong>Classificação:</strong> ${curso.classification}</p>
+                  <div class="event-duration">
+                    <p><strong>Duração:</strong> ${curso.durationValue} ${curso.durationUnit}(s)</p>
+                  </div>
+                </div>
+                <div class="event-type" id="${curso.typeCourse.toLowerCase()}">${curso.typeCourse}</div>
+                <div class="event-type" id="${curso.modeCourse?.toLowerCase()}">${curso.modeCourse || ''}</div>
               </div>
             </div>
-            <div>
-              <div class="event-classificacao event-elements">
-                <p><strong>Classificação:</strong> ${curso.classification}</p>
-                <div class="event-duration">
-                <p><strong>Duração:</strong> ${curso.durationValue} ${curso.durationUnit}(s)</p>
-              </div>
-              </div>
-              <div class="event-type" id="${curso.typeCourse.toLowerCase()}">${curso.typeCourse}</div>
-              <div class="event-type" id="${curso.modeCourse?.toLowerCase()}">${curso.modeCourse || ''}</div>
-            </div>
-          </div>
 
             <div class="event-button">
               <a href="${curso.link}" target="_blank" class="btnIngresso">Acesse o curso</a>
@@ -2710,6 +2784,7 @@ async function carregarCursosDoArtista(artistId) {
     console.error("Erro ao carregar cursos do artista:", err);
   }
 }
+
 // === ABRIR MODAL DE EXCLUSÃO DE CURSO ===
 function abrirModalExcluirCurso(cursoId, tituloCurso) {
   const modal = document.getElementById("modalExcluirCurso");

@@ -36,13 +36,13 @@
                 </div>
                 <img src="./icons/chevron-right.svg" alt="">
             </div>
-            <div class="navSections">
+            <!-- <div class="navSections">
                 <div>
                     <img src="./icons/chat-dots.svg" alt="">
                     <a href="./conversas.html">Conversas</a>
                 </div>
                 <img src="./icons/chevron-right.svg" alt="">
-            </div>
+            </div> -->
             <div class="navSections">
                 <div>
                     <img src="./icons/gear-fill.svg" alt="">
@@ -70,18 +70,18 @@
                       <div class="col-left">
                         <div class="formRow">
                           <label for="titleEvent">Título do evento</label>
-                          <input type="text" id="titleEvent" placeholder="Digite o título do evento" required>
+                          <input type="text" name="title" id="titleEvent" placeholder="Digite o título do evento" required>
                         </div>
             
                         <div class="formRow">
                           <label for="descriptionEvent">Descrição</label>
-                          <textarea id="descriptionEvent" rows="6" placeholder="Descreva o evento"></textarea>
+                          <textarea id="descriptionEvent" name="description" rows="6" placeholder="Descreva o evento"></textarea>
                           <span id="charCount" class="charCount">0 / 225</span>
                         </div>
             
                         <div class="formRow">
                           <label for="ticketLink">Link para ingresso</label>
-                          <input type="url" id="ticketLink" placeholder="https://www.site-do-evento.com/ingresso">
+                          <input type="url" name="ticketLink" id="ticketLink" placeholder="https://www.site-do-evento.com/ingresso">
                         </div>
                       </div>
             
@@ -89,7 +89,7 @@
                       <div class="col-right">
                         <div class="formGroup">
                           <label for="classification">Classificação indicativa</label>
-                          <select id="classification" required>
+                          <select id="classification" name="classification" required>
                             <option value="">Selecione</option>
                             <option value="livre">Livre</option>
                             <option value="12 anos">12 anos</option>
@@ -109,12 +109,12 @@
             
                         <div class="formGroup">
                           <label for="dateEvent">Data</label>
-                          <input type="date" id="dateEvent" required>
+                          <input type="date" id="dateEvent" name="date" required>
                         </div>
             
                         <div class="formGroup">
                           <label for="timeEvent">Horário</label>
-                          <input type="time" id="timeEvent" required>
+                          <input type="time" id="timeEvent" name="time" required>
                         </div>
                       </div>
                     </div>
@@ -133,6 +133,7 @@
         crossorigin="anonymous"></script>
     <script src="./script.js"></script>
     <script src="./eventos.js"></script>
+    <script src="./acessibilidade.js"></script>
 
 
 </body>

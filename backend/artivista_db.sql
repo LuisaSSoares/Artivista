@@ -16,6 +16,7 @@ profileImage varchar (255)
 create table artists(
 id int not null primary key auto_increment,
 service enum ('sim', 'não'),
+phone VARCHAR(20),
 userId int,
 activity1 varchar(100),
 activity2 varchar(100),

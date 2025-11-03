@@ -302,32 +302,44 @@ app.get("/users/list", (req, res) => {
   })
 
 //Rota DELETE para deletar user
-app.delete("/user/delete/:id", (req, res) => {
+app.delete("/user/delete/:id", async (req, res) => {
   const { id } = req.params;
 
-  // Primeiro apaga artistas relacionados
-  const deleteArtists = `DELETE FROM artists WHERE userId = ?`;
-  db.query(deleteArtists, [id], (err) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: "Erro ao remover artistas relacionados." });
+  try {
+    // 1️⃣ Busca o ID do artista (artists.id)
+    const [artistRows] = await db.promise().query("SELECT id FROM artists WHERE userId = ?", [id]);
+    const artistId = artistRows[0]?.id;
+
+    if (artistId) {
+      // 2️⃣ Apaga dependências de posts
+      await db.promise().query("DELETE FROM imageAndVideo WHERE id_post IN (SELECT id FROM posts WHERE artistId = ?)", [artistId]);
+      await db.promise().query("DELETE FROM likes WHERE postId IN (SELECT id FROM posts WHERE artistId = ?)", [artistId]);
+      await db.promise().query("DELETE FROM favorites WHERE postId IN (SELECT id FROM posts WHERE artistId = ?)", [artistId]);
+      await db.promise().query("DELETE FROM comments WHERE postId IN (SELECT id FROM posts WHERE artistId = ?)", [artistId]);
+      await db.promise().query("DELETE FROM posts WHERE artistId = ?", [artistId]);
+
+      // 3️⃣ Apaga eventos e cursos ligados ao artista
+      await db.promise().query("DELETE FROM events WHERE artistId = ?", [artistId]);
+      await db.promise().query("DELETE FROM courses WHERE artistId = ?", [artistId]);
+
+      // 4️⃣ Apaga o artista
+      await db.promise().query("DELETE FROM artists WHERE id = ?", [artistId]);
     }
 
-    // Depois apaga o usuário
-    const deleteUser = `DELETE FROM users WHERE id = ?`;
-    db.query(deleteUser, [id], (err2) => {
-      if (err2) {
-        return res.status(500).json({ success: false, message: "Erro ao excluir o usuário." });
-      }
+    // 5️⃣ Apaga o usuário
+    await db.promise().query("DELETE FROM users WHERE id = ?", [id]);
 
-      res.json({ success: true, message: "Usuário e artistas relacionados excluídos com sucesso." });
-    });
-  });
+    res.json({ success: true, message: "Usuário e todos os dados relacionados foram excluídos com sucesso." });
+  } catch (err) {
+    console.error("Erro ao excluir usuário:", err);
+    res.status(500).json({ success: false, message: "Erro interno ao excluir usuário.", error: err.message });
+  }
 });
-  
-//Rota POST para cadastrar artistas
+
+// Rota POST para cadastrar artistas (com telefone opcional)
 app.post('/artist/register', verificarToken, async (req, res) => {
-  const { service, activity1, activity2 = null, links = [] } = req.body;
-  const userId = req.user.id
+  const { service, phone, activity1, activity2 = null, links = [] } = req.body;
+  const userId = req.user.id;
 
   // Validação básica
   if (!service || !userId || !activity1) {
@@ -339,35 +351,102 @@ app.post('/artist/register', verificarToken, async (req, res) => {
   }
 
   try {
-    const userCheck = await db.promise().query('SELECT id FROM users WHERE id = ?', [userId]);
-    if (userCheck[0].length === 0) {
+    // Verifica se o usuário existe
+    const [userCheck] = await db.promise().query('SELECT id FROM users WHERE id = ?', [userId]);
+    if (userCheck.length === 0) {
       return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
     }
 
-    const [link1, link2, link3] = links.concat([null, null, null]); // garante 3 posições
-    const sql = `
-      INSERT INTO artists (service, userId, activity1, activity2, link1, link2, link3)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    
-    const [result] = await db.promise().query(sql, [service, userId, activity1, activity2, link1, link2, link3]);
+    // Garante 3 posições no array de links
+    const [link1, link2, link3] = links.concat([null, null, null]);
 
-    res.status(201).json({ success: true, message: 'Artista cadastrado com sucesso.', artistId: result.insertId });
+    // Se o artista não vende serviços, telefone fica nulo
+    const phoneValue = service === 'sim' ? phone : null;
+
+    // ✅ Agora insere o telefone junto
+    const sql = `
+      INSERT INTO artists (service, phone, userId, activity1, activity2, link1, link2, link3)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const [result] = await db.promise().query(sql, [
+      service,
+      phoneValue,
+      userId,
+      activity1,
+      activity2,
+      link1,
+      link2,
+      link3
+    ]);
+
+    res.status(201).json({
+      success: true,
+      message: 'Artista cadastrado com sucesso.',
+      artistId: result.insertId
+    });
 
   } catch (err) {
     console.error('Erro na rota /artist/register:', err);
-    res.status(500).json({ success: false, message: 'Erro interno no servidor.', error: err.message });
+    res.status(500).json({
+      success: false,
+      message: 'Erro interno no servidor.',
+      error: err.message
+    });
   }
-})
+});
 
-// Rota GET perfil simples
+// Rota PUT para atualizar numero de telefone e links
+app.put('/artist/updateConfig/:userId', (req, res) => {
+  const { userId } = req.params;
+  const { links = [], phone = null, service = "não" } = req.body;
+
+  if (!Array.isArray(links) || links.length > 3) {
+    return res.status(400).json({
+      success: false,
+      message: 'Links deve ser um array com até 3 URLs.'
+    });
+  }
+
+  const [link1, link2, link3] = links.concat([null, null, null]);
+
+  const sql = `
+    UPDATE artists 
+    SET phone = ?, link1 = ?, link2 = ?, link3 = ?, service = ?
+    WHERE userId = ?
+  `;
+
+  db.query(sql, [phone, link1, link2, link3, service, userId], (err) => {
+    if (err) {
+      console.error("Erro ao atualizar configurações do artista:", err);
+      return res.status(500).json({ success: false, message: "Erro ao atualizar configurações do artista." });
+    }
+
+    res.json({ success: true, message: "Configurações atualizadas com sucesso." });
+  });
+});
+
+// ✅ Rota GET perfil simples (atualizada com telefone)
 app.get('/profile/:id', (req, res) => {
   const userId = req.params.id;
 
   const sql = `
     SELECT 
-      u.id, u.name, u.userName, u.email, u.userType, u.bio, u.historia_arte, u.profileImage,
-      a.service, a.activity1, a.activity2, a.link1, a.link2, a.link3
+      u.id, 
+      u.name, 
+      u.userName, 
+      u.email, 
+      u.userType, 
+      u.bio, 
+      u.historia_arte, 
+      u.profileImage,
+      a.service, 
+      a.phone,          -- ✅ novo campo adicionado
+      a.activity1, 
+      a.activity2, 
+      a.link1, 
+      a.link2, 
+      a.link3
     FROM users u
     LEFT JOIN artists a ON a.userId = u.id
     WHERE u.id = ?
@@ -384,9 +463,17 @@ app.get('/profile/:id', (req, res) => {
       return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
     }
 
-    res.json({ success: true, data: results[0] });
+    const perfil = results[0];
+
+    // ✅ se o artista não vende serviço, o telefone não é retornado
+    if (perfil.service !== 'sim') {
+      delete perfil.phone;
+    }
+
+    res.json({ success: true, data: perfil });
   });
 });
+
 
 // Rota GET para listar os artistas que vendem serviços (com filtro opcional)
 app.get("/artists/list", (req, res) => {
@@ -649,17 +736,33 @@ app.post('/events/create', (req, res) => {
     return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
   }
 
-  const sql = `
-    INSERT INTO events (title, dateEvent, time, description, classification, typeEvent, link, artistId)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(sql, [title, dateEvent, time, description, classification, typeEvent, link, artistId], (err, result) => {
+  // 🔍 Corrige: busca o ID real do artista (tabela artists)
+  const sqlFindArtist = 'SELECT id FROM artists WHERE userId = ?';
+  db.query(sqlFindArtist, [artistId], (err, result) => {
     if (err) {
-      return res.status(500).json({ success: false, message: 'Erro ao criar evento.', error: err });
+      console.error('Erro ao buscar artista:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao buscar artista.' });
     }
 
-    res.status(201).json({ success: true, message: 'Evento criado com sucesso.', eventId: result.insertId });
+    if (result.length === 0) {
+      return res.status(400).json({ success: false, message: 'Perfil de artista não encontrado.' });
+    }
+
+    const realArtistId = result[0].id;
+
+    const sqlInsert = `
+      INSERT INTO events (title, dateEvent, time, description, classification, typeEvent, link, artistId)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sqlInsert, [title, dateEvent, time, description, classification, typeEvent, link, realArtistId], (err2, result2) => {
+      if (err2) {
+        console.error('Erro ao criar evento:', err2);
+        return res.status(500).json({ success: false, message: 'Erro ao criar evento.' });
+      }
+
+      res.status(201).json({ success: true, message: 'Evento criado com sucesso.', eventId: result2.insertId });
+    });
   });
 });
 
@@ -720,41 +823,92 @@ app.delete('/events/delete/:id', (req, res) => {
 // **Cursos**
 // Rota POST para criar curso
 app.post('/courses/create', (req, res) => {
-  const {title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link, artistId } = req.body;
+  const {
+    title,
+    dateCourse,
+    startTime,
+    endTime,
+    description,
+    classification,
+    typeCourse,
+    modeCourse,
+    durationValue,
+    durationUnit,
+    link,
+    artistId
+  } = req.body;
 
-  if (!title || !dateCourse || !startTime || !endTime || !description || !classification || !typeCourse || !modeCourse || !durationValue || !durationUnit || !link || !artistId) {
-    return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser preenchidos.' });
+  if (
+    !title || !dateCourse || !startTime || !endTime ||
+    !description || !classification || !typeCourse ||
+    !modeCourse || !durationValue || !durationUnit || !link || !artistId
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: 'Todos os campos obrigatórios devem ser preenchidos.'
+    });
   }
 
-  const sql = `
-    INSERT INTO courses (
-      title, dateCourse, startTime, endTime, description, classification, typeCourse, modeCourse, durationValue, durationUnit, link, artistId
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(
-    sql, 
-    [title, dateCourse, startTime, endTime, description, classification,typeCourse, modeCourse, durationValue, durationUnit, link, artistId], 
-    (err, result) => {
-      if (err) {
-        return res.status(500).json({ success: false, message: 'Erro ao criar curso.', error: err });
-      }
-      res.status(201).json({ success: true, message: 'Curso criado com sucesso.', courseId: result.insertId });
+  // 🔍 Busca o ID real do artista (tabela artists)
+  const sqlFindArtist = 'SELECT id FROM artists WHERE userId = ?';
+  db.query(sqlFindArtist, [artistId], (err, result) => {
+    if (err) {
+      console.error('Erro ao buscar artista:', err);
+      return res.status(500).json({ success: false, message: 'Erro ao buscar artista.' });
     }
-  );
+
+    if (result.length === 0) {
+      return res.status(400).json({ success: false, message: 'Perfil de artista não encontrado.' });
+    }
+
+    const realArtistId = result[0].id;
+
+    const sqlInsert = `
+      INSERT INTO courses (
+        title, dateCourse, startTime, endTime, description,
+        classification, typeCourse, modeCourse, durationValue,
+        durationUnit, link, artistId
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      sqlInsert,
+      [
+        title, dateCourse, startTime, endTime, description,
+        classification, typeCourse, modeCourse, durationValue,
+        durationUnit, link, realArtistId
+      ],
+      (err2, result2) => {
+        if (err2) {
+          console.error('Erro ao criar curso:', err2);
+          return res.status(500).json({ success: false, message: 'Erro ao criar curso.' });
+        }
+
+        res.status(201).json({
+          success: true,
+          message: 'Curso criado com sucesso.',
+          courseId: result2.insertId
+        });
+      }
+    );
+  });
 });
+
 
 // Rota GET para listar todos os cursos
 app.get('/courses', (req, res) => {
   const sql = `
     SELECT 
-      c.*,
-      u.name AS artistName
-    FROM courses c
-    JOIN artists a ON c.artistId = a.id
-    JOIN users u ON a.userId = u.id
-    ORDER BY c.dateCourse ASC
+    c.id, c.title, c.dateCourse, c.startTime, c.endTime, c.description,
+    c.classification, c.typeCourse, c.modeCourse, c.durationValue, c.durationUnit, c.link,
+    c.artistId,
+    u.id AS userId,     
+    u.name AS artistName
+  FROM courses c
+  JOIN artists a ON c.artistId = a.id
+  JOIN users u ON a.userId = u.id
+  ORDER BY c.dateCourse ASC
   `;
 
   db.query(sql, (err, results) => {

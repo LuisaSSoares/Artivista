@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artivista</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bellota+Text:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Julius+Sans+One&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Yeseva+One&display=swap" rel="stylesheet">
+  <link rel="icon" href="./icons/Artivista logo.png">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="backgroundHomepage"></div>
+        <div class="boxContainers">
+            <div class="containerMenu">
+                <img src="./components/ArtivistaLogo.png" id="logoMenu" alt="logo do Artivista">
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/house-fill.svg" alt="">
+                        <a href="./index.html">Início </a>                        
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/person-circle.svg" alt="">
+                        <a href="./perfil.html">Minha conta </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <!-- <div class="navSections">
+                    <div>
+                        <img src="./icons/chat-dots.svg" alt="">
+                        <a href="./conversas.html">Conversas</a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div> -->
+                <div class="navSections">
+                    <div>
+                        <img src="./icons/gear-fill.svg" alt="">
+                        <a href="./configuracoes.html">Configurações </a>
+                    </div>
+                    <img src="./icons/chevron-right.svg" alt="">
+                </div>
+                <div class="addContent" id="addContent">
+                    <a href="criacaoConteudo.html">
+                        <p>Criar novo conteúdo</p>
+                        <img src="./icons/plus-circle-fill.svg" alt="">
+                    </a>
+                </div>                    
+
+            </div>
+            <div class="containerContent">
+                <div class="configContainer">
+                    <section class="configSection perfilSection">
+                      <h1>Configurações</h1>
+                        <div class="perfilBox">
+                          <img id="fotoPerfil" src="./icons/person-circle.svg" alt="foto do perfil">
+                          <div class="perfilInfo">
+                            <div>
+                            <h3 id="nomeUsuario">Nome do Usuário</h3>
+                            <p id="username">@username</p>                         
+                            </div>
+                            <span id="tipoPerfil" class="tipoPerfil">Usuário</span>     
+                          </div>
+                          <button id="btnTornarArtista" class="btnTornarArtista">Tornar-se artista</button>
+                        </div>
+                      </section>
+              
+                      <!-- ACESSIBILIDADE -->
+                      <section class="configSection">
+                        <h3>Acessibilidade</h3>
+                        <label class="toggle">
+                          <input type="checkbox" id="leitorTela">
+                          <span class="slider"></span>
+                          Ativar leitura de tela para deficientes visuais
+                        </label>
+                        <hr>
+                      </section>
+              
+                      <!-- LINKS EXTERNOS (ARTISTA) -->
+                      <section id="secaoLinksExternos" class="configSection artistaOnly" hidden>
+                        <h3>Links externos</h3>
+                        <div id="linksExternosContainer">
+                          <button id="addLink" class="btnAddLink">
+                            <img src="./icons/plus-circle-fill.svg" alt="">
+                            Adicionar link</button>
+                        </div>
+                        <hr>
+                      </section>
+              
+                      <!-- SERVIÇO (ARTISTA) -->
+                      <section id="secaoServico" class="configSection artistaOnly" hidden>
+                        <h3>Serviço</h3>
+                        <label class="toggle">
+                          <input type="checkbox" id="venderServico">
+                          <span class="slider"></span>
+                          Vender serviços artísticos
+                        </label>
+              
+                        <div id="telefoneContainer" hidden>
+                          <label for="telefone">Número de telefone:</label>
+                          <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+                        </div>
+                      </section>
+              
+                      <!-- AÇÕES -->
+                      <section class="configActions">
+                        <button id="btnSalvar" class="btnSalvar">Salvar alterações</button>
+                        <button id="btnSair" class="btnSair">Sair da conta</button>
+                        <button id="btnExcluir" class="btnExcluir">Excluir conta</button>
+                      </section>
+                    </div>
+                  </div>
+            </div> 
+            <div id="modalAddLink" class="modalAddLink hidden">
+              <div class="modal-content">
+                <h3>Adicionar novo link</h3>
+                <input type="url" id="inputNovoLink" placeholder="Cole o link da plataforma" required>
+                <div class="modal-actions">
+                  <button id="cancelarAddLink">Cancelar</button>
+                  <button id="salvarAddLink">Salvar</button>
+                </div>
+              </div>
+            </div>
+            <div id="modalExcluirConta" class="modalAddLink hidden">
+              <div class="modal-content">
+                <h3>Excluir conta</h3>
+                <p>Tem certeza de que deseja excluir sua conta? Esta ação não poderá ser desfeita.</p>
+                <div class="modal-actions">
+                  <button id="cancelarExclusao">Cancelar</button>
+                  <button id="confirmarExclusao">Excluir</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="modal" id="guestLoginModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Acesso restrito:</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Você precisa estar logado para acessar seu perfil. Por favor, faça login ou cadastre-se</p>
+                    </div>
+                    <div class="modal-footer">
+                      <a href="./login.html" class="btn btn-secondary">Fazer login</a>
+                      <a href="./cadastro.html" class="btn btn-primary">Cadastre-se</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+  <script src="./script.js"></script>
+  <script src="./configuracoes.js"></script>
+  <script src="./acessibilidade.js"></script>
+</body>
+</html>
