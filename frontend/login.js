@@ -1,3 +1,17 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyDWFHyaIiYTt-s95TVzLLhyusJTtKrR-CU",
+  authDomain: "artivista-3c39b.firebaseapp.com",
+  projectId: "artivista-3c39b",
+  storageBucket: "artivista-3c39b.firebasestorage.app",
+  messagingSenderId: "227309624563",
+  appId: "1:227309624563:web:ebec5ceda520815b016b86",
+  measurementId: "G-HZTDV3CEWE"
+};
+
+// Inicializa o Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
 document.addEventListener('DOMContentLoaded', function () {
     const formElement = document.querySelector('.form');
     const btnCadastrar = document.querySelector('.cadastrar'); 
@@ -5,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const emailInput = document.getElementById('email');
     const senhaInput = document.getElementById('senha');
     const continueWithoutLoginLink = document.getElementById('continueWithoutLogin'); 
+    const btnGoogle = document.getElementById('btnGoogle');
   
     // Redireciona para cadastro
     btnCadastrar.addEventListener('click', function () {
@@ -35,6 +50,81 @@ document.addEventListener('DOMContentLoaded', function () {
       // Define o userType como 'guest'
       localStorage.setItem('userType', 'guest');
     });
+    if (btnGoogle && typeof firebase !== 'undefined') {
+      btnGoogle.addEventListener('click', signInWithGoogle);
+  }
+
+  function realizarLogin() {
+    const email = emailInput.value.trim();
+    const senha = senhaInput.value.trim();
+
+    // ... [Sua lógica de login com email/senha] ...
+  }
+
+  function validarEmail(email) {
+    const re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    return re.test(email);
+  }
+  
+  // ----------------------------------------------------
+  // 📌 NOVAS FUNÇÕES: Login Google e Comunicação com Backend
+  // ----------------------------------------------------
+  
+  function signInWithGoogle() {
+      if (typeof auth === 'undefined') {
+          console.error("Firebase Auth não está inicializado.");
+          return;
+      }
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      auth.signInWithPopup(provider)
+          .then((result) => {
+              const user = result.user;
+              console.log("Login com Google bem-sucedido:", user);
+              handleGoogleUserBackend(user);
+          })
+          .catch((error) => {
+              const errorMessage = error.message;
+              console.error("Erro no login com Google:", errorMessage);
+              alert("Erro ao entrar com o Google: " + errorMessage);
+          });
+  }
+
+  function handleGoogleUserBackend(firebaseUser) {
+      const backendUrl = `http://localhost:3520/auth/social-login`; 
+      
+      const userData = {
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || 'Google User',
+          firebaseUid: firebaseUser.uid 
+      };
+
+      fetch(backendUrl, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData),
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              sessionStorage.setItem('authToken', data.token);
+              localStorage.setItem('userId', data.user.id);
+              localStorage.setItem('usuario', JSON.stringify(data.user)); 
+              localStorage.setItem('userType', data.user.userType);
+              
+              window.location.href = 'index.html'; 
+          } else {
+              alert(data.message || "Erro ao processar login social no servidor.");
+          }
+      })
+      .catch(error => {
+          console.error('Erro na comunicação com o backend:', error);
+          alert('Erro de rede ao finalizar o login.');
+      });
+  }
   
     function realizarLogin() {
       const email = emailInput.value.trim();

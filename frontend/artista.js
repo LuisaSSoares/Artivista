@@ -324,11 +324,18 @@ async function salvarArtista() {
       data = await response.json();
     }
 
-    if (response.ok) {
-      window.location.href = 'index.html';
-    } else {
-      alert('Erro: ' + (data.message || 'Erro ao cadastrar artista.'));
-    }
+    if (response.ok && data.success) {
+      // SALVA o NOVO token e o objeto 'user' atualizado
+      if (data.token) {
+          sessionStorage.setItem('authToken', data.token); // Salva o novo token
+      }
+      if (data.user) {
+          // Atualiza os dados do usuário, incluindo o userType='artista'
+          localStorage.setItem('usuario', JSON.stringify(data.user)); 
+          localStorage.setItem('userType', data.user.userType); 
+      }
+      window.location.href = 'index.html'; // Redireciona
+  }
   } catch (error) {
     alert('Erro na requisição: ' + error.message);
   }

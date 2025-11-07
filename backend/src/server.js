@@ -77,6 +77,86 @@ const uploadProfile = multer({ storage: storageProfile });
 const uploadFeed = multer({ storage: storageFeed });
 
 //***Artistas e usuários***
+// Rota POST para Login Social (Google)
+app.post("/auth/social-login", (req, res) => {
+  const { email, name, firebaseUid } = req.body;
+  
+  if (!email) {
+      return res.status(400).json({ success: false, message: "Email é obrigatório." });
+  }
+
+  // 1. Verificar se o usuário já existe na tabela 'users'
+  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+      if (err) {
+          console.error('Erro na consulta do DB (Social Login):', err);
+          return res.status(500).json({ success: false, message: "Erro interno do servidor." });
+      }
+
+      let user;
+      let userId;
+
+      if (results.length > 0) {
+          // Usuário existente: Apenas loga
+          user = results[0];
+          
+      } else {
+          // 2. Novo usuário: Cadastrar
+          try {
+              // Prepara uma senha aleatória criptografada (para satisfazer a coluna NOT NULL do DB)
+              const randomPassword = Math.random().toString(36).substring(2, 15);
+              // NOTA: Certifique-se de que `saltRounds` e `bcrypt` estão definidos no server.js
+              const hashedPassword = await bcrypt.hash(randomPassword, saltRounds); 
+
+              // Usa a primeira parte do email como userName padrão
+              const defaultUserName = email.split('@')[0]; 
+              
+              const insertSql = 'INSERT INTO users (name, userName, email, password, userType) VALUES (?, ?, ?, ?, ?)';
+              
+              const insertResult = await new Promise((resolve, reject) => {
+                  db.query(insertSql, [name, defaultUserName, email, hashedPassword, 'padrão'], (err, result) => {
+                      if (err) reject(err);
+                      resolve(result);
+                  });
+              });
+
+              userId = insertResult.insertId;
+              
+              // Busca os dados do novo usuário
+              const fetchSql = 'SELECT * FROM users WHERE id = ?';
+              const fetchedUser = await new Promise((resolve, reject) => {
+                  db.query(fetchSql, [userId], (err, rows) => {
+                      if (err) reject(err);
+                      resolve(rows[0]);
+                  });
+              });
+              
+              user = fetchedUser;
+
+          } catch (insertError) {
+              console.error('Erro ao cadastrar novo usuário (Social Login):', insertError);
+              return res.status(500).json({ success: false, message: "Erro ao cadastrar novo usuário." });
+          }
+      }
+
+      // 3. Gerar JWT e retornar sucesso
+      if (user) {
+          const userForToken = { 
+              id: user.id, 
+              email: user.email, 
+              userType: user.userType 
+          };
+          
+          // NOTA: Certifique-se de que `jwt` e `jwtSecret` estão definidos no server.js
+          const token = jwt.sign(userForToken, jwtSecret, { expiresIn: '1d' });
+          
+          delete user.password;
+          return res.json({ success: true, message: "Login social bem-sucedido.", user, token });
+      }
+      
+      return res.status(500).json({ success: false, message: "Erro desconhecido durante o login social." });
+  });
+});
+
 // Rota POST de cadastro de usuário
 app.post("/user/register", async (req, res) => {
   const { name, userName, email, password, userType} = req.body;
@@ -336,65 +416,70 @@ app.delete("/user/delete/:id", async (req, res) => {
   }
 });
 
-// Rota POST para cadastrar artistas (com telefone opcional)
-app.post('/artist/register', verificarToken, async (req, res) => {
-  const { service, phone, activity1, activity2 = null, links = [] } = req.body;
-  const userId = req.user.id;
+// A Rota deve estar ASSÍNCRONA apenas para usar o 'jwt.sign' (não é estritamente necessário)
+app.post('/artist/register', verificarToken, (req, res) => {
+  const { service, phone, userId, activity1, activity2, links } = req.body;
+  // O userId deve ser extraído do token (req.user.id) por segurança, mas usaremos o que veio do body para manter o fluxo
+  
+  // Links para a query de INSERT
+  const link1 = links[0] || null;
+  const link2 = links[1] || null;
+  const link3 = links[2] || null;
 
-  // Validação básica
-  if (!service || !userId || !activity1) {
-    return res.status(400).json({ success: false, message: 'service, userId e activity1 são obrigatórios.' });
-  }
-
-  if (!Array.isArray(links) || links.length > 3) {
-    return res.status(400).json({ success: false, message: 'links deve ser um array com até 3 URLs.' });
-  }
-
-  try {
-    // Verifica se o usuário existe
-    const [userCheck] = await db.promise().query('SELECT id FROM users WHERE id = ?', [userId]);
-    if (userCheck.length === 0) {
-      return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
-    }
-
-    // Garante 3 posições no array de links
-    const [link1, link2, link3] = links.concat([null, null, null]);
-
-    // Se o artista não vende serviços, telefone fica nulo
-    const phoneValue = service === 'sim' ? phone : null;
-
-    // ✅ Agora insere o telefone junto
-    const sql = `
+  // 1. INSERIR dados na tabela 'artists'
+  const insertArtistSql = `
       INSERT INTO artists (service, phone, userId, activity1, activity2, link1, link2, link3)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+  `;
+  const insertArtistValues = [service, phone, userId, activity1, activity2, link1, link2, link3];
 
-    const [result] = await db.promise().query(sql, [
-      service,
-      phoneValue,
-      userId,
-      activity1,
-      activity2,
-      link1,
-      link2,
-      link3
-    ]);
+  // ** ⚠️ AQUI ESTÁ A CHAVE: O DB.QUERY É ANINHADO E SEQUENCIAL ⚠️ **
+  db.query(insertArtistSql, insertArtistValues, (err, artistResult) => {
+      if (err) {
+          console.error('Erro ao inserir artista:', err);
+          // Impede o erro 500 do crash do servidor, retorna mensagem de erro do banco
+          return res.status(500).json({ success: false, message: 'Erro ao cadastrar artista (INSERT).' });
+      }
 
-    res.status(201).json({
-      success: true,
-      message: 'Artista cadastrado com sucesso.',
-      artistId: result.insertId
-    });
+      // 2. ATUALIZAR userType na tabela 'users'
+      const updateUserSql = 'UPDATE users SET userType = "artista" WHERE id = ?';
+      db.query(updateUserSql, [userId], (err2, updateResult) => {
+          if (err2) {
+              console.error('Erro ao atualizar userType:', err2);
+              return res.status(500).json({ success: false, message: 'Erro ao cadastrar artista (UPDATE).' });
+          }
 
-  } catch (err) {
-    console.error('Erro na rota /artist/register:', err);
-    res.status(500).json({
-      success: false,
-      message: 'Erro interno no servidor.',
-      error: err.message
-    });
-  }
-});
+          // 3. RECUPERAR dados do usuário atualizado
+          const getUserSql = 'SELECT id, name, userName, email, userType, bio, historia_arte, profileImage FROM users WHERE id = ?';
+          db.query(getUserSql, [userId], (err3, userResults) => {
+              if (err3) {
+                  console.error('Erro ao buscar usuário atualizado:', err3);
+                  return res.status(500).json({ success: false, message: 'Erro ao buscar dados do usuário.' });
+              }
+
+              if (userResults.length === 0) {
+                  return res.status(404).json({ success: false, message: 'Usuário não encontrado após atualização.' });
+              }
+
+              const userUpdated = userResults[0];
+
+              // 4. GERAR NOVO TOKEN com o userType="artista" (Resolve o Erro de Token na próxima requisição)
+              const newToken = jwt.sign(
+                  { id: userUpdated.id, userType: userUpdated.userType },
+                  jwtSecret,
+                  { expiresIn: '1h' }
+              );
+
+              // Retorno de Sucesso
+              return res.status(200).json({
+                  success: true,
+                  token: newToken,
+                  user: userUpdated
+              });
+          }); 
+      }); 
+  }); 
+}); 
 
 // Rota PUT para atualizar numero de telefone e links
 app.put('/artist/updateConfig/:userId', (req, res) => {

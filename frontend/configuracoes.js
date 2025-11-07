@@ -385,7 +385,6 @@ if (confirmarExclusao) {
     });
   }
   document.getElementById("btnTornarArtista").addEventListener("click", async () => {
-    await tornarUsuarioArtista();
     window.location.href = "artista.html";
   });
   });
