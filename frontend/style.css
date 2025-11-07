@@ -236,6 +236,15 @@ body {
   color: #fff;
 }
 
+#continueWithoutLogin{
+  transition: all 0.25s ease;
+}
+#continueWithoutLogin:hover{
+  transform: scale(1.02);
+  color: #1f3d0d;
+
+}
+
 /* Botão Google */
 .btnGoogle{
   padding: 5px;
@@ -244,6 +253,7 @@ body {
   width: auto;
   gap: 15px;
   color: #747171;
+  transition: all 0.25s ease;
 }
 
 .btnGoogle img{
@@ -251,6 +261,11 @@ body {
   width: 40px;
 }
 
+
+.btnGoogle:hover{
+  background-color: #c2bebe;
+  transform: scale(1.05);
+}
 /* Modal user guess (quando user entra sem fazer login) */
 #guestLoginModal {
   z-index: 1055 !important;
@@ -3623,6 +3638,12 @@ input#ticketLink.disabled[readonly] {
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+#btnTornarArtista:hover{
+  transform: scale(1.05);
+  background-color: #4a7403;
 }
 
 .configSection {

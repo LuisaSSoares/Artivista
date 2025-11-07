@@ -253,7 +253,6 @@ async function carregarEventos() {
 }
 
 // 🔄 Executa automaticamente na página de eventos
-// 🔄 Executa automaticamente na página de eventos
 if (window.location.pathname.includes("eventosECursos.html")) {
   carregarEventos().then(() => {
     const eventoDestacadoId = localStorage.getItem("eventoDestacado");
