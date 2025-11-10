@@ -165,14 +165,6 @@ async function carregarEventos() {
     const res = await fetch("http://localhost:3520/events");
     const result = await res.json();
 
-    // ✅ O array correto vem dentro de "events"
-    if (!result.success || !Array.isArray(result.events) || result.events.length === 0) {
-      listaEventos.innerHTML = `
-        <li><span class="noPublicationSpan"><span>Nenhum evento encontrado.</span></span></li>
-      `;
-      return;
-    }
-
     listaEventos.innerHTML = "";
 
     for (const evento of result.events) {
@@ -240,7 +232,8 @@ async function carregarEventos() {
         `;    
         listaEventos.appendChild(item);
         item.setAttribute("data-id", evento.id);
-      }      
+      } 
+      await verificarEventosECursos();     
   } catch (err) {
     console.error("Erro ao carregar eventos:", err);
     const listaEventos = document.getElementById("listaEventosECursos");

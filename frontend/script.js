@@ -346,8 +346,14 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarPostagensCurtidas();
         atualizarComentariosFeitos();
         atualizarContagemFavoritosPorSecao();
-        carregarEventosArtista(parseInt(viewedId));
-        carregarCursosDoArtista(parseInt(viewedId));
+        Promise.all([
+          carregarEventosArtista(parseInt(viewedId)),
+          carregarCursosDoArtista(parseInt(viewedId))
+        ]).then(() => {
+          if (typeof verificarEventosECursos === "function") {
+            verificarEventosECursos();
+          }
+        });
       }
       if (!isOwner) {
         const navBar = document.querySelector('.navBar');
@@ -2433,12 +2439,12 @@ async function carregarEventosArtista(userId) {
 
   } catch (err) {
     console.error("Erro ao carregar eventos do artista:", err);
-    lista.innerHTML = `
-      <div class="noPublicationSpan">
-        <img src="./icons/emoji-frown.svg" alt="">
-        <span>Erro ao carregar eventos.</span>
-      </div>`;
-    contador.textContent = "(0)";
+    // lista.innerHTML = `
+    //   <div class="noPublicationSpan">
+    //     <img src="./icons/emoji-frown.svg" alt="">
+    //     <span>Erro ao carregar eventos.</span>
+    //   </div>`;
+    // contador.textContent = "(0)";
   }
 }
 // Função pra EXCLUIR eventos
@@ -2834,4 +2840,29 @@ function editarCurso(cursoId) {
   localStorage.setItem("cursoEditandoId", cursoId);
   // Redireciona para a página de criação de curso (modo edição)
   window.location.href = "criarCurso.html?modo=editar";
+}
+async function verificarEventosECursos() {
+  const lista = document.getElementById("listaEventosECursos");
+  if (!lista) return;
+
+  // 🩹 CORREÇÃO: se ainda houver carregamento de cursos ou eventos, aguarde
+  if (window.location.pathname.includes("perfil")) {
+    // Espera um instante extra no perfil, pois os cursos e eventos carregam separados
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  const temEventos = lista.querySelectorAll(".tagEvento:not(.tagCurso)").length > 0;
+  const temCursos  = lista.querySelectorAll(".tagCurso").length > 0;
+
+  // Remove mensagens antigas
+  lista.querySelectorAll(".noPublicationSpan").forEach(el => el.remove());
+
+  if (!temEventos && !temCursos) {
+    lista.innerHTML = `
+      <div class="noPublicationSpan">
+        <img src="./icons/brush.svg" alt="">
+        <span>Nenhum evento ou curso cadastrado.</span>
+      </div>
+    `;
+  }
 }

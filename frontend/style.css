@@ -3094,16 +3094,19 @@ input[type="time"] {
   max-width: 115px; 
 }
 
-.tagEvento {
+.tagEvento, .tagCurso {
   position: relative;
   left: 80px;
-  background-color: #6fa014;
-  color: white;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: bold;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.tagEvento{
+  background-color: #6fa014;
+  color: white;
 }
 .event-type {
   display: inline-block;

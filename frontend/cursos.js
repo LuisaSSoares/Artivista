@@ -151,6 +151,8 @@ const cursoId = localStorage.getItem("cursoEditandoId");
 
 if (modoEdicao && cursoId) {
   try {
+    const titulo = document.querySelector("h1, .titleForm h1");
+    if (titulo) titulo.textContent = "Editar curso";
     const res = await fetch(`http://localhost:3520/courses/${cursoId}`);
     const data = await res.json();
 
@@ -230,13 +232,6 @@ if (modoEdicao && cursoId) {
       const res = await fetch("http://localhost:3520/courses");
       const data = await res.json();
   
-      if (!data.success || !Array.isArray(data.courses) || data.courses.length === 0) {
-        listaEventos.innerHTML = `
-          <li><span class="noPublicationSpan"><span>Nenhum curso encontrado.</span></span></li>
-        `;
-        return;
-      }
-  
       for (const curso of data.courses) {
         let imageUrl = "";
         try {
@@ -299,6 +294,7 @@ if (modoEdicao && cursoId) {
     } catch (err) {
       console.error("Erro ao carregar cursos:", err);
     }
+    await verificarEventosECursos();
   }
 
   async function republicarCurso(id) {
@@ -336,6 +332,5 @@ if (modoEdicao && cursoId) {
     } else {
       alert(data.message || "Erro ao republicar curso.");
     }
-  }
-  
+  } 
   
