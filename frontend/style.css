@@ -936,6 +936,7 @@ body {
   .containerContent {
     margin: 10px;
     padding: 15px;
+    padding-bottom: 90px;
     border-radius: 20px;
   }
 
@@ -4111,7 +4112,7 @@ input#ticketLink.disabled[readonly] {
       position: fixed;
       bottom: 0;
       left: 0;
-      z-index: 10;
+      z-index: 20;
       width: 100%;
       height: 80px;
       background: #DCE8D0;
@@ -4253,7 +4254,7 @@ input#ticketLink.disabled[readonly] {
 }
 
 #username{
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .dataPost{
@@ -4271,4 +4272,434 @@ input#ticketLink.disabled[readonly] {
 .tagsFeed{
   display: block;
 }
+
+.postReact button img{
+  width: 20px;
+  width: 20px;
+}
+
+.contadorComentarios, .contadorLikes{
+  font-size: 15px;
+}
+
+.postInfos h3{
+  font-size: 17px;
+}
+
+.commentHeader strong{
+  font-size: 13px;
+}
+.noPublicationSpan span{
+  text-align: center;
+  font-size: 13px;
+}
+}
+
+/* ========================================================= */
+/* RESPONSIVIDADE - EVENTOS E CURSOS (2 colunas fixas) */
+/* ========================================================= */
+@media (max-width: 600px) {
+
+  /* Grid com duas colunas fixas */
+  #listaEventosECursos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* exatamente 2 colunas */
+    gap: 14px;
+    padding: 0;
+    overflow-y: auto;
+    margin: 0;
+    list-style: none;
+  }
+
+  .eventosECursos{
+    width: 100%;
+    box-shadow: none
+  }
+
+  /* Cada item ocupa metade da tela */
+  #listaEventosECursos li {
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .event-autor{
+    font-size: 10px;
+  }
+
+  .event-title{
+    font-size: 15px;
+  }
+
+  .tagEvento, .tagCurso{
+    left: 50px;
+    padding: 2px 5px;
+    font-size: 10px;
+  }
+
+  /* Imagem do evento/curso */
+  .event-image-container img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+
+  /* Título e descrição */
+  .event-title {
+    font-size: 14px;
+    margin: 6px 8px 4px;
+  }
+
+  .event-description {
+    font-size: 12px;
+    margin: 0 8px 8px;
+    height: calc(1.2em * 3);
+  }
+
+  /* Infos adicionais */
+  .event-details {
+    font-size: 8px;
+    display: block;
+  }
+
+  .event-elements{
+    gap: 10px;
+  }
+  
+  .event-elements img{
+    width: 10px;
+    height: 10px;
+  }
+
+  .event-time, .event-duration{
+    margin-bottom: 10px;
+  }
+
+  .event-type{
+    padding: 2px 7px;
+  }
+
+  /* Botão */
+  .event-button {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .btnIngresso {
+    display: inline-block;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    text-decoration: none;
+  }
+}
+
+/* ========================================================= */
+/* RESPONSIVIDADE - CONTRATE UM ARTISTA (2 colunas fixas) */
+/* ========================================================= */
+@media (max-width: 600px) {
+
+  /* Lista de artistas em duas colunas */
+  #listaContrateArtista {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* exatamente 2 colunas */
+    gap: 14px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  /* Cada card de artista */
+  #listaContrateArtista li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contrateArtista {
+    width: 100%;
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    box-shadow: none;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .nomeArtista, .nomeUserArtista{
+    font-size: 14px;
+  }
+
+
+  #perfilArtistButton{
+    padding: 5px;
+    font-size: 13px;
+  }
+
+}
+
+/* RESPONSIVIDADE - config */
+@media (max-width: 600px) {
+  .configActions{
+    margin: 0;
+  }
+
+  .btnSalvar{
+    margin-bottom: 0;
+  }
+
+  #nomeUsuario{
+    font-size: 20px;
+  }
+}
+
+/* === RESPONSIVIDADE - CRIAÇÃO DE POSTS === */
+@media (max-width: 600px) {
+  .createPostTitle hr {
+    width: 70%;
+  }
+
+  .postDivider {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Quadrado de upload e carrossel */
+  .imagePlaceholder,
+  #previewCarousel,
+  #previewCarousel .carousel-inner,
+  #previewCarousel .carousel-item {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    aspect-ratio: 1 / 1;
+  }
+
+  /* Infos de postagem */
+  .postInfosCreate input,
+  .postInfosCreate textarea,
+  .postInfosCreate select {
+    width: 300px;
+    
+  }
+
+  .submitPost {
+    width: 80%;
+    max-width: 250px;
+    padding: 10px;
+    font-size: 15px;
+    margin: 0 auto;
+  }
+
+  /* Espaçamento e aparência geral */
+  .containerMenu {
+    width: 100%;
+    border-radius: 0;
+    margin: 0;
+    padding: 10px;
+  }
+}
+/* === RESPONSIVIDADE - CRIAÇÃO DE EVENTOS E CURSOS === */
+@media (max-width: 600px) {
+  .formGrid{
+    display: block;
+  }
+
+  .imagePreview{
+    width: 100%;
+  }
+}
+
+
+/* ====================================================== */
+/* RESPONSIVIDADE - PÁGINA DE PERFIL (até 600px) */
+/* ====================================================== */
+@media (max-width: 600px) {
+  .perfilContainer{
+    max-height: 100%;
+    margin: 0;
+  }
+  
+  .infos {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* alinha tudo à esquerda */
+    gap: 4px; /* espaço entre nome, tags e username */
+  }
+
+.linkItem{
+  padding: 3px 7px;
+  word-break: normal;
+}
+.linkItem span{
+  font-size: 9px;
+}
+  
+  /* Perfil principal */
+  .perfilSeparator {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+  }
+
+.perfilContainer .tag{
+  padding: 2px 7px;
+  font-size: 8px;
+}
+
+  #perfilPhoto {
+    width: 80px;
+    height: 80px;
+  }
+
+  .infos h2 {
+    font-size: 20px;
+  }
+
+  .infos h5 {
+    font-size: 14px;
+  }
+
+  .infos p {
+    max-width: 100%;
+    font-size: 14px;
+  }
+
+  .editProfile {
+    width: 80%;
+    max-width: 250px;
+  }
+
+  /* NavBar de abas (Postagens / Sobre / Agenda) */
+  .navBar {
+    gap: 10px;
+    position: relative;
+  }
+
+  .navBar a {
+    font-size: 16px;
+    padding: 6px 0;
+  }
+  /* Estrutura da aba "Sobre" */
+  .aboutProfile {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .activityAndHistory {
+    width: 100%;
+    padding: 0;
+  }
+
+  .postsReact {
+    width: 100%;
+  }
+
+  .historyContainer {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+  }
+
+  .historyContainer h3 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .photoCard video {
+    height: 200px;
+  }
+
+  /* Galeria pessoal */
+  .galeriaPessoal {
+    padding: 10px;
+    width: 100%;
+  }
+
+  .galeriaPessoalContainers {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .gpItem {
+    height: auto;
+    padding: 10px;
+  }
+
+  .gpItem img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .gpItem p {
+    font-size: 12px;
+  }
+
+  /* Grid das postagens e favoritos */
+  .photoGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .photoCard {
+    width: 100%;
+  }
+
+  /* Modal editar perfil */
+  .modal-perfil {
+    width: 95%;
+    padding: 15px;
+    max-height: 85vh;
+  }
+
+  .passwordContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .field-input,
+  .field-textarea {
+    width: 100%;
+  }
+
+  .CustomConfirm {
+    width: 100%;
+    font-size: 15px;
+  }
+
+  /* Seção de agenda do artista */
+  #listaEventosECursos {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  #listaEventosECursos li {
+    width: 100%;
+  }
+
+  /* Botão de voltar nas abas */
+  .likedHeader {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .likedHeader h3{
+    font-size: 15px;
+  }
+
+  #btnVoltarAbout, #btnVoltarGaleria, #btnVoltarComentarios {
+    width: auto;
+    font-size: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  .likedHeader button {
+    width: 100%;
+    max-width: 240px;
+    border-radius: 20px;
+  }
 }

@@ -45,14 +45,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       "github.io": "Portfólio",
       "medium.com": "Medium",
       "notion.so": "Notion",
+      "cargocollective.com": "Cargo",
+      "wordpress.com": "WordPress",
+      "canva.com": "Canva",
       "spotify.com": "Spotify",
       "apple.com": "Apple Music", "music.apple.com": "Apple Music",
       "deezer.com": "Deezer",
       "tidal.com": "Tidal",
       "amazon.com": "Amazon Music", "music.amazon.com": "Amazon Music",
+      "audible.com": "Audible",
+      "napster.com": "Napster",
+      "youtube-music.com": "YouTube Music",
+      "music.youtube.com": "YouTube Music",
+      "wattpad.com": "Wattpad",
+      "scribd.com": "Scribd",
+      "smashwords.com": "Smashwords",
+      "lulu.com": "Lulu",
+      "kdp.amazon.com": "KDP",
+      "bookfunnel.com": "BookFunnel",
+      "inkitt.com": "Inkitt",
       "dribbble.com": "Dribbble",
+      "coroflot.com": "Coroflot",
       "carbonmade.com": "Carbonmade",
-      "portfolio.adobe.com": "Adobe Portfolio"
+      "portfolio.adobe.com": "Adobe Portfolio",
+      "fabrik.io": "Fabrik",
+      "crevado.com": "Crevado"
     };
   
     inputTel.addEventListener("input", (e) => {
