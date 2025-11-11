@@ -3922,3 +3922,359 @@ input#ticketLink.disabled[readonly] {
 #confirmarExclusao:hover{
   background-color: #6e1010;
 }
+
+/* RESPONSIVIDADE (MEDIA QUERIES) */
+@media (max-width: 600px) {
+
+  /* --- Fundo Principal: Garante que o fundo Fixo funcione bem --- */
+  /* Não alteramos o .background para manter a imagem fixa e o overlay */
+  
+  /* --- GERAL: Containers Principais (Login/Cadastro/Artista) --- */
+  .containerLogin, 
+  .containerCadastro {
+      max-width: 80%; /* Ocupa a largura total da tela */
+      width: 80%;
+      padding: 30px 20px; /* Reduz o padding interno */
+      min-height: 80vh; /* Ocupa a altura total em celulares (se o conteúdo for pequeno) */
+  }
+
+  .cadastroTitulo h1, .artistaTitulo h1 {
+      font-size: 1.8rem; /* Reduz o tamanho da fonte do título */
+  }
+
+  /* --- LOGIN & CADASTRO: Botões --- */
+  /* Faz os botões ficarem empilhados verticalmente */
+  .buttons {
+    width: 80%;
+      gap: 5px; 
+  }
+  .btnGoogle {
+      width: 100%; /* Ocupa a largura total */
+  }
+  
+  /* --- CADASTRO: Campos de Senha (lado a lado) --- */
+  /* Transforma a linha de senha e confirma senha em coluna */
+  .campoSenhaCadastro {
+      flex-direction: column;
+  }
+  .campoSenhaCadastro .campo {
+      width: 100%; 
+  }
+
+  /* --- ARTISTA: Links e Áreas --- */
+/* --- ARTISTA: Container de Áreas/Tags e Input de Busca (Ajustes da última interação) --- */
+.areaContainer {
+  padding: 0 10px; 
+}
+.inputContainer {
+  display: flex;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.inputContainer input {
+  flex: 1;
+  min-width: 0; 
+}
+.inputContainer button {
+  width: 40px; 
+  flex-shrink: 0;
+}
+
+/* --- ARTISTA: Seção de Adicionar Links (.addLinkContainer) --- */
+.addLinkContainer {
+  width: 100%;
+  padding: 0 10px; 
+}
+.addLink {
+  display: flex;
+  width: 100%;
+}
+.addLink input {
+  flex: 1;
+  min-width: 0; 
+}
+.addLink .btnLink {
+  width: 40px; 
+  flex-shrink: 0; 
+}
+
+/* --- CORREÇÃO 1: LINKS/TAGS DE PERFIS EXTERNOS --- */
+#linksContainer {
+  /* Garante que o container de links tenha um layout flexível para quebrar */
+  display: flex;
+  flex-wrap: wrap; /* Permite que os botões/tags quebrem para a linha de baixo */
+  gap: 8px; /* Espaçamento entre os links */
+  justify-content: flex-start; /* Alinha os links à esquerda, e não ao centro */
+  padding: 10px 0; /* Padding para dar espaço vertical */
+}
+/* Se você tiver uma classe específica para os botões de link (ex: .link-tag), ajuste-a aqui */
+.linksContainer button {
+   /* Exemplo: Ajusta o tamanho da fonte das tags de link */
+  font-size: 0.85rem; 
+  height: 35px; /* Altura padrão para um toque confortável */
+}
+
+/* --- CORREÇÃO 2: CHECKBOX DE SERVIÇO --- */
+.checkServico {
+  display: flex; /* Usa flexbox para alinhar o checkbox (input) e o texto (label) */
+  align-items: flex-start; /* Alinha no topo se o texto for longo */
+  text-align: left; /* ANULA o text-align: center que o container pode estar forçando */
+  padding: 15px 10px; /* Adiciona um padding para espaçamento */
+}
+.checkServico label {
+  font-size: 0.9rem; /* Reduz o tamanho da fonte do texto (label) */
+  margin-left: 10px; /* Garante espaço entre o checkbox e o texto */
+  line-height: 1.2; /* Ajuda na leitura de textos longos no mobile */
+}
+.checkServico input[type="checkbox"] {
+  /* Garante que o checkbox não seja muito grande e mantenha o alinhamento */
+  width: 18px; 
+  height: 18px;
+  flex-shrink: 0; /* Impede que o checkbox seja espremido */
+}
+
+.btn.finalizar {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.modalAddLink .modal-content {
+  width: 90vw; 
+  padding: 15px; 
+}
+}
+/* ========================================================== */
+/* RESPONSIVIDADE (MEDIA QUERIES) - AJUSTES FINAIS DE ESTRUTURA E CONTEÚDO */
+/* ========================================================== */
+@media (max-width: 600px) {
+
+  main {
+      padding-bottom: 90px; /* espaço extra pro menu */
+  }
+
+  /* --- NAV BAR SUPERIOR (Pesquisa) --- */
+  .navBar a{
+    font-size: 15px;
+    justify-content: space-between;
+    display: flex;
+  }
+
+  .categorySection {
+    overflow-x: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px; /* espaçamento entre os cards */
+  }
+  
+  .categoryCard {
+    width: 40vw;           
+    max-width: 160px;       
+    aspect-ratio: 1 / 1;   
+    border-radius: 12px;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .categoryCard hr {
+    width: 60%;
+    border: 1px solid #2C5712;  /* cor ajustável */
+    margin: 6px 0;
+  }
+  
+
+
+  /* 🔍 Barra de pesquisa ocupa toda a tela, visível e central */
+  .inputContainerHome{
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+  }
+
+  .inputContainerHome input {
+      width: 100%;
+      font-size: 16px;
+      padding: 8px 10px;
+  }
+
+
+
+  /* --- MENU INFERIOR --- */
+  .containerMenu {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      z-index: 10;
+      width: 100%;
+      height: 80px;
+      background: #DCE8D0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+      border-radius: 0;
+      overflow: hidden;
+  }
+
+    .containerMenu .navSections {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 1;
+    min-width: 0; /* evita quebra e garante que o texto reduza */
+  }
+
+  .containerMenu a{
+    display: flex;
+    text-align: center;
+    text-decoration: none;
+    font-size: 8px;
+    padding: 5px 0;
+    overflow: hidden;
+  }
+
+  .createContent{
+    display: flex !important;
+  }
+
+  .containerMenu img {
+      width: 20px;
+  }
+
+  /* 🖼️ Logo maior, com nome abaixo centralizado */
+#logoMenu{
+      width: auto;
+      height: 45px;
+  }
+
+  .containerMenu a p,
+  .containerMenu a span,
+  .containerMenu a h3 {
+      margin-top: 3px;
+      line-height: 1;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+  }
+
+  /* 💥 Botão de adicionar conteúdo */
+  .addContent {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+      flex-shrink: 0;
+  }
+
+  .addContent img{
+    width: 90%;
+    height: 90%;
+  }
+  .addContent p{
+    display: none;
+  }
+
+  /* --- SEÇÕES (Feed, Eventos, Artistas) --- */
+  .feedContainer ul,
+  .containerEventos ul,
+  .containerArtistas ul {
+      width: 100%;
+      padding: 0;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      box-sizing: border-box;
+  }
+  /* 🧭 Seta continua oculta */
+  .setaNavSection {
+      display: none;
+  }
+}
+
+/* === Responsividade do feed (mesmo padrão da home e login) === */
+@media (max-width: 600px) {
+
+  .containerContent {
+    margin: 10px;
+    padding: 15px;
+  }
+
+  .feedTitle h1 {
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .feedTitle img {
+    width: 45px;
+    height: 45px;
+  }
+
+  .feedTitle hr {
+    width: 70%;
+  }
+
+  .feedContainer {
+    width: 100%;
+    padding: 0 5px;
+  }
+
+  .postCard {
+    width: 100%;
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .carousel {
+    width: 100%;
+  }
+
+  .carousel-item img {
+    width: 100%;
+    max-height: 180px;
+  }
+
+  .postHeader img#profileImage {
+    width: 45px;
+    height: 45px;
+  }
+
+  .postInfos h3 {
+    font-size: 16px;
+  }
+
+  .postInfos p {
+    font-size: 13px;
+  }
+
+  .postReact button img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .postComment input {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .postComment img {
+    width: 25px;
+    height: 25px;
+  }
+
+  .reactCommentGroup {
+    width: 100%;
+  }
+} 
