@@ -4207,11 +4207,6 @@ input#ticketLink.disabled[readonly] {
 /* === Responsividade do feed (mesmo padrão da home e login) === */
 @media (max-width: 600px) {
 
-  .containerContent {
-    margin: 10px;
-    padding: 15px;
-  }
-
   .feedTitle h1 {
     font-size: 22px;
     text-align: center;
@@ -4231,14 +4226,21 @@ input#ticketLink.disabled[readonly] {
     padding: 0 5px;
   }
 
+  .postMain{
+    display: block;
+  }
+
   .postCard {
     width: 100%;
     padding: 10px;
-    gap: 12px;
   }
 
   .carousel {
-    width: 100%;
+    width: 100%; 
+  }
+
+  .postMain .carousel{
+    max-width: 100%;
   }
 
   .carousel-item img {
@@ -4246,35 +4248,27 @@ input#ticketLink.disabled[readonly] {
     max-height: 180px;
   }
 
-  .postHeader img#profileImage {
-    width: 45px;
-    height: 45px;
-  }
+#name{
+  font-size: 13px;
+}
 
-  .postInfos h3 {
-    font-size: 16px;
-  }
+#username{
+  font-size: 8px;
+}
 
-  .postInfos p {
-    font-size: 13px;
-  }
+.dataPost{
+  font-size: 7px;
+}
+.postHeader img#profileImage {
+  width: 30px;
+  height: 30px;
+}
 
-  .postReact button img {
-    width: 20px;
-    height: 20px;
-  }
+.postHeader{
+  margin-top: 10px;
+}
 
-  .postComment input {
-    width: 100%;
-    font-size: 13px;
-  }
-
-  .postComment img {
-    width: 25px;
-    height: 25px;
-  }
-
-  .reactCommentGroup {
-    width: 100%;
-  }
-} 
+.tagsFeed{
+  display: block;
+}
+}
