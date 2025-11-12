@@ -44,4 +44,4 @@ Além de incentivar a visibilidade cultural, a plataforma também promove o empr
 - **Firebase Cloud Messaging (FCM)** (Backend): Serviço da plataforma Firebase responsável pelo envio de mensagens em tempo real e notificações push, melhorando a comunicação com os usuários da plataforma.
 
 ---
-## Status do projeto: Em desenvolvimento
+## Status do projeto: Concluído, apenas falta deixá-lo acessível a todos
